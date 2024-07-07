@@ -1,0 +1,102 @@
+/*body {*/
+/*  padding: 50px;*/
+/*  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;*/
+/*}*/
+
+/*a {*/
+/*  color: #00B7FF;*/
+/*}*/
+
+h1 {
+    font-weight: 500;
+}
+p {
+    martin-bottom: 0;
+}
+
+.btn-toggle {
+    border-radius: 20px;
+    border: 2px solid #ccc;
+    padding: 0;
+    overflow: hidden;
+}
+.btn-toggle .btn {
+    border-radius: 0;
+    padding: 10px 20px;
+}
+.btn-toggle .btn:first-child {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+.btn-toggle .btn:last-child {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+.btn-toggle .btn.active {
+    background-color: #000;
+    color: #fff;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+#mainNav {
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 3px;
+}
+
+.claim-container {
+    padding: 0px !important;
+}
+
+.expense-card {
+    padding: 24px !important;
+
+    .card-identifier {
+        align-self: center;
+    }
+
+    .card-amount {
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    .card-entity-name {
+        color: #939393;
+        font-weight: 500;
+
+    }
+
+    .card-entity-value {
+        font-weight: 500;
+        font-size: 20px;
+    }
+
+    .card-entity-desc {
+        color: #939393;
+        font-size: 15px;
+    }
+
+    .claim-expense-category {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .claim-expense-description {
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.5);
+        font-weight: 400;
+    }
+
+    .claim-expense-amount {
+        white-space: nowrap;
+        margin-left: 10px;
+        font-weight: bold;
+    }
+
+    .plus-one-more {
+        font-size: 13px;
+        font-weight: 500;
+        margin-top: 3px;
+    }
+}
