@@ -10,9 +10,6 @@
 h1 {
     font-weight: 500;
 }
-p {
-    martin-bottom: 0;
-}
 
 .btn-toggle {
     border-radius: 20px;
@@ -46,7 +43,7 @@ body {
 }
 
 .claim-container {
-    padding: 0px !important;
+    padding: 0 !important;
 }
 
 .expense-card {
@@ -99,4 +96,26 @@ body {
         font-weight: 500;
         margin-top: 3px;
     }
+}
+
+.claim-status-badge {
+    font-size: 12px;
+    display: inline-block;
+    padding: 2px 10px;
+    font-weight: 500;
+}
+
+.claim-completed {
+    background-color: #DCFCE7;
+    color: #166534;
+}
+
+.claim-pending {
+    background-color: #FEF9C3;
+    color: #854D0E;
+}
+
+.claim-red {
+    background-color: #FEE1E2;
+    color: #991B1B;
 }

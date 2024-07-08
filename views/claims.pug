@@ -67,7 +67,7 @@ block content
                                     .card-entity-value 4
                                 .col-4
                                     .card-entity-name Status
-                                    .card-entity-value(style="font-size:12px") Completed
+                                    .claim-status-badge.claim-completed.rounded-pill Completed
                             .row.m-2
                                 .d-flex.justify-content-between.align-items-end.my-1
                                     .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
@@ -100,13 +100,20 @@ block content
                                     .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
                                         div Second Text
                                 .plus-one-more +1 more...
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Claim Offset
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div - $1.23
 
 
 
                             .row.m-2
                                 .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
+                                    button.btn.btn-outline-primary Expand
+                                    button.btn.btn-outline-danger Cancel
+                                    button.btn.btn-outline-primary
+                                        i.bi-share
                     .col-sm-12.col-lg-6.col-xl-4.mb-4
                         .card.expense-card.p-2
                             .row.m-2
@@ -115,33 +122,62 @@ block content
                                     span 123
                                 .col.text-end.card-amount $123.45
                             .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc x`
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
+                                .col-5
                                     .card-entity-name Submitted
                                     .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                .col-3
+                                    .card-entity-name Items
+                                    .card-entity-value 4
+                                .col-4
+                                    .card-entity-name Status
+                                    .claim-status-badge.claim-pending.rounded-pill Pending
+                            .row.m-2
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .plus-one-more +1 more...
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Claim Offset
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div - $1.23
+
+
 
                             .row.m-2
                                 .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
+                                    button.btn.btn-outline-primary Expand
+                                    button.btn.btn-outline-danger Cancel
+                                    button.btn.btn-outline-primary
+                                        i.bi-share
+                    .col-sm-12.col-lg-6.col-xl-4.mb-4
                         .card.expense-card.p-2
                             .row.m-2
                                 .col.text-start.card-identifier
@@ -149,33 +185,62 @@ block content
                                     span 123
                                 .col.text-end.card-amount $123.45
                             .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc x`
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
+                                .col-5
                                     .card-entity-name Submitted
                                     .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                .col-3
+                                    .card-entity-name Items
+                                    .card-entity-value 4
+                                .col-4
+                                    .card-entity-name Status
+                                    .claim-status-badge.claim-pending.rounded-pill Pending
+                            .row.m-2
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .plus-one-more +1 more...
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Claim Offset
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div - $1.23
+
+
 
                             .row.m-2
                                 .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
+                                    button.btn.btn-outline-primary Expand
+                                    button.btn.btn-outline-danger Cancel
+                                    button.btn.btn-outline-primary
+                                        i.bi-share
+                    .col-sm-12.col-lg-6.col-xl-4.mb-4
                         .card.expense-card.p-2
                             .row.m-2
                                 .col.text-start.card-identifier
@@ -183,32 +248,61 @@ block content
                                     span 123
                                 .col.text-end.card-amount $123.45
                             .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc Description
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
+                                .col-5
                                     .card-entity-name Submitted
                                     .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                .col-3
+                                    .card-entity-name Items
+                                    .card-entity-value 4
+                                .col-4
+                                    .card-entity-name Status
+                                    .claim-status-badge.claim-red.rounded-pill Canceled
+                            .row.m-2
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Amongus
+                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div Second Text
+                                .plus-one-more +1 more...
+                                .d-flex.justify-content-between.align-items-end.my-1
+                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                        .claim-expense-category.me-1 Claim Offset
+                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                        div - $1.23
+
+
 
                             .row.m-2
                                 .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
+                                    button.btn.btn-outline-primary Expand
+                                    button.btn.btn-outline-danger Cancel
+                                    button.btn.btn-outline-primary
+                                        i.bi-share
 
         //.container.py-5(style="outline: 1px dashed red")
         //    h1(style='font-weight: 500 !important') Expenses
