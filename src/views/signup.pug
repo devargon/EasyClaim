@@ -1,0 +1,35 @@
+extends layout
+
+block content
+    section.py-5
+        .container.py-5
+            .row.mb-4.mb-lg-5
+                .col-md-8.col-sl-6.text-center.mx-auto
+                    p.fw-bold.text-success.mb-2 Signup for EasyExpense
+                    h2.fw-bold Start tracking your expenses
+            .row.d-flex.justify-content-center
+                .col-md-6.col-xl-4
+                    .card.p-4
+                        .card-body.text-center.d-flex.flex-column.align-items-center
+                            .d-flex.justify-content-center.p-4.bg-primary.shadow.bs-icon.mb-4.text-white.fs-1(style="width: 80px; height: 80px;border-radius: 50px")
+                                svg(xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16")
+                                    path(d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z")
+                            form(method='post')
+                                div.mb-3
+                                    input.rounded-4.form-control(type="name", name="name", placeholder="Name").rounded-3
+                                    #nameHelpBlock.form-text This name will be shown to users you send a claim to.
+                                div.mb-3
+                                    input.rounded-4.form-control(type="email", name="email", placeholder="Email").rounded-3
+                                div.mb-3
+                                    input.rounded-4.form-control(type="password", name="password", placeholder="Password")
+                                div.mb-3
+                                    input.rounded-4.form-control(type="password", name="confirmpassword", placeholder="Confirm Password")
+                                div reCaptcha goes here
+                                div.mb-3
+                                    button.rounded-pill.btn.btn-primary.shadow.d-block.w-100(type="submit") Sign up
+                            span.mb-2.text-muted Already have an account?
+                                a.ms-2.text-muted(href='/login') Log in
+
+
+
+

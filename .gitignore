@@ -369,3 +369,4 @@ nbactions.xml
 *.css.map
 
 package-lock.json
+/.env
