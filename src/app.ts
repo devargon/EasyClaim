@@ -4,10 +4,11 @@ import createError from 'http-errors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-
-import indexRouter from './routes';
+import session from 'express-session';
+import indexRouter from './routes/indexRoute';
 import usersRouter from './routes/users';
-import accountsRouter from './routes/accounts';
+import accountsRouter from './routes/accountRoute';
+import {fetchUser} from "./middlewares/fetchUser";
 
 var app: Application = express();
 
@@ -15,15 +16,27 @@ var app: Application = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'unknown',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: process.env.NODE_ENV === "production"}
+}))
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(fetchUser);
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
+
+
 
 // 404 handler
 app.use("*", function (req, res, next) {
