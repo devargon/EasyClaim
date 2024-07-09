@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('easyexpense:server');
+var debug = require('debug')('easyclaim:server');
 var http = require('http');
 
 /**

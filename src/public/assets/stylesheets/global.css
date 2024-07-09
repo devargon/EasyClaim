@@ -119,3 +119,8 @@ body {
     background-color: #FEE1E2;
     color: #991B1B;
 }
+
+.password-requirements {
+    margin-top: .25rem;
+    font-size: 0.8rem;
+}
