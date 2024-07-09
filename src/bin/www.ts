@@ -8,23 +8,23 @@ var app = require('../app');
 var debug = require('debug')('easyclaim:server');
 var http = require('http');
 
-/**
- * Get port from environment and store in Express.
- */
+import dotenv from 'dotenv';
+dotenv.config();
+
+console.log("Verifying required environment variables are present");
+const requiredEnvVars = ['SESSION_SECRET', 'DATABASE_URL'];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
-
 var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
