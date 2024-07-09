@@ -1,9 +1,8 @@
 import {Request, Response, NextFunction} from 'express';
 import isEmail from 'validator/lib/isEmail';
-import prisma from '../config/db';
-import {registerUser} from "../services/accountService";
+import {findUserByEmail, registerUser} from "../services/accountService";
+import 'express-session';
 import bcrypt from 'bcrypt';
-const saltRounds =10
 
 function validatePassword(password: string) {
     const validations = {
@@ -18,8 +17,29 @@ function validatePassword(password: string) {
 }
 
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
-    req.body.email
-    req.body.password
+    if (req.user) {
+        return res.status(200).send("You're already logged in mofo");
+    }
+    if (!req.body.email || !req.body.password) {
+        return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+    }
+    console.log(`Finding user with email ${req.body.email}`)
+    const found_user = await findUserByEmail(req.body.email);
+
+    if (!found_user) {
+        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+    }
+
+    console.log("Email found.");
+
+    const isValidPassword = await bcrypt.compare(req.body.password, found_user.password);
+    console.log(`Password match result: ${isValidPassword}`);
+    if (!isValidPassword) {
+        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+    }
+
+    req.session.userId = found_user.id;
+    return res.status(200).send("You're logged in.");
 }
 
 export const FormRegisterUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -39,7 +59,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
         return res.render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`

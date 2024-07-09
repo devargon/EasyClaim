@@ -8,17 +8,20 @@ block content
                     p.fw-bold.text-success.mb-2 Login to EasyClaim
                     h2.fw-bold Welcome Back
             .row.d-flex.justify-content-center
-                .col-md-6.col-xl-4
+                .col-md-7.col-xl-5.col-xxl-4
                     .card.p-4
                         .card-body.text-center.d-flex.flex-column.align-items-center
                             .d-flex.justify-content-center.p-4.bg-primary.shadow.bs-icon.mb-4.text-white.fs-1(style="width: 80px; height: 80px;border-radius: 50px")
                                 svg(xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16")
                                     path(d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z")
+                            if login_error
+                                .alert.alert-danger
+                                    div !{login_error}
                             form(method='post', action='/accounts/login')
                                 div.mb-3
-                                    input.rounded-4.form-control(type="email", name="email", placeholder="Email").rounded-3
+                                    input.rounded-4.form-control(type="email", name="email", placeholder="Email", value=values.email || '', required='').rounded-3
                                 div.mb-3
-                                    input.rounded-4.form-control(type="password", name="password", placeholder="Password")
+                                    input.rounded-4.form-control(type="password", name="password", placeholder="Password", required='')
 
                                 div.mb-3
                                     button.rounded-pill.btn.btn-primary.shadow.d-block.w-100(type="submit") Log in
