@@ -1,3 +1,4 @@
+import 'express-async-errors';
 import express, {Request, Response, Application, NextFunction} from "express";
 import createError from 'http-errors';
 import path from 'path';
@@ -6,6 +7,7 @@ import logger from 'morgan';
 
 import indexRouter from './routes';
 import usersRouter from './routes/users';
+import accountsRouter from './routes/accounts';
 
 var app: Application = express();
 
@@ -21,21 +23,42 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/accounts', accountsRouter);
 
-// catch 404 and forward to error handler
-app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
-  next(createError(404));
+// 404 handler
+app.use("*", function (req, res, next) {
+  if (req.originalUrl.startsWith("/api")) {
+    // Return a simple response for API requests
+    return next(
+        createError(404, `Unknown Resource ${req.method} ${req.originalUrl}`)
+    );
+  }
+  // Return a simplified 404 error explaining what happened to frontend facing customers
+  return res.status(404).render("404", {
+    notfound_resource: `Unknown Resource ${req.method} ${req.originalUrl}`,
+  });
 });
 
-// error handler
-app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
-  // set locals, only providing error in development
+// Error handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // log the error to the console
+  console.error(err);
+
+  // respond with the error page or JSON
+  if (req.accepts('html')) {
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  } else {
+    // respond with JSON
+    res.status(err.status || 500).json({
+      message: err.message,
+      error: req.app.get('env') === 'development' ? err : {}
+    });
+  }
 });
 
 module.exports = app;

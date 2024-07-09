@@ -1,6 +1,10 @@
 extends layout
 
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+  .section.py-5
+    .container.p-4
+      h1.text-danger An unexpected exception occured.
+      .font-monospace(style='white-space: pre-wrap;')= message
+      br
+      h2= error.status
+      pre #{error.stack}
