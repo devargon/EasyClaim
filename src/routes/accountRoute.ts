@@ -1,4 +1,3 @@
-import 'express-async-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import {FormRegisterUser, LoginUser} from "../controllers/accountController";
 import {redirectIfLoggedIn} from "../middlewares/redirectIfLoggedIn";
@@ -13,6 +12,7 @@ router.get('/login', redirectIfLoggedIn, (req: Request, res: Response, next: Nex
     if (req.user) {
         return res.status(200).send("You're already logged in mofo");
     }
+    req.body.redirect = req.query.redirect || "/";
     res.render('login', { title: 'Login to EasyClaim', register_error: null, values: req.body });
 });
 
@@ -22,6 +22,7 @@ router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: Ne
     if (req.user) {
         return res.status(200).send("You're already logged in mofo");
     }
+    req.body.redirect = req.query.redirect || "/";
     res.render('signup', { title: 'Sign up for EasyClaim', register_error: null, values: req.body});
 });
 

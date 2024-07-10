@@ -17,9 +17,6 @@ function validatePassword(password: string) {
 }
 
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
-    if (req.user) {
-        return res.status(200).send("You're already logged in mofo");
-    }
     if (!req.body.email || !req.body.password) {
         return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
     }
@@ -39,7 +36,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     }
 
     req.session.userId = found_user.id;
-    return res.status(200).send("You're logged in.");
+    return res.status(201).redirect(req.body.redirect || "/");
 }
 
 export const FormRegisterUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -56,16 +53,16 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     if (!passwordIsValid) {register_error = "Your password did not meet the security requirements. Please make a stronger password.";}
 
     if (register_error) {
-        return res.render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
+        return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`
-        return res.render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
+        return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
 
     const user = await registerUser(name, email, password);
-    return res.status(200).json(user);
+    return res.status(201).redirect(req.body.redirect || "/");
 }

@@ -18,6 +18,7 @@ block content
                                 .alert.alert-danger
                                     div !{login_error}
                             form(method='post', action='/accounts/login')
+                                input(type="hidden", name="redirect", id="redirect", value=values.redirect)
                                 div.mb-3
                                     input.rounded-4.form-control(type="email", name="email", placeholder="Email", value=values.email || '', required='').rounded-3
                                 div.mb-3
@@ -28,7 +29,12 @@ block content
                             span.mb-2.text-muted Forgot your password?
                                 a.ms-2.text-muted(href='/forgotpassword') Reset it
                             span.text-muted New to EasyClaim?
-                                a.ms-2.text-muted(href='/accounts/signup') Sign up
+                                - var signupUrl = '/accounts/signup'
+                                if values.redirect
+                                    - signupUrl += '?redirect=' + encodeURIComponent(values.redirect)
+
+                                a.ms-2.text-muted(href=signupUrl) Sign up
+
 
 
 

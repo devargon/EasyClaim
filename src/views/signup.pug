@@ -20,6 +20,7 @@ block content
                                 .alert.alert-danger
                                     div !{register_error}
                             form.text-lg-start.needs-validation#signup-form(method='post', novalidate='')
+                                input(type="hidden", name="redirect", id="redirect", value=values.redirect)
                                 div.mb-3
                                     input.form-control(type="name", name="name", id="name", placeholder="Name", required='', maxlength=50, value=values.name || '').rounded-3
                                     #nameHelpBlock.form-text People who receive your claim will see this name.
@@ -54,7 +55,10 @@ block content
                                 div.mb-3
                                     button.rounded-pill.btn.btn-primary.shadow.d-block.w-100#submitFormBtn(type="submit") Sign up
                             span.mb-2.text-muted Already have an account?
-                                a.ms-2.text-muted(href='/accounts/login') Log in
+                                - var loginUrl = '/accounts/login'
+                                if values.redirect
+                                    - loginUrl += '?redirect=' + encodeURIComponent(values.redirect)
+                                a.ms-2.text-muted(href=loginUrl) Log in
     script(src="/assets/javascripts/signup.js")
 
 
