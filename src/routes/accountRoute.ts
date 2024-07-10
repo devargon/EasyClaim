@@ -28,7 +28,7 @@ router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: Ne
 });
 
 router.get('/signup/success', redirectAsRequiresLogin, (req: Request, res: Response, next: NextFunction) => {
-    res.render('signupsuccessful')
+    res.render('signupsuccessful', {title: "Signup Successful"})
 });
 
 router.post('/signup', redirectIfLoggedIn, FormRegisterUser);

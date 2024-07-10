@@ -11,4 +11,16 @@ block content
             h1.fw-bolder Signup successful
             br
             h3 Welcome to EasyClaim, #{user.name}!
-            div Get started with EasyClaim.
+            div Get started with EasyClaim with these three steps:
+            ul.mt-2(style='list-style-type: none')
+                li.mb-2.d-flex.align-items-center
+                    .bg-primary.text-bg-primary(style="height: 2.5rem; font-weight: bold; width: 2.5rem; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; border-radius: 50%") 1
+                    span.ms-2 Create an expense.
+                li.mb-2.d-flex.align-items-center
+                    .bg-primary.text-bg-primary(style="height: 2.5rem; font-weight: bold; width: 2.5rem; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; border-radius: 50%") 2
+                    span.ms-2 Select multiple expenses to make up a claim.
+                li.mb-2.d-flex.align-items-center
+                    .bg-primary.text-bg-primary(style="height: 2.5rem; font-weight: bold; width: 2.5rem; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; border-radius: 50%") 3
+                    span.ms-2 Create the claim, and share it to someone to get your money back.
+            a.btn.btn-primary(href="/expenses") Let's go
+
