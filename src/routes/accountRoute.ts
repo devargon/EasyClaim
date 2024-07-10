@@ -28,4 +28,13 @@ router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: Ne
 
 router.post('/signup', redirectIfLoggedIn, FormRegisterUser);
 
+router.get('/logout', (req: Request, res: Response, next: NextFunction) => {
+    req.session.destroy(function(err) {
+        if (err) {
+            return res.status(500).send("Unable to log out.")
+        }
+    })
+    res.redirect("/");
+})
+
 export default router;
