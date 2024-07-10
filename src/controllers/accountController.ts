@@ -21,12 +21,12 @@ function validatePassword(password: string) {
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     if (!req.body.email || !req.body.password) {
-        return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+        return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     debug(`Finding user with email ${req.body.email}`);
     const found_user = await findUserByEmail(req.body.email);
     if (!found_user) {
-        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
 
     debug(`Account for ${req.body.email} found. Comparing hashes`);
@@ -34,7 +34,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     const isValidPassword = await bcrypt.compare(req.body.password, found_user.password);
     debug(`Password match result for ${req.body.email}:  ${isValidPassword}`);
     if (!isValidPassword) {
-        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
+        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     req.session.userId = found_user.id;
     return res.status(201).redirect(req.body.redirect || "/");
