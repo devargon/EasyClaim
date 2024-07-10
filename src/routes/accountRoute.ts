@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import {FormRegisterUser, LoginUser} from "../controllers/accountController";
 import {redirectIfLoggedIn} from "../middlewares/redirectIfLoggedIn";
+import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
 const router = express.Router();
 
 /* GET home page. */
@@ -24,6 +25,10 @@ router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: Ne
     }
     req.body.redirect = req.query.redirect || "/";
     res.render('signup', { title: 'Sign up for EasyClaim', register_error: null, values: req.body});
+});
+
+router.get('/signup/success', redirectAsRequiresLogin, (req: Request, res: Response, next: NextFunction) => {
+    res.render('signupsuccessful')
 });
 
 router.post('/signup', redirectIfLoggedIn, FormRegisterUser);

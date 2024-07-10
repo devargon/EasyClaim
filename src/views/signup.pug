@@ -6,7 +6,7 @@ block content
             .row.mb-4.mb-lg-5
                 .col-md-8.col-sl-6.text-center.mx-auto
                     p.fw-bold.text-success.mb-2 Signup for EasyClaim
-                    h2.fw-bold Start tracking your expenses
+                    h2.fw-bold Start tracking your expenses, for easy claiming
             .row.d-flex.justify-content-center
                 .col-md-7.col-xl-5.col-xxl-4
                     .card.p-4
@@ -27,6 +27,7 @@ block content
                                 div.mb-3
                                     input.form-control(type="email", name="email", id="email", placeholder="Email", required='', maxlength=255, value=values.email || '').rounded-3
                                     .invalid-feedback Please enter a valid email.
+                                    #emailHelpBlock.form-text You will use this to sign in.
                                 div.mb-3
                                     input.form-control(type="password", name="password", id="password", placeholder="Password", required='', minlength=6, maxlength=20)
                                     .invalid-feedback Password is required.
