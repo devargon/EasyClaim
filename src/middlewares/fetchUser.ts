@@ -14,6 +14,7 @@ export async function fetchUser(req: Request, res: Response, next: NextFunction)
             const user = await findUserById(req.session.userId);
             if (user) {
                 req.user = user;
+                res.locals.user = user;
             }
         } catch (error) {
             console.error('Error fetching user:', error);
