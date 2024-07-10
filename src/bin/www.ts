@@ -12,12 +12,19 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 console.log("Verifying required environment variables are present");
-const requiredEnvVars = ['SESSION_SECRET', 'DATABASE_URL'];
-
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+const requiredEnvVars = {
+  'SESSION_SECRET': "Encoding session data for express-session",
+  'DATABASE_URL': "Connecting to the database via Prisma",
+  'DB_SESSION_URL': "Separate database URL storing express-session data.",
+};
+const missingEnvVars = Object.entries(requiredEnvVars).filter(([envVar]) => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-  console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.error(`Missing required environment variables:`)
+  missingEnvVars.forEach(missing => {
+    console.log(`${missing[0]}: ${missing[1]}`);
+  })
+  console.error("Please provide them in the .env file before continuing.")
   process.exit(1);
 }
 
