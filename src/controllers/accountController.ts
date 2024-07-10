@@ -4,6 +4,8 @@ import {findUserByEmail, registerUser} from "../services/accountService";
 import 'express-session';
 import bcrypt from 'bcrypt';
 
+const debug = require('debug')('easyclaim:accounts');
+
 function validatePassword(password: string) {
     const validations = {
         length: password.length >= 6 && password.length <= 20,
@@ -17,30 +19,28 @@ function validatePassword(password: string) {
 }
 
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
+
     if (!req.body.email || !req.body.password) {
         return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
     }
-    console.log(`Finding user with email ${req.body.email}`)
+    debug(`Finding user with email ${req.body.email}`);
     const found_user = await findUserByEmail(req.body.email);
-
     if (!found_user) {
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
     }
 
-    console.log("Email found.");
+    debug(`Account for ${req.body.email} found. Comparing hashes`);
 
     const isValidPassword = await bcrypt.compare(req.body.password, found_user.password);
-    console.log(`Password match result: ${isValidPassword}`);
+    debug(`Password match result for ${req.body.email}:  ${isValidPassword}`);
     if (!isValidPassword) {
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email}})
     }
-
     req.session.userId = found_user.id;
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
 export const FormRegisterUser = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("registering user")
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
@@ -55,14 +55,14 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     if (register_error) {
         return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
-
+    debug(`Checking for existing user for ${req.body.email}`);
     const existingUser = await findUserByEmail(email);
-
     if (existingUser) {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`
         return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
-
+    debug(`Registering user ${req.body.email}...`);
     const user = await registerUser(name, email, password);
+    debug(`Registration completed for ${req.body.email}`);
     return res.status(201).redirect(req.body.redirect || "/");
 }
