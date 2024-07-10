@@ -53,8 +53,10 @@ block content
                                             span Passwords must match!
                                 div reCaptcha goes here
                                 div.mb-3
-                                    button.rounded-pill.btn.btn-primary.shadow.d-block.w-100#submitFormBtn(type="submit") Sign up
-                            span.mb-2.text-muted Already have an account?
+                                    button.rounded-pill.btn.btn-primary.shadow.d-block.w-100#submit(type="submit")
+                                        span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                        | Sign up
+                                span.mb-2.text-muted Already have an account?
                                 - var loginUrl = '/accounts/login'
                                 if values.redirect
                                     - loginUrl += '?redirect=' + encodeURIComponent(values.redirect)

@@ -25,7 +25,9 @@ block content
                                     input.rounded-4.form-control(type="password", name="password", placeholder="Password", required='')
 
                                 div.mb-3
-                                    button.rounded-pill.btn.btn-primary.shadow.d-block.w-100(type="submit") Log in
+                                    button.rounded-pill.btn.btn-primary.shadow.d-block.w-100(id="submit", type="submit")
+                                        span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                        | Log in
                             span.mb-2.text-muted Forgot your password?
                                 a.ms-2.text-muted(href='/forgotpassword') Reset it
                             span.text-muted New to EasyClaim?
