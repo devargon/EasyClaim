@@ -9,6 +9,20 @@ import indexRouter from './routes/indexRoute';
 import usersRouter from './routes/users';
 import accountsRouter from './routes/accountRoute';
 import {fetchUser} from "./middlewares/fetchUser";
+import {Sequelize} from "sequelize";
+import {MariaDbDialect} from "@sequelize/mariadb";
+import connectSessionSequelize from "connect-session-sequelize";
+
+// Sequelize connection as URL:
+const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: false});
+
+const SequelizeStore = connectSessionSequelize(session.Store);
+
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+  checkExpirationInterval: 15 * 60 * 1000,
+  expiration: 7 * 24 * 60 * 60 * 1000,
+})
 
 var app: Application = express();
 
@@ -17,11 +31,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(session({
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'unknown',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: process.env.NODE_ENV === "production"}
 }))
+
+sessionStore.sync();
 
 
 app.use(logger('dev'));
