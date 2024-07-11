@@ -28,14 +28,14 @@ block content
                                     button.rounded-pill.btn.btn-primary.shadow.d-block.w-100(id="submit", type="submit")
                                         span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
                                         | Log in
-                            span.mb-2.text-muted Forgot your password?
-                                a.ms-2.text-muted(href='/forgotpassword') Reset it
-                            span.text-muted New to EasyClaim?
+                            span.mb-2.text-body-secondary Forgot your password?
+                                a.ms-2.text-body-secondary(href='/forgotpassword') Reset it
+                            span.text-body-secondary New to EasyClaim?
                                 - var signupUrl = '/accounts/signup'
                                 if values.redirect
                                     - signupUrl += '?redirect=' + encodeURIComponent(values.redirect)
 
-                                a.ms-2.text-muted(href=signupUrl) Sign up
+                                a.ms-2.text-body-secondary(href=signupUrl) Sign up
 
 
 

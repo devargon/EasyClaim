@@ -57,11 +57,11 @@ block content
                                     button.rounded-pill.btn.btn-primary.shadow.d-block.w-100#submit(type="submit")
                                         span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
                                         | Sign up
-                                span.mb-2.text-muted Already have an account?
+                                span.mb-2.text-body-secondary Already have an account?
                                 - var loginUrl = '/accounts/login'
                                 if values.redirect
                                     - loginUrl += '?redirect=' + encodeURIComponent(values.redirect)
-                                a.ms-2.text-muted(href=loginUrl) Log in
+                                a.ms-2.text-body-secondary(href=loginUrl) Log in
     script(src="/assets/javascripts/signup.js")
 
 
