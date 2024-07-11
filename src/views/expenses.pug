@@ -1,231 +1,241 @@
 extends layout
 
+block head
+    link(rel="stylesheet" href="/assets/stylesheets/expenses.css")
+    script(src="https://unpkg.com/vue@3/dist/vue.global.js")
+    script(src="/assets/javascripts/checkMime.js")
+
 block content
-    .modal.modal-lg#myModal(tabindex='-1')
-        .modal-dialog
-            .modal-content
-                form(action="/expense/new", method="post")
-                    .modal-header
-                        h5.modal-title Add new expense
-                        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                    .modal-body
-                        .row.mb-3
-                            label(for='expense_amt', class='form-label') Expense amount
-                            .input-group.input-group-lg
-                                span.input-group-text $
-                                input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00')
+    #app
+        .modal.fade.modal-lg#createExpenseModal(tabindex='-1')
+            .modal-dialog
+                .modal-content
+                    div#submitExpenseStep1(v-if="currentStep === 1")
+                        form(action="/expense/new", method="post")
+                            .modal-header
+                                h5.modal-title Add new expense
+                                button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                            .modal-body
+                                .row.mb-3
+                                    label(for='expense_amt', class='form-label') Expense amount
+                                    .input-group.input-group-lg
+                                        span.input-group-text $
+                                        input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00')
 
-                        .row.mb-3
-                            .col-6
-                                label(for='category', class='form-label') Category
-                                select(class='form-select', aria-label='Category', name='category', id='category')
-                            .col-6
-                                label(for='spent_date', class='form-label') Spent on
-                                input(type='date', class='form-control', id='spent_date', name='description', aria-label='Spent on')
-                        .row.mb-3
-                            .col
-                                label(for='description', class='form-label') Description
-                                input(type='text', class='form-control', placeholder='Explain your expense briefly', id='description', name='description', aria-label='First name')
-                        .row.mb-3
-                            .col
-                                label(for='add_files', class='form-label') Add files
-                                input(type='text', class='form-control', placeholder='Explain your expense briefly', id='add_files', name='add_files', aria-label='First name')
-                    .modal-footer
-                        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
-                        button.btn.btn-primary(type='submit') Submit
+                                .row.mb-3
+                                    .col-6
+                                        label(for='category', class='form-label') Category
+                                        select(class='form-select', aria-label='Category', name='category', id='category')
+                                    .col-6
+                                        label(for='spent_date', class='form-label') Spent on
+                                        input(type='date', class='form-control', id='spent_date', name='description', aria-label='Spent on')
+                                .row.mb-3
+                                    .col
+                                        label(for='description', class='form-label') Description
+                                        input(type='text', class='form-control', placeholder='Explain your expense briefly', id='description', name='description', aria-label='First name')
+                                .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                    button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                    button.btn.btn-primary(type='submit') Submit
+                    div#submitExpenseStep2(v-if="currentStep === 2")
 
-
-    section.py-3
-        .container.py-5
-            .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
-                div
-                    h1.fw-medium Expenses
-                    .row.mt-2
-                        .col-sm-6
-                            .fw-medium Unclaimed
-                                .fw-medium.fs-2 $3,456.78
-
-                        .col-sm-6
-                            .fw-medium Claim pending
-                                .fw-medium.fs-2 $3,456.78
-
-                .d-flex.align-items-center.gap-2.pt-3
-                    button.btn.btn-primary.rounded-pill(data-bs-toggle="modal", data-bs-target="#myModal") New Expense
-                    button.btn.btn-outline-primary.rounded-pill(disabled='') Make Claim
-            .mt-3
-                nav.nav.nav-pills(style='display: inline-flex')
-                    a.nav-link.active.rounded-pill.px-2.py-1.fs-6(href='#') Unclaimed
-                    a.nav-link.rounded-pill.px-2.py-1.fs-6(href='#') Claimed
-            p.mt-3 Select an expense by clicking on it, to submit a claim.
-            .container.mt-5.claim-container
-                .row
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc x`
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc x`
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc x`
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-                    .col-sm-12.col-md-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Claim
-                                    .card-entity-value Travel
-                                    .card-entity-desc Description
-                                .col-6
-                                    .card-entity-name Spent On
-                                    .card-entity-value 2023-04-15
-                            .row.m-2
-                                .col-6
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-6
-                                    .card-entity-name Attachments
-                                    .card-entity-desc Tap to open
-                                    .d-flex.flex-wrap.gap-2.mt-2
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Edit
-                                    button.btn.btn-outline-primary Delete
-
-        //.container.py-5(style="outline: 1px dashed red")
-        //    h1(style='font-weight: 500 !important') Expenses
-        //    div
-        //        div.fw-medium Unclaimed
-        //        div.fw-medium.fs-2 $19.00
-        //    div
-        //        div.fw-medium Submitted for claiming
-        //        div.fw-medium.fs-2 $19.00
-
-
-            //.row.mb-4.mb-lg-5
-            //    .col-md-8.col-sl-6.text-center.mx-auto
-            //        p.fw-bold.text-success.mb-2 Login
-            //        h2.fw-bold Welcome Back
-            //.row.d-flex.justify-content-center
-            //    .col-md-6.col-xl-4
-            //        .card
-            //            .card-body.text-center.d-flex.flex-column.align-items-center
-            //                .bs-icon-xl.bs-icon-circle.bs-icon-primary.shadow.bs-icon.my-4
-            //                    //+person-no-circle-icon()
-            //                    i.bi-person
-            //                form(method='post')
-            //                    div.mb-3
-            //                        input.form-control(type="email", name="email", placeholder="Email")
-            //                    div.mb-3
-            //                        input.form-control(type="password", name="password", placeholder="Password")
-            //
-            //                    div.mb-3
-            //                        button.btn.btn-primary.shadow.d-block.w-100(type="submit") Log in
-            //                p.text-muted Forgot your password?
+                        form(action="/expense/new", method="post")
+                            .modal-header
+                                div
+                                    .d-flex.align-items-end.gap-2
+                                        h5.modal-title Add Attachments
+                                        div.text-body-secondary Invoices, receipts, etc
+                                    div.text-muted(style="font-size: 0.8rem") Transport &middot; Grab for mummy &middot; $19.23
+                            .modal-body
+                                p.text-body-secondary.text-center Drag and drop files or click to select. You can remove any files before uploading.
+                                .upload-prompt#expense-attachment-upload(style="height: 10rem")
+                                    h1.text-muted-foreground
+                                        i.bi.bi-upload
+                                    div.fw-medium.text-muted-foreground Drag and drop files here
+                                    div.text-muted-foreground or click to select files
+                                input#expense-attachment-file-input(type="file" style="display: none" accept=".jpg,.jpeg,.png,.pdf", multiple='')
+                                // File items UI will go here
+                                .file-display#expense-attachments-display(style="gap: 2px;")
+                                    .file-item
+                                        .file-details
+                                            i.bi.bi-file-earmark.file-icon
+                                            div
+                                                p.file-name example.jpg
+                                                p.file-size 1.2 MB
+                                        button.btn-close(type='button' aria-label='Remove file')
+                                    .file-item
+                                        .file-details
+                                            i.bi.bi-file-earmark.file-icon
+                                            .file-info
+                                                p.file-name example.jpg
+                                                p.file-size 1.2 MB
+                                                .progress.progress-bar-container
+                                                    .progress-bar(role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100")
+                                        button.btn-close(type='button', aria-label='Remove file')
+                                div FYI when developing this page, I don't want the user to be able to dismiss the modal until the file has been uploaded. Done button should be disabled while file is uploaded, and close button should be disabled. Probably dhange the data-backdrop="static" to prevent it from being closed. And data-keyboard="false"
+                                .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                    button.btn.btn-primary(type='button' data-bs-dismiss='modal') Done
 
 
 
+        section.py-3
+            .container.py-5
+                .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
+                    div
+                        h1.fw-medium Expenses
+                        .row.mt-2
+                            .col-sm-6
+                                .fw-medium Unclaimed
+                                    .fw-medium.fs-2 $3,456.78
+
+                            .col-sm-6
+                                .fw-medium Claim pending
+                                    .fw-medium.fs-2 $3,456.78
+
+                    .d-flex.align-items-center.gap-2.pt-3
+                        button.btn.btn-primary.rounded-pill(data-bs-toggle="modal", data-bs-target="#createExpenseModal") New Expense
+                        button.btn.btn-outline-primary.rounded-pill(disabled='') Make Claim
+                .mt-3
+                    nav.nav.nav-pills(style='display: inline-flex')
+                        a.nav-link.active.rounded-pill.px-2.py-1.fs-6(href='#') Unclaimed
+                        a.nav-link.rounded-pill.px-2.py-1.fs-6(href='#') Claimed
+                p.mt-3 Select an expense by clicking on it, to submit a claim.
+                .container.mt-5.claim-container
+                    .row
+                        .col-sm-12.col-md-6.col-xl-4.mb-4
+                            .card.expense-card.p-2
+                                .row.m-2
+                                    .col.text-start.card-identifier
+                                        span #
+                                        span 123
+                                    .col.text-end.card-amount $123.45
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Claim
+                                        .card-entity-value Travel
+                                        .card-entity-desc x`
+                                    .col-6
+                                        .card-entity-name Spent On
+                                        .card-entity-value 2023-04-15
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Submitted
+                                        .card-entity-value 2023-04-16
+                                    .col-6
+                                        .card-entity-name Attachments
+                                        .card-entity-desc Tap to open
+                                        .d-flex.flex-wrap.gap-2.mt-2
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+
+                                .row.m-2
+                                    .d-flex.gap-2
+                                        button.btn.btn-outline-primary Edit
+                                        button.btn.btn-outline-primary Delete
+                        .col-sm-12.col-md-6.col-xl-4.mb-4
+                            .card.expense-card.p-2
+                                .row.m-2
+                                    .col.text-start.card-identifier
+                                        span #
+                                        span 123
+                                    .col.text-end.card-amount $123.45
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Claim
+                                        .card-entity-value Travel
+                                        .card-entity-desc x`
+                                    .col-6
+                                        .card-entity-name Spent On
+                                        .card-entity-value 2023-04-15
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Submitted
+                                        .card-entity-value 2023-04-16
+                                    .col-6
+                                        .card-entity-name Attachments
+                                        .card-entity-desc Tap to open
+                                        .d-flex.flex-wrap.gap-2.mt-2
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+
+                                .row.m-2
+                                    .d-flex.gap-2
+                                        button.btn.btn-outline-primary Edit
+                                        button.btn.btn-outline-primary Delete
+                        .col-sm-12.col-md-6.col-xl-4.mb-4
+                            .card.expense-card.p-2
+                                .row.m-2
+                                    .col.text-start.card-identifier
+                                        span #
+                                        span 123
+                                    .col.text-end.card-amount $123.45
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Claim
+                                        .card-entity-value Travel
+                                        .card-entity-desc x`
+                                    .col-6
+                                        .card-entity-name Spent On
+                                        .card-entity-value 2023-04-15
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Submitted
+                                        .card-entity-value 2023-04-16
+                                    .col-6
+                                        .card-entity-name Attachments
+                                        .card-entity-desc Tap to open
+                                        .d-flex.flex-wrap.gap-2.mt-2
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+
+                                .row.m-2
+                                    .d-flex.gap-2
+                                        button.btn.btn-outline-primary Edit
+                                        button.btn.btn-outline-primary Delete
+                        .col-sm-12.col-md-6.col-xl-4.mb-4
+                            .card.expense-card.p-2
+                                .row.m-2
+                                    .col.text-start.card-identifier
+                                        span #
+                                        span 123
+                                    .col.text-end.card-amount $123.45
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Claim
+                                        .card-entity-value Travel
+                                        .card-entity-desc Description
+                                    .col-6
+                                        .card-entity-name Spent On
+                                        .card-entity-value 2023-04-15
+                                .row.m-2
+                                    .col-6
+                                        .card-entity-name Submitted
+                                        .card-entity-value 2023-04-16
+                                    .col-6
+                                        .card-entity-name Attachments
+                                        .card-entity-desc Tap to open
+                                        .d-flex.flex-wrap.gap-2.mt-2
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                                            .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                                                img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+
+                                .row.m-2
+                                    .d-flex.gap-2
+                                        button.btn.btn-outline-primary Edit
+                                        button.btn.btn-outline-primary Delete
+
+    script(src="/assets/javascripts/expenses.js")
