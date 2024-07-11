@@ -8,6 +8,7 @@ import session from 'express-session';
 import indexRouter from './routes/indexRoute';
 import usersRouter from './routes/users';
 import accountsRouter from './routes/accountRoute';
+import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
@@ -52,6 +53,7 @@ app.use(fetchUser);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
+app.use('/expenses', expenseRouter);
 
 
 
