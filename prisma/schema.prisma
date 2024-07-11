@@ -20,6 +20,7 @@ model User {
   password    String      @db.VarChar(255)
   createdAt   DateTime    @default(now())
   attachments Attachment[]
+  hasSeenWelcomePage Boolean @default(false)
 }
 
 model Claim {
