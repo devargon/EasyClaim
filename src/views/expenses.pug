@@ -10,70 +10,70 @@ block content
         .modal.fade.modal-lg#createExpenseModal(tabindex='-1')
             .modal-dialog
                 .modal-content
-                    div#submitExpenseStep1(v-if="currentStep === 1")
-                        form(action="/expense/new", method="post")
-                            .modal-header
-                                h5.modal-title Add new expense
-                                button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                            .modal-body
-                                .row.mb-3
-                                    label(for='expense_amt', class='form-label') Expense amount
-                                    .input-group.input-group-lg
-                                        span.input-group-text $
-                                        input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00')
+                    form(action="/expense/new", method="post", id="expense-form")
+                        .modal-header
+                            h5.modal-title Add new expense
+                            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                        .modal-body
+                            .row.mb-3
+                                label(for='expense_amt', class='form-label') Expense amount
+                                .input-group.input-group-lg
+                                    span.input-group-text $
+                                    input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00')
 
-                                .row.mb-3
-                                    .col-6
-                                        label(for='category', class='form-label') Category
-                                        select(class='form-select', aria-label='Category', name='category', id='category')
-                                    .col-6
-                                        label(for='spent_date', class='form-label') Spent on
-                                        input(type='date', class='form-control', id='spent_date', name='description', aria-label='Spent on')
-                                .row.mb-3
-                                    .col
-                                        label(for='description', class='form-label') Description
-                                        input(type='text', class='form-control', placeholder='Explain your expense briefly', id='description', name='description', aria-label='First name')
-                                .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
-                                    button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
-                                    button.btn.btn-primary(type='submit') Submit
-                    div#submitExpenseStep2(v-if="currentStep === 2")
-
-                        form(action="/expense/new", method="post")
-                            .modal-header
-                                div
-                                    .d-flex.align-items-end.gap-2
-                                        h5.modal-title Add Attachments
-                                        div.text-body-secondary Invoices, receipts, etc
-                                    div.text-muted(style="font-size: 0.8rem") Transport &middot; Grab for mummy &middot; $19.23
-                            .modal-body
-                                p.text-body-secondary.text-center Drag and drop files or click to select. You can remove any files before uploading.
-                                .upload-prompt#expense-attachment-upload(style="height: 10rem")
-                                    h1.text-muted-foreground
-                                        i.bi.bi-upload
-                                    div.fw-medium.text-muted-foreground Drag and drop files here
-                                    div.text-muted-foreground or click to select files
-                                input#expense-attachment-file-input(type="file" style="display: none" accept=".jpg,.jpeg,.png,.pdf", multiple='')
-                                // File items UI will go here
-                                .file-display#expense-attachments-display(style="gap: 2px;")
-                                    .file-item
-                                        .file-details
-                                            i.bi.bi-file-earmark.file-icon
-                                            div
-                                                p.file-name example.jpg
-                                                p.file-size 1.2 MB
-                                        button.btn-close(type='button' aria-label='Remove file')
-                                    .file-item
-                                        .file-details
-                                            i.bi.bi-file-earmark.file-icon
-                                            .file-info
-                                                p.file-name example.jpg
-                                                p.file-size 1.2 MB
-                                                .progress.progress-bar-container
-                                                    .progress-bar(role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100")
-                                        button.btn-close(type='button', aria-label='Remove file')
-                                div FYI when developing this page, I don't want the user to be able to dismiss the modal until the file has been uploaded. Done button should be disabled while file is uploaded, and close button should be disabled. Probably dhange the data-backdrop="static" to prevent it from being closed. And data-keyboard="false"
-                                .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
-                                    button.btn.btn-primary(type='button' data-bs-dismiss='modal') Done
+                            .row.mb-3
+                                .col-6
+                                    label(for='category', class='form-label') Category
+                                    select(class='form-select', aria-label='Category', name='category', id='category')
+                                .col-6
+                                    label(for='spent_date', class='form-label') Spent on
+                                    input(type='date', class='form-control', id='spent_date', name='description', aria-label='Spent on')
+                            .row.mb-3
+                                .col
+                                    label(for='description', class='form-label') Description
+                                    input(type='text', class='form-control', placeholder='Explain your expense briefly', id='description', name='description', aria-label='First name')
+                            .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                button.btn.btn-primary(type='submit') Submit
+        .modal.fade.modal-lg#manageExpenseAttachmentsModal(tabindex='-1')
+            .modal-dialog
+                .modal-content
+                    form(action="/expense/attachments", method="post")
+                        .modal-header
+                            div
+                                .d-flex.align-items-baseline.gap-2
+                                    h5.modal-title Add Attachments
+                                    div.text-body-secondary Invoices, receipts, etc
+                                div.text-muted(style="font-size: 0.8rem") Transport &middot; Grab for mummy &middot; $19.23
+                        .modal-body
+                            p.text-body-secondary.text-center Drag and drop files or click to select. You can remove any files before uploading.
+                            .upload-prompt#expense-attachment-upload(style="height: 10rem")
+                                h1.text-muted-foreground
+                                    i.bi.bi-upload
+                                div.fw-medium.text-muted-foreground Drag and drop files here
+                                div.text-muted-foreground or click to select files
+                            input#expense-attachment-file-input(type="file" style="display: none" accept=".jpg,.jpeg,.png,.pdf", multiple='')
+                            // File items UI will go here
+                            .file-display#expense-attachments-display(style="gap: 2px;")
+                                .file-item
+                                    .file-details
+                                        i.bi.bi-file-earmark.file-icon
+                                        div
+                                            p.file-name example.jpg
+                                            p.file-size 1.2 MB
+                                    button.btn-close(type='button' aria-label='Remove file')
+                                .file-item
+                                    .file-details
+                                        i.bi.bi-file-earmark.file-icon
+                                        .file-info
+                                            p.file-name example.jpg
+                                            p.file-size 1.2 MB
+                                            .progress.progress-bar-container
+                                                .progress-bar(role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100")
+                                    button.btn-close(type='button', aria-label='Remove file')
+                            div FYI when developing this page, I don't want the user to be able to dismiss the modal until the file has been uploaded. Done button should be disabled while file is uploaded, and close button should be disabled. Probably dhange the data-backdrop="static" to prevent it from being closed. And data-keyboard="false"
+                            .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                button.btn.btn-primary(type='button' data-bs-dismiss='modal') Done
 
 
 

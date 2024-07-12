@@ -15,6 +15,44 @@ const app = Vue.createApp({
 app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    const filesInUpload = [];
+
+    const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
+
+    const createExpenseModal = new bootstrap.Modal(document.getElementById("createExpenseModal"));
+
+    const fileDisplay = document.getElementById("expense-attachments-display");
+
+    let currentExpenseId = 0;
+
+    async function openUploadModal(expenseId, expense_data = null) {
+        currentExpenseId = expenseId;
+        if (!expense_data) {
+            // get expensee data
+            expense_data = {};
+        }
+        // populate the description of the expense at the top of the manageExpenseAttachmentsModal
+        fileDisplay.innerHTML = '';
+
+        uploadModal.show();
+
+        await initFileUploader();
+    }
+
+    const expenseForm = document.getElementById("expense-form");
+    console.log(`Expense form?`);
+    console.log(expenseForm);
+
+    expenseForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(expenseForm);
+        const formData = JSON.stringify(Object.fromEntries(data.entries()));
+        console.log(formData);
+        expenseForm.reset();
+        createExpenseModal.hide();
+        await openUploadModal(1);
+    })
     class FileItem {
         constructor(file, actualMimeType, container) {
             this.file = file;
@@ -22,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.container = container;
             this.element = this.createFileItem();
             this.container.appendChild(this.element);
-            this.isUploadSuccess = false; // Flag to track if upload was successful
+            this.isUploadSuccess = false;
         }
 
         createFileItem() {
@@ -32,6 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const fileDetails = document.createElement('div');
             fileDetails.className = 'file-details';
+
+            const fileLink = document.createElement('a');
+            fileLink.className = "text-decoration-none";
+            fileLink.href = "javascript:void(0);";
 
             const fileIcon = document.createElement('i');
             fileIcon.className = 'bi bi-file-earmark file-icon';
@@ -47,11 +89,17 @@ document.addEventListener('DOMContentLoaded', function() {
             fileSizeElement.className = 'file-size';
             fileSizeElement.textContent = `${(this.file.size / 1024 / 1024).toFixed(2)} MB`;
 
+            const fileActionMessage = document.createElement('div');
+            fileActionMessage.className = 'file-action-message';
+
             fileInfo.appendChild(fileNameElement);
             fileInfo.appendChild(fileSizeElement);
+            fileInfo.appendChild(fileActionMessage);
 
             fileDetails.appendChild(fileIcon);
             fileDetails.appendChild(fileInfo);
+
+            fileLink.appendChild(fileDetails);
 
             const removeButton = document.createElement('button');
             removeButton.className = 'btn-close';
@@ -81,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             progressBarContainer.appendChild(progressBar);
 
             // Append file details, progress bar, and remove button to the main file item container
-            fileItem.appendChild(fileDetails);
+            fileItem.appendChild(fileLink);
             fileInfo.appendChild(progressBarContainer);
             fileItem.appendChild(removeButton);
 
@@ -91,6 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
             this.progressBarContainer = progressBarContainer;
             this.fileItem = fileItem;
             this.fileInfo = fileInfo;
+            this.fileLink = fileLink;
+            this.fileActionMessage = fileActionMessage;
 
             return fileItem;
         }
@@ -100,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.progressBar.setAttribute('aria-valuenow', progress);
         }
 
-        async completeSuccess(deleteUrl) {
+        async completeSuccess(fileUrl, deleteUrl) {
             this.isUploadSuccess = true;
             // Hide the progress bar
             // this.progressBarContainer.style.display = 'none';
@@ -108,6 +158,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Show the remove button
             this.removeButton.style.display = 'block';
+
+            this.fileLink.href = fileUrl;
 
             // Set up the remove button to handle deletion
             this.removeButton.onclick = async () => {
@@ -133,10 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
             this.removeButton.style.display = 'block';
 
             // Display the error message
-            const messageElement = document.createElement('p');
-            messageElement.className = 'file-item-error';
-            messageElement.textContent = message;
-            this.fileInfo.appendChild(messageElement);
+            this.fileActionMessage.classList.add("text-danger");
+            this.fileActionMessage.textContent = message;
 
             // If the error is not from an upload, set up the remove button to just remove the element
             if (!isFromUpload) {
@@ -152,41 +202,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    const expenseForm  = document.getElementById('expense-form');
-
     const uploadArea = document.getElementById('expense-attachment-upload');
 
     const fileInput = document.getElementById('expense-attachment-file-input')
 
-    const fileDisplay = document.getElementById("expense-attachments-display")
+    async function initFileUploader() {
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        })
 
-    uploadArea.addEventListener('click', () => {
-        fileInput.click();
-    })
+        uploadArea.addEventListener('dragover', (event) => {
+            event.preventDefault(); // To prevent file from benig opened in a new tab I presume
+            uploadArea.classList.add('dragover');
+        })
 
-    uploadArea.addEventListener('dragover', (event) => {
-        event.preventDefault(); // To prevent file from benig opened in a new tab I presume
-        uploadArea.classList.add('dragover');
-    })
+        uploadArea.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            await handleFiles(event.dataTransfer.files);
+        })
 
-    uploadArea.addEventListener('drop', async (event) => {
-        event.preventDefault();
-        uploadArea.classList.remove('dragover');
-        await handleFiles(event.dataTransfer.files);
-    })
-
-    fileInput.addEventListener('change', async () => {
-        await handleFiles(fileInput.files);
-    })
+        fileInput.addEventListener('change', async () => {
+            await handleFiles(fileInput.files);
+        })
+    }
 
     async function handleFiles(files) {
         console.log(files.length);
+
+        // get
+
         for (let file of files) {
             const actualMimeType = await loadMime(file);
             console.log(actualMimeType);
-            const stringFileSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
 
             const fileItem = new FileItem(file, actualMimeType, fileDisplay);
+
+            if filesInUpload.
+
+            filesInUpload.push(file);
 
             // Example conditional rendering
             if (!['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'].includes(actualMimeType)) {
@@ -194,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (file.size > 8000000) {
                 return fileItem.completeError('Attachments must be smaller than 8 MB.');
             } else {
+                console.log(`Here, the file will be uploaded as part of claim ${currentExpenseId}`)
                 let progress = 0;
                 const interval = setInterval(() => {
                     if (progress < 100) {
@@ -201,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         fileItem.updateProgress(progress);
                     } else {
                         clearInterval(interval);
+                        fileItem.completeSuccess("https://media.nogra.app/download", "/api/attachments/delete")
                     }
                 }, 500); // Update progress every 500ms
             }

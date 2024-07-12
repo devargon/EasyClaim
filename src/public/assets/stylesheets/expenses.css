@@ -43,6 +43,14 @@
         padding: 0.6rem 0.5rem;
         background-color: var(--bs-gray-100);
         margin-bottom: 0.3rem;
+
+        a {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            text-decoration: none;
+
+        }
     }
 
     .file-details {
@@ -69,6 +77,7 @@
         font-weight: 500;
         margin: 0;
         display: inline;
+        color: black;
     }
 
     .file-size {
@@ -77,9 +86,8 @@
         margin: 0;
     }
 
-    .file-item-error {
+    .file-action-message {
         font-size: 0.9rem;
-        color: red;
         margin: 0;
     }
 
