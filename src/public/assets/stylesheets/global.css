@@ -53,6 +53,15 @@ body {
         align-self: center;
     }
 
+    .card-created-date {
+        padding: 0 0.3rem;
+        color: var(--bs-gray-600);
+    }
+
+    .card-created-date:hover {
+        cursor: pointer;
+    }
+
     .card-amount {
         font-weight: bold;
         font-size: 20px;
@@ -65,8 +74,10 @@ body {
     }
 
     .card-entity-value {
+        display: flex;
         font-weight: 500;
         font-size: 20px;
+        column-gap: 0.4rem;
     }
 
     .card-entity-desc {

@@ -16,6 +16,16 @@ app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    function formatMoney (money) {
+        let currency_disp
+        try {
+            currency_disp = currency(money).format();
+        } catch {
+            currency_disp = "$" + Number(money).toFixed(2)
+        }
+        return currency_disp;
+    }
+
     const filesInUpload = [];
 
     const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
@@ -24,16 +34,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fileDisplay = document.getElementById("expense-attachments-display");
 
+    // const expenseDatePicker = document.getElementById("spent_date");
+    // expenseDatePicker.max = new Date().toLocaleDateString('fr-ca') // To set to today's date
+    // expenseDatePicker.value = new Date().toLocaleDateString('fr-ca');
+
     let currentExpenseId = 0;
 
     async function openUploadModal(expenseId, expense_data = null) {
         currentExpenseId = expenseId;
         if (!expense_data) {
-            // get expensee data
+            // get expense data
             expense_data = {};
         }
         // populate the description of the expense at the top of the manageExpenseAttachmentsModal
         fileDisplay.innerHTML = '';
+
+        let expenseDetails = [];
+
+        if (expense_data) {
+            if (expense_data.category) {
+                expenseDetails.push(expense_data.category.name);
+            }
+            if (expense_data.description) {
+                expenseDetails.push(expense_data.description);
+            }
+            let currency_disp = formatMoney(expense_data.amount);
+            expenseDetails.push(currency_disp);
+        }
+
+        document.getElementById("manageExpenseAttachmentsExpenseDetails").innerText = expenseDetails.join(" \u00B7 ");
 
         uploadModal.show();
 
@@ -41,17 +70,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const expenseForm = document.getElementById("expense-form");
-    console.log(`Expense form?`);
-    console.log(expenseForm);
 
     expenseForm.addEventListener("submit", async (event) => {
+
         event.preventDefault();
-        const data = new FormData(expenseForm);
-        const formData = JSON.stringify(Object.fromEntries(data.entries()));
-        console.log(formData);
-        expenseForm.reset();
-        createExpenseModal.hide();
-        await openUploadModal(1);
+
+        function completeError(error_message) {
+            createExpenseAlert.innerHTML = error_message;
+            createExpenseAlert.style.display = "block";
+        }
+
+        const createExpenseAlert = document.getElementById("createExpenseAlert");
+        createExpenseAlert.innerHTML = "";
+        createExpenseAlert.style.display = "none";
+
+        const formDataJson = formToJSON(expenseForm);
+
+        const createExpenseResponse = await fetch('/expenses/api/new', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: formDataJson,
+            credentials: 'same-origin'
+        })
+
+        makeFormSubmitButtonUnload(expenseForm);
+        const text = await createExpenseResponse.text()
+        let jsonResponse;
+
+        try {
+            jsonResponse = JSON.parse(text);
+        } catch (err) { // not JSON
+            jsonResponse = null;
+        }
+        if (createExpenseResponse.status !== 201) {
+            completeError(jsonResponse?.error_message || "An unknown error occured.");
+            createExpenseAlert.style.display = "block";
+        } else {
+            if (jsonResponse) {
+                const existingCardElement = document.getElementById(jsonResponse.html.id);
+                if (existingCardElement) {
+                    existingCardElement.outerHTML = jsonResponse.html.render
+                } else {
+                    const expensesSection = document.getElementById("expenses-section");
+                    expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
+                }
+                expenseForm.reset();
+                createExpenseModal.hide();
+                await openUploadModal(1, jsonResponse);
+            } else {
+                createExpenseModal.hide();
+                location.reload();
+            }
+        }
     })
     class FileItem {
         constructor(file, actualMimeType, container) {
@@ -230,15 +300,12 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleFiles(files) {
         console.log(files.length);
 
-        // get
-
         for (let file of files) {
             const actualMimeType = await loadMime(file);
             console.log(actualMimeType);
 
             const fileItem = new FileItem(file, actualMimeType, fileDisplay);
 
-            if filesInUpload.
 
             filesInUpload.push(file);
 
@@ -262,11 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             console.log(file)
-
-            // s = `File: ${file.name}\nMime type ${actualMimetype}`;
-            //
-            // alert(s);
-            // const fileItem = document.createElement('div');
         }
     }
 })
