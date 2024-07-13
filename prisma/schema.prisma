@@ -21,14 +21,18 @@ model User {
   createdAt   DateTime    @default(now())
   attachments Attachment[]
   hasSeenWelcomePage Boolean @default(false)
+  expenses Expense[]
+  claims Claim[]
 }
 
 model Claim {
   id Int @id @default(autoincrement())
+  userId Int
   submittedAt DateTime @default(now())
   status Status @default(PENDING)
   claimOffset Decimal? @db.Decimal(10, 2)
   expenses Expense[]
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model Category {
@@ -41,7 +45,8 @@ model Category {
 
 model Expense {
   id           Int         @id @default(autoincrement())
-  spentOn      DateTime    @default(now())
+  userId       Int
+  spentOn      DateTime    @db.Date @default(now())
   submittedAt  DateTime    @default(now())
   editedAt     DateTime?   @updatedAt
   amount       Decimal?    @db.Decimal(10, 2)
@@ -51,6 +56,7 @@ model Expense {
   attachments  Attachment[]
   claimId Int?
   claim Claim? @relation(fields: [claimId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model Attachment {
