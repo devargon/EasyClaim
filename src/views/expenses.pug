@@ -90,33 +90,41 @@ block content
         section.py-3
             .container.py-5
                 .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
-                    div
+                    .flex-grow-1
                         h1.fw-medium Expenses
-                        .row.mt-2
-                            .col-sm-6
-                                .fw-medium Unclaimed
-                                    .fw-medium.fs-2 $3,456.78
-
-                            .col-sm-6
-                                .fw-medium Claim pending
-                                    .fw-medium.fs-2 $3,456.78
+                        .d-flex.mt-2.gap-5
+                            .fw-medium(v-if="!showingCompletedExpenses") Unclaimed
+                                .fw-medium.fs-2(data-money=amounts.incomplete.format({
+                                    separator: '',
+                                    symbol: ''
+                                })) #{amounts.incomplete.format()}
+                            .fw-medium(v-if="!showingCompletedExpenses") Claim pending
+                                .fw-medium.fs-2(data-money=amounts.pending.format({
+                                    separator: '',
+                                    symbol: ''
+                                })) #{amounts.pending.format()}
+                            .fw-medium(v-if="showingCompletedExpenses") Claimed
+                                .fw-medium.fs-2(data-money=amounts.completed.format({
+                                    separator: '',
+                                    symbol: ''
+                                })) #{amounts.completed.format()}
 
                     .d-flex.align-items-center.gap-2.pt-3
                         button.btn.btn-primary.rounded-pill(data-bs-toggle="modal", data-bs-target="#createExpenseModal") New Expense
                         button.btn.btn-outline-primary.rounded-pill(disabled='') Make Claim
                 .mt-3
                     nav.nav.nav-pills(style='display: inline-flex')
-                        a.nav-link.active.rounded-pill.px-2.py-1.fs-6(href='#') Unclaimed
-                        a.nav-link.rounded-pill.px-2.py-1.fs-6(href='#') Claimed
+                        .nav-link.rounded-pill.px-2.py-1.fs-6.clickable-pill(:class="{ active: !showingCompletedExpenses }", @click="showingCompletedExpenses=false") Unclaimed
+                        .nav-link.rounded-pill.px-2.py-1.fs-6.clickable-pill(:class="{ active: showingCompletedExpenses }", @click="showingCompletedExpenses=true") Claimed
                 p.mt-3 Select an expense by clicking on it, to submit a claim.
-                .container.mt-5.claim-container
-                    if expenses.length === 0
+                .container.mt-5.claim-container#incompleteExpenses(v-show="!showingCompletedExpenses")
+                    if incompleteExpenses.length === 0
                         .no-claims
                             h1.fw-bold.text-center This section's quite empty...
-                            h5.mt-2.text-center Click "New Expense" above to track your first expense!
+                            p.mt-2.text-center Click "New Expense" above to track your first expense!
                     else
                         .row#expenses-section
-                            each expense in expenses
+                            each expense in incompleteExpenses
                                 include components/expense-card.pug
                             .col-sm-12.col-md-6.col-xl-4.mb-4
                                 .card.expense-card.p-2
@@ -220,5 +228,14 @@ block content
                                         .d-flex.gap-2
                                             button.btn.btn-outline-primary Edit
                                             button.btn.btn-outline-primary Delete
+                .container.mt-5.claim-container#completedExpenses(v-show="showingCompletedExpenses")
+                    if completedExpenses.length === 0
+                        .no-claims
+                            h1.fw-bold.text-center Nothing to see here ...
+                            p.mt-2.text-center Expenses linked to complete claims will show here.
+                    else
+                        .row#expenses-section
+                            each expense in completedExpenses
+                                include components/expense-card.pug
 
     script(src="/assets/javascripts/expenses.js")

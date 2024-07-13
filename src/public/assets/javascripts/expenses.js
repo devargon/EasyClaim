@@ -1,7 +1,8 @@
 const app = Vue.createApp({
     data() {
         return {
-            currentStep: 2
+            currentStep: 2,
+            showingCompletedExpenses: false
         }
     },
     methods: {
