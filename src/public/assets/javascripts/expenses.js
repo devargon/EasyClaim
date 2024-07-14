@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fileDisplay = document.getElementById("expense-attachments-display");
 
-    // const expenseDatePicker = document.getElementById("spent_date");
-    // expenseDatePicker.max = new Date().toLocaleDateString('fr-ca') // To set to today's date
-    // expenseDatePicker.value = new Date().toLocaleDateString('fr-ca');
+    const expenseDateTimePicker = document.getElementById("spent_dt");
+    const now_dt = new Date();
+    expenseDateTimePicker.value = new Date(now_dt.getTime() - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
 
     let currentExpenseId = 0;
 
@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error("Unable to update Unclaimed amt:", error)
                 }
                 try {
+                    document.querySelector(".no-claims").style.display = "none";
                     const existingCardElement = document.getElementById(jsonResponse.html.id);
                     if (existingCardElement) {
                         existingCardElement.outerHTML = jsonResponse.html.render

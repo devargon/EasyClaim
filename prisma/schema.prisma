@@ -46,7 +46,7 @@ model Category {
 model Expense {
   id           Int         @id @default(autoincrement())
   userId       Int
-  spentOn      DateTime    @db.Date @default(now())
+  spentOn      DateTime    @default(now())
   submittedAt  DateTime    @default(now())
   editedAt     DateTime?   @updatedAt
   amount       Decimal    @db.Decimal(10, 2)
