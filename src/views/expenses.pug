@@ -122,120 +122,16 @@ block content
                         .no-claims
                             h1.fw-bold.text-center This section's quite empty...
                             p.mt-2.text-center Click "New Expense" above to track your first expense!
-                    else
-                        .row#expenses-section
-                            each expense in incompleteExpenses
-                                include components/expense-card.pug
-                            .col-sm-12.col-md-6.col-xl-4.mb-4
-                                .card.expense-card.p-2
-                                    .row.m-2
-                                        .col.text-start.card-identifier
-                                            span #
-                                            span 123
-                                        .col.text-end.card-amount $123.45
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Claim
-                                            .card-entity-value Travel
-                                            .card-entity-desc x`
-                                        .col-6
-                                            .card-entity-name Spent On
-                                            .card-entity-value 2023-04-15
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Submitted
-                                            .card-entity-value 2023-04-16
-                                        .col-6
-                                            .card-entity-name Attachments
-                                            .card-entity-desc Tap to open
-                                            .d-flex.flex-wrap.gap-2.mt-2
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                                    .row.m-2
-                                        .d-flex.gap-2
-                                            button.btn.btn-outline-primary Edit
-                                            button.btn.btn-outline-primary Delete
-                            .col-sm-12.col-md-6.col-xl-4.mb-4
-                                .card.expense-card.p-2
-                                    .row.m-2
-                                        .col.text-start.card-identifier
-                                            span #
-                                            span 123
-                                        .col.text-end.card-amount $123.45
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Claim
-                                            .card-entity-value Travel
-                                            .card-entity-desc x`
-                                        .col-6
-                                            .card-entity-name Spent On
-                                            .card-entity-value 2023-04-15
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Submitted
-                                            .card-entity-value 2023-04-16
-                                        .col-6
-                                            .card-entity-name Attachments
-                                            .card-entity-desc Tap to open
-                                            .d-flex.flex-wrap.gap-2.mt-2
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                                    .row.m-2
-                                        .d-flex.gap-2
-                                            button.btn.btn-outline-primary Edit
-                                            button.btn.btn-outline-primary Delete
-                            .col-sm-12.col-md-6.col-xl-4.mb-4
-                                .card.expense-card.p-2
-                                    .row.m-2
-                                        .col.text-start.card-identifier
-                                            span #
-                                            span 123
-                                        .col.text-end.card-amount $123.45
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Claim
-                                            .card-entity-value Travel
-                                            .card-entity-desc Description
-                                        .col-6
-                                            .card-entity-name Spent On
-                                            .card-entity-value 2023-04-15
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Submitted
-                                            .card-entity-value 2023-04-16
-                                        .col-6
-                                            .card-entity-name Attachments
-                                            .card-entity-desc Tap to open
-                                            .d-flex.flex-wrap.gap-2.mt-2
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-                                                .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
-                                                    img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
-
-                                    .row.m-2
-                                        .d-flex.gap-2
-                                            button.btn.btn-outline-primary Edit
-                                            button.btn.btn-outline-primary Delete
+                    .row#expenses-section
+                        each expense in incompleteExpenses
+                            include components/expense-card.pug
                 .container.mt-5.claim-container#completedExpenses(v-show="showingCompletedExpenses")
                     if completedExpenses.length === 0
                         .no-claims
                             h1.fw-bold.text-center Nothing to see here ...
                             p.mt-2.text-center Expenses linked to complete claims will show here.
-                    else
-                        .row#expenses-section
-                            each expense in completedExpenses
-                                include components/expense-card.pug
+                    .row#completed-expenses-section
+                        each expense in completedExpenses
+                            include components/expense-card.pug
 
     script(src="/assets/javascripts/expenses.js")
