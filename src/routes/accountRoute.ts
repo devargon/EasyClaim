@@ -19,7 +19,6 @@ router.get('/login', redirectIfLoggedIn, (req: Request, res: Response, next: Nex
 router.post('/login', redirectIfLoggedIn, LoginUser)
 
 router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: NextFunction) => {
-    req.body.redirect = req.query.redirect || "/";
     res.render('signup', { title: 'Sign up for EasyClaim', register_error: null, values: req.body});
 });
 
