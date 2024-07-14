@@ -43,7 +43,7 @@ if (document.forms.length > 0) {
     }
 }
 
-function formToJSON(form) {
+function formToJSObject(form) {
     const data = new FormData(form);
 
     let object = {};
@@ -58,5 +58,5 @@ function formToJSON(form) {
         }
         object[key].push(value);
     });
-    return JSON.stringify(object);
+    return object;
 }
