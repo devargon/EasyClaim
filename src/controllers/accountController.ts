@@ -64,5 +64,6 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     debug(`Registering user ${req.body.email}...`);
     const user = await registerUser(name, email, password);
     debug(`Registration completed for ${req.body.email}`);
-    return res.status(201).redirect(req.body.redirect || "/");
+    req.session.userId = user.id;
+    return res.status(201).redirect("/accounts/signup/success");
 }
