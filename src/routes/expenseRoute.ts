@@ -17,10 +17,14 @@ function formatMoney(money: string | number) {
 
 /* GET home page. */
 router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
     const categories = await prisma.category.findMany();
-    let expenses = await prisma.expense.findMany({include: {category: true}, orderBy: {submittedAt: 'desc'}});
+    let expenses = await prisma.expense.findMany({where: {userId: req.user.id}, include: {category: true}, orderBy: {submittedAt: 'desc'}});
 
     const completedExpenses = expenses.filter(expense => expense.claimId !== null && expense.claimComplete);
+    const incompleteExpenses = expenses.filter(expense => !expense.claimComplete)
     let incompleteExpensesAmt = currency(0.00);
     let pendingClaimExpenseAmt = currency(0.00);
     let completedExpenseAmt = currency(0.00);
@@ -35,7 +39,6 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
         }
     });
 
-    const incompleteExpenses = expenses.filter(expense => !expense.claimComplete)
     setTimeout(() => {
     }, 3000);
     res.render('expenses', {
