@@ -26,16 +26,16 @@ block content
                                     span.input-group-text $
                                     input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00', min='0.01', required='')
 
-                            .row.mb-3
-                                .col-6
+                            .row.mb-3.row-gap-3
+                                .col-12.col-lg-6
                                     label(for='category', class='form-label') Category
                                     select(class='form-select', aria-label='Category', name='category', id='category', required='')
                                         option(value="", disabled="", selected="") Select one
                                         each category in categories
                                             option(value=category.id) #{category.name}
-                                .col-6
-                                    label(for='spent_date', class='form-label') Spent on
-                                    input(type='date', class='form-control', id='spent_date', name='spent_date', aria-label='Spent on', required='')
+                                .col-12.col-lg-6
+                                    label(for='spent_dt', class='form-label') Spent on
+                                    input(type='datetime-local', class='form-control', id='spent_dt', name='spent_dt', aria-label='Spent on', required='')
                             .row.mb-3
                                 .col
                                     label(for='description', class='form-label') Description
@@ -94,7 +94,7 @@ block content
                         h1.fw-medium Expenses
                         .d-flex.mt-2.gap-5
                             .fw-medium(v-if="!showingCompletedExpenses") Unclaimed
-                                .fw-medium.fs-2(data-money=amounts.incomplete.format({
+                                .fw-medium.fs-2(id="unclaimed-amt", data-money=amounts.incomplete.format({
                                     separator: '',
                                     symbol: ''
                                 })) #{amounts.incomplete.format()}

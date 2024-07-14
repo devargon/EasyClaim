@@ -82,7 +82,7 @@ router.post('/api/new', redirectAsRequiresLogin, async (req: Request, res: Respo
         return res.status(400).json({error_message});
     }
 
-    const spent_on = req.body.spent_date;
+    const spent_on = req.body.spent_dt;
     const spent_on_actual = new Date(spent_on);
     if (!isValidDate(spent_on_actual)) {
         error_message = "Please provide a valid date.";

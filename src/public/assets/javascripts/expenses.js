@@ -81,18 +81,34 @@ document.addEventListener('DOMContentLoaded', function() {
             createExpenseAlert.style.display = "block";
         }
 
+        let formDataJson;
+
         const createExpenseAlert = document.getElementById("createExpenseAlert");
         createExpenseAlert.innerHTML = "";
         createExpenseAlert.style.display = "none";
 
-        const formDataJson = formToJSON(expenseForm);
+        try {
+            formDataJson = formToJSObject(expenseForm);
+            formDataJson.spent_dt = new Date(document.getElementById("spent_dt").value).toISOString();
+        } catch (e) {
+            completeError("An error occured while trying to send your expense. Please try again later.");
+            return console.error("Failed to create form data for sending: ", e)
+        }
 
-        const createExpenseResponse = await fetch('/expenses/api/new', {
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: formDataJson,
-            credentials: 'same-origin'
-        })
+
+        let createExpenseResponse;
+
+        try {
+            createExpenseResponse = await fetch('/expenses/api/new', {
+                method: 'post',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formDataJson),
+                credentials: 'same-origin'
+            })
+        } catch (e) {
+            console.error("Failed to send new expense data: ", e);
+            return completeError(`I couldn't create this new expense: ${e.toString()}`)
+        }
 
         makeFormSubmitButtonUnload(expenseForm);
         const text = await createExpenseResponse.text()
@@ -108,12 +124,25 @@ document.addEventListener('DOMContentLoaded', function() {
             createExpenseAlert.style.display = "block";
         } else {
             if (jsonResponse) {
-                const existingCardElement = document.getElementById(jsonResponse.html.id);
-                if (existingCardElement) {
-                    existingCardElement.outerHTML = jsonResponse.html.render
-                } else {
-                    const expensesSection = document.getElementById("expenses-section");
-                    expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
+                try {
+                    const unclaimedAmt = document.getElementById("unclaimed-amt")
+                    const newPendingAmount = currency(unclaimedAmt.dataset.money).add(jsonResponse.expense.amount)
+                    console.log(newPendingAmount);
+                    unclaimedAmt.setAttribute("data-money", newPendingAmount.format({separator: '',symbol: ''}));
+                    unclaimedAmt.innerText = newPendingAmount.format();
+                } catch (error) {
+                    console.error("Unable to update Unclaimed amt:", error)
+                }
+                try {
+                    const existingCardElement = document.getElementById(jsonResponse.html.id);
+                    if (existingCardElement) {
+                        existingCardElement.outerHTML = jsonResponse.html.render
+                    } else {
+                        const expensesSection = document.getElementById("expenses-section");
+                        expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
+                    }
+                } catch (error) {
+                    console.log("Unable to add new expense card:", error);
                 }
                 expenseForm.reset();
                 createExpenseModal.hide();
