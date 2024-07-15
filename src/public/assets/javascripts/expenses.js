@@ -172,9 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!expense_data) {
             let fetchExpenseResponse
             try {
-                fetchExpenseResponse = await fetch('/expenses/api/expense/' + expenseId, {
+                fetchExpenseResponse = await fetch('/api/expenses/' + expenseId, {
                     method: 'get',
-                    credentials: 'same-origin'
+                    credentials: 'same-origin',
+                    signal: AbortSignal.timeout(5000)
                 })
             } catch (e) {
                 console.error("Failed to read expense data: ", e);
@@ -245,9 +246,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let createExpenseResponse;
 
         try {
-            createExpenseResponse = await fetch('/expenses/api/new', {
+            createExpenseResponse = await fetch('/api/expenses/new', {
                 method: 'post',
                 headers: {'Content-Type': 'application/json'},
+                signal: AbortSignal.timeout(5000),
                 body: JSON.stringify(formDataJson),
                 credentials: 'same-origin'
             })
@@ -409,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set up the remove button to handle deletion
             this.removeButton.onclick = async () => {
                 try {
-                    const response = await fetch(deleteUrl, { method: 'GET' });
+                    const response = await fetch(deleteUrl, { method: 'GET', signal: AbortSignal.timeout(5000) });
                     if (response.status === 200) {
                         this.fileItem.textContent = 'Attachment deleted.';
                     } else {
