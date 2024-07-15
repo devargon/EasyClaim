@@ -16,6 +16,7 @@ function formatMoney(money: string | number) {
 }
 
 /* GET home page. */
+// noinspection JSUnusedLocalSymbols
 router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();
@@ -55,6 +56,7 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
     });
 });
 
+// noinspection JSUnusedLocalSymbols
 router.post('/api/new', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();

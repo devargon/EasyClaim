@@ -18,6 +18,7 @@ function validatePassword(password: string) {
     return isValid;
 }
 
+// noinspection JSUnusedLocalSymbols
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     if (!req.body.email || !req.body.password) {
@@ -40,6 +41,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
+// noinspection JSUnusedLocalSymbols
 export const FormRegisterUser = async (req: Request, res: Response, next: NextFunction) => {
     const name = req.body.name;
     const email = req.body.email;
