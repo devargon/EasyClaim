@@ -107,6 +107,37 @@ body {
         font-weight: 500;
         margin-top: 3px;
     }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgb(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: var(--bs-card-border-radius);
+        border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+        z-index: 1;
+        text-align: center;
+
+        .content {
+            background-color: white;
+            color: black;
+            padding: 20px 10px;
+            border-radius: 8px;
+
+            .action {
+                display: flex;
+                justify-content: center;
+                gap: .5rem;
+            }
+        }
+
+    }
 }
 
 .claim-status-badge {
