@@ -55,6 +55,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
+app.use('/api/expenses', expenseAPIRouter);
 
 app.get('/500', function(req: Request, res: Response, next: NextFunction) {
   return res.render('500')
