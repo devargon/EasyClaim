@@ -10,6 +10,7 @@ import usersRouter from './routes/users';
 import accountsRouter from './routes/accountRoute';
 import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
+import expenseAPIRouter from './routes/expenseAPIRoute';
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
 import connectSessionSequelize from "connect-session-sequelize";
@@ -55,17 +56,24 @@ app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
 
+app.get('/500', function(req: Request, res: Response, next: NextFunction) {
+  return res.render('500')
+})
+
+app.get('/404', function(req: Request, res: Response, next: NextFunction) {
+  return res.render('404')
+})
+
 
 
 // 404 handler
 app.use("*", function (req, res, next) {
   if (req.originalUrl.startsWith("/api")) {
-    // Return a simple response for API requests
-    return next(
-        createError(404, `Unknown Resource ${req.method} ${req.originalUrl}`)
-    );
+    return res.status(404).json({error: "Not found", error_message: "Not found"})
+    // return next(
+    //     createError(404, `Unknown Resource ${req.method} ${req.originalUrl}`)
+    // );
   }
-  // Return a simplified 404 error explaining what happened to frontend facing customers
   return res.status(404).render("404", {
     notfound_resource: `Unknown Resource ${req.method} ${req.originalUrl}`,
   });
@@ -74,23 +82,29 @@ app.use("*", function (req, res, next) {
 // Error handler
 // noinspection JSUnusedLocalSymbols
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // log the error to the console
-  console.error(err);
-
-  // respond with the error page or JSON
-  if (req.accepts('html')) {
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
+  if (req.app.get('env') === 'development' || process.env.NODE_ENV === 'development') {
+    if (req.accepts('html')) {
+      res.status(err.status || 500);
+      res.render('error');
+    } else {
+      res.status(err.status || 500).json({
+        message: err.message,
+        error: req.app.get('env') === 'development' ? err : {}
+      });
+    }
   } else {
-    // respond with JSON
-    res.status(err.status || 500).json({
-      message: err.message,
-      error: req.app.get('env') === 'development' ? err : {}
-    });
+    if (req.accepts('html')) {
+      res.render('500');
+    } else {
+      res.status(err.status || 500).json({
+        error: "Internal server error"
+      });
+    }
   }
 });
 
