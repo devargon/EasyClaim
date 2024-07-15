@@ -17,6 +17,53 @@ app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    function pushToast(message, header, type) {
+        let color;
+        color = type ? `text-bg-${type} border-0` : "";
+        const toastElement = document.createElement("div");
+        toastElement.className = `toast ${color}`
+        toastElement.setAttribute("role", "alert");
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+        const closeBtn = document.createElement("button");
+        closeBtn.type = "button";
+        closeBtn.className = "btn-close";
+        closeBtn.setAttribute("data-bs-dismiss", "toast");
+        closeBtn.setAttribute("aria-label", "Close");
+        if (header) {
+            const toastHeader = document.createElement("div");
+            toastHeader.className = "toast-header";
+            const headerElement = document.createElement("strong")
+            headerElement.className = "me-auto";
+            headerElement.innerText = header;
+            toastHeader.appendChild(headerElement);
+            toastHeader.appendChild(closeBtn);
+            toastElement.appendChild(toastHeader);
+        }
+
+        const toastBody = document.createElement("div");
+        toastBody.className = "toast-body";
+        toastBody.innerText = message;
+        if (!header) {
+            const dFlexDiv = document.createElement("div");
+            dFlexDiv.className = "d-flex";
+            dFlexDiv.appendChild(toastBody);
+            closeBtn.classList.add("me-2", "m-auto");
+            dFlexDiv.appendChild(closeBtn);
+            toastElement.appendChild(dFlexDiv);
+        } else {
+            toastElement.appendChild(toastBody);
+        }
+        document.querySelector('.toast-container').appendChild(toastElement);
+
+        const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 4000});
+        toast.show();
+
+        toastElement.addEventListener('hidden.bs.toast', () => {
+            toastElement.remove();
+        });
+    }
+
     function formatMoney (money) {
         let currency_disp
         try {
