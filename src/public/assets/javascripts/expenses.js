@@ -273,8 +273,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log(newPendingAmount);
                     unclaimedAmt.setAttribute("data-money", newPendingAmount.format({separator: '',symbol: ''}));
                     unclaimedAmt.innerText = newPendingAmount.format();
-                } catch (error) {
-                    console.error("Unable to update Unclaimed amt:", error)
+                } catch (e) {
+                    console.error("Unable to update Unclaimed amt:", e)
                 }
                 try {
                     document.querySelector(".no-claims").style.display = "none";
@@ -285,8 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         const expensesSection = document.getElementById("expenses-section");
                         expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
                     }
-                } catch (error) {
-                    console.log("Unable to add new expense card:", error);
+                } catch (e) {
+                    console.log("Unable to add new expense card:", e);
                 }
                 expenseForm.reset();
                 createExpenseModal.hide();
