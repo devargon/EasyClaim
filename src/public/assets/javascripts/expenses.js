@@ -35,9 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fileDisplay = document.getElementById("expense-attachments-display");
 
-    const expenseDateTimePicker = document.getElementById("spent_dt");
-    const now_dt = new Date();
-    expenseDateTimePicker.value = new Date(now_dt.getTime() - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
+    // populate the datetime field in new expense
+    try {
+        const expenseDateTimePicker = document.getElementById("spent_dt");
+        const now_dt = new Date();
+        expenseDateTimePicker.value = new Date(now_dt.getTime() - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
+    } catch (e) {
+        console.error("Could not populate datetime field with default value:", e)
+    }
 
     let currentExpenseId = 0;
 
@@ -147,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 expenseForm.reset();
                 createExpenseModal.hide();
-                await openUploadModal(1, jsonResponse);
+                await openUploadModal(jsonResponse.expense.id, jsonResponse.expense);
             } else {
                 createExpenseModal.hide();
                 location.reload();
