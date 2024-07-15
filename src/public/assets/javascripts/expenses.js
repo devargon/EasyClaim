@@ -256,13 +256,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         makeFormSubmitButtonUnload(expenseForm);
-        const text = await createExpenseResponse.text()
         let jsonResponse;
-
         try {
-            jsonResponse = JSON.parse(text);
-        } catch (err) { // not JSON
-            jsonResponse = null;
+            jsonResponse = await createExpenseResponse.json();
+        } catch (e) {
+            // not JSON
         }
         if (createExpenseResponse.status !== 201) {
             completeError(jsonResponse?.error_message || "An unknown error occured.");
