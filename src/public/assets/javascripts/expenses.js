@@ -87,11 +87,11 @@ document.addEventListener('DOMContentLoaded', function() {
             event.stopPropagation();
             const action = target.getAttribute('data-action');
             const expenseId = target.getAttribute('data-expense-id');
-            handleExpenseAction(action, expenseId);
+            handleExpenseAction(action, expenseId, target);
         }
     });
 
-    function handleExpenseAction(action, expenseId) {
+    function handleExpenseAction(action, expenseId, target) {
         switch (action) {
             case 'delete':
                 renderDeletePrompt(expenseId);
@@ -103,7 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(`Will actually delete expense${expenseId}`);
                 break;
             case 'attachments':
-                openUploadModal(expenseId, null).then(r => {});
+                if (target) target.setAttribute("disabled", "");
+                openUploadModal(expenseId, null).then(() => {if (target) target.removeAttribute("disabled")});
                 break;
             default:
                 console.error("Event delegation encountered unknown action: ", action);
