@@ -74,6 +74,79 @@ document.addEventListener('DOMContentLoaded', function() {
         return currency_disp;
     }
 
+    document.getElementById("incompleteExpenses").addEventListener("click", function(event) {
+        let target = event.target;
+        if (!target) return;
+        // in case user clicked on <i> icon
+        if (target.tagName === 'I' && target.parentElement.classList.contains('action-button')) {
+            target = target.parentElement;
+        }
+        if (target && target.classList.contains('action-button')) {
+            console.log("Event has action-button class.");
+            event.preventDefault();
+            event.stopPropagation();
+            const action = target.getAttribute('data-action');
+            const expenseId = target.getAttribute('data-expense-id');
+            handleExpenseAction(action, expenseId);
+        }
+    });
+
+    function handleExpenseAction(action, expenseId) {
+        switch (action) {
+            case 'delete':
+                renderDeletePrompt(expenseId);
+                break;
+            case 'edit':
+                console.log(`Will show edit modal for expense ${expenseId}`);
+                break;
+            case 'real-delete':
+                console.log(`Will actually delete expense${expenseId}`);
+                break;
+            case 'attachments':
+                openUploadModal(expenseId, null).then(r => {});
+                break;
+            default:
+                console.error("Event delegation encountered unknown action: ", action);
+        }
+    }
+
+    function renderDeletePrompt(expenseId) {
+        const card = document.getElementById(`expense-${expenseId}`);
+        const promptOverlay = document.createElement("div")
+        promptOverlay.className = "overlay";
+
+        const promptOverlayContent = document.createElement("div")
+        promptOverlayContent.className = "content";
+
+        const promptOverlayText = document.createElement("p");
+        promptOverlayText.innerText = "Are you sure you want to delete this expense?";
+
+        const promptOverlayActions = document.createElement("div");
+        promptOverlayActions.className = "action";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn btn-danger";
+        deleteBtn.innerHTML = "<i class='bi bi-trash3-fill'></i> Delete"
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn btn-secondary";
+        cancelBtn.innerText = "Cancel";
+
+        cancelBtn.addEventListener("click", function() {
+            promptOverlay.remove();
+        });
+
+        promptOverlayActions.appendChild(deleteBtn);
+        promptOverlayActions.appendChild(cancelBtn);
+
+        promptOverlayContent.appendChild(promptOverlayText);
+        promptOverlayContent.appendChild(promptOverlayActions);
+
+        promptOverlay.appendChild(promptOverlayContent);
+
+        card.querySelector(".expense-card-contents").appendChild(promptOverlay);
+    }
+
     const filesInUpload = [];
 
     const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
