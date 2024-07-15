@@ -169,14 +169,34 @@ document.addEventListener('DOMContentLoaded', function() {
     async function openUploadModal(expenseId, expense_data = null) {
         currentExpenseId = expenseId;
         if (!expense_data) {
-            // get expense data
-            expense_data = {};
+            let fetchExpenseResponse
+            try {
+                fetchExpenseResponse = await fetch('/expenses/api/expense/' + expenseId, {
+                    method: 'get',
+                    credentials: 'same-origin'
+                })
+            } catch (e) {
+                console.error("Failed to read expense data: ", e);
+                pushToast("I couldn't fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
+                return;
+            }
+            let jsonResponse = null;
+            try {
+                jsonResponse = await fetchExpenseResponse.json();
+            } catch (e) { // not JSON
+                console.error("Failed to read expense data: ", e);
+                pushToast("Could not fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
+                return;
+            }
+            if (fetchExpenseResponse.status !== 200) {
+                console.error("Unexpected status code received: ", fetchExpenseResponse.status);
+                pushToast(jsonResponse?.error_message || "An unknown error occured.", "Couldn't manage attachments", "danger");
+            } else expense_data = jsonResponse;
         }
-        // populate the description of the expense at the top of the manageExpenseAttachmentsModal
+
         fileDisplay.innerHTML = '';
-
+        // populate the description of the expense at the top of the manageExpenseAttachmentsModal
         let expenseDetails = [];
-
         if (expense_data) {
             if (expense_data.category) {
                 expenseDetails.push(expense_data.category.name);
@@ -186,13 +206,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             let currency_disp = formatMoney(expense_data.amount);
             expenseDetails.push(currency_disp);
+            document.getElementById("manageExpenseAttachmentsExpenseDetails").innerText = expenseDetails.join(" \u00B7 ");
+            uploadModal.show();
+            await initFileUploader();
+        } else {
+            console.error("Failed to read expense data: ", e);
+            pushToast("Could not fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
         }
-
-        document.getElementById("manageExpenseAttachmentsExpenseDetails").innerText = expenseDetails.join(" \u00B7 ");
-
-        uploadModal.show();
-
-        await initFileUploader();
     }
 
     const expenseForm = document.getElementById("expense-form");
