@@ -15,54 +15,66 @@ function formatMoney(money: string | number) {
     return currency(Number(money)).format();
 }
 
-
-
-// noinspection JSUnusedLocalSymbols
-router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-        return res.status(401).send();
-    }
-    let error_message;
-    console.log(req.body);
-
+function validateExpenseMiddleware(req: Request, res: Response, next: NextFunction) {
     const amount = req.body.expense_amt;
-    const amount_regex = /^\d+(?:\.\d{2})?$/
-    console.log(amount)
+    const amount_regex = /^\d+(?:\.\d{2})?$/;
+    console.log(amount);
 
     if (!amount || !amount_regex.test(amount)) {
-        error_message = "You did not enter a valid expense amount.";
-        return res.status(400).json({error_message});
+        const error_message = "You did not enter a valid expense amount.";
+        return res.status(400).json({ error_message });
     }
     const amount_actual = Number(amount);
     console.log(amount_actual);
 
     if (amount_actual < 0.01) {
-        error_message = "You must spend at least $0.01 to record this expense!";
-        return res.status(400).json({error_message});
+        const error_message = "You must spend at least $0.01 to record this expense!";
+        return res.status(400).json({ error_message });
     }
 
     const category = req.body.category;
     const category_actual = Number(category);
     if (isNaN(category_actual)) {
-        error_message = "Please choose a valid expense category.";
-        return res.status(400).json({error_message});
+        const error_message = "Please choose a valid expense category.";
+        return res.status(400).json({ error_message });
     }
 
     const spent_on = req.body.spent_dt;
     const spent_on_actual = new Date(spent_on);
-    if (!isValidDate(spent_on_actual)) {
-        error_message = "Please provide a valid date.";
-        return res.status(400).json({error_message});
+    if (isNaN(spent_on_actual.getTime())) { // Using getTime to check for invalid date
+        const error_message = "Please provide a valid date.";
+        return res.status(400).json({ error_message });
     }
 
     const description = req.body.description === "" ? null : req.body.description;
 
+    // Storing values in res.locals for access outside the middleware
+    res.locals.expense = {
+        amount: amount_actual,
+        category: category_actual,
+        spent_on: spent_on_actual,
+        description: description
+    };
+
+    next(); // Proceed to the next middleware or route handler
+}
+
+
+
+// noinspection JSUnusedLocalSymbols
+router.post('/new', redirectAsRequiresLogin, validateExpenseMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+
+    const { amount, category, spent_on, description } = res.locals.expense;
+
     const new_expense = await prisma.expense.create({
         data: {
-            amount: amount_actual,
+            amount: amount,
             description: description,
-            categoryId: category_actual,
-            spentOn: spent_on_actual,
+            categoryId: category,
+            spentOn: spent_on,
             userId: req.user.id
         },
         include: {
