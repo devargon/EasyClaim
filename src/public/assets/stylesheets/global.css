@@ -140,6 +140,15 @@ body {
     }
 }
 
+.expense-card.selected-card {
+    background-color: #f0f8ff;
+    border-color: #00f;
+}
+
+.expense-card input[type="checkbox"] {
+    display: none;
+}
+
 .claim-status-badge {
     font-size: 12px;
     display: inline-block;

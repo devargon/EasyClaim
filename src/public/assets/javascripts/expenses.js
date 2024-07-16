@@ -1,19 +1,16 @@
 const app = Vue.createApp({
     data() {
         return {
-            currentStep: 2,
+            selectedExpenses: [],
             showingCompletedExpenses: false
         }
     },
     methods: {
-        nextStep()  {
-            this.currentStep += 1;
-        }
     }
 });
 
 // Mount the app to the DOM element with id 'app'
-app.mount('#app');
+const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -77,19 +74,31 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("incompleteExpenses").addEventListener("click", function(event) {
         let target = event.target;
         if (!target) return;
+        // console.log(target);
         // in case user clicked on <i> icon
-        if (target.tagName === 'I' && target.parentElement.classList.contains('action-button')) {
+        if ((target.tagName === 'I' && target.parentElement.classList.contains('action-button')) || (target.tagName === 'IMG')) {
             target = target.parentElement;
         }
-        if (target && target.classList.contains('action-button')) {
+        if (target.classList.contains('action-button')) {
             console.log("Event has action-button class.");
             event.preventDefault();
             event.stopPropagation();
             const action = target.getAttribute('data-action');
             const expenseId = target.getAttribute('data-expense-id');
             handleExpenseAction(action, expenseId, target);
+        } else if (target.tagName === 'BUTTON' || target.classList.contains('btn') || target.classList.contains('expense-card-attachment')) {
+            // Handled on its own
+        } else {
+            target = target.closest('.expense-card');
+            handleCardTouch(target);
         }
     });
+
+    function handleCardTouch(target) {
+        const card_checkbox = target.querySelector('input[type="checkbox"]');
+        card_checkbox.click();``
+        target.classList.toggle('selected-card', card_checkbox.checked);
+    }
 
     function handleExpenseAction(action, expenseId, target) {
         switch (action) {
