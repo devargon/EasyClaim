@@ -165,8 +165,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const filesInUpload = [];
 
     const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
+    const createExpenseModalElement = document.getElementById("createExpenseModal");
+    const createExpenseModal = new bootstrap.Modal(createExpenseModalElement);
 
-    const createExpenseModal = new bootstrap.Modal(document.getElementById("createExpenseModal"));
+    createExpenseModalElement.addEventListener("hidden.bs.modal", event => {
+        resetExpenseForm();
+    })
+
+    createExpenseModalElement.addEventListener("show.bs.modal", event => {
+        const spentDtInput = document.getElementById("spent_dt");
+        if (!spentDtInput.value) {
+            const now_dt = new Date();
+            spentDtInput.value = new Date(now_dt.getTime() - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
+        }
+    })
 
     const fileDisplay = document.getElementById("expense-attachments-display");
 
