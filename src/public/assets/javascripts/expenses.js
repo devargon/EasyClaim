@@ -268,45 +268,35 @@ document.addEventListener('DOMContentLoaded', function() {
             return console.error("Failed to create form data for sending: ", e)
         }
 
+        if (expenseForm.dataset.purpose === 'edit') {
+            const editExpenseId = expenseForm.dataset.expenseid;
+            const actualEditExpenseId = parseInt(editExpenseId, 10);
+            if (isNaN(actualEditExpenseId)) {
+                makeFormSubmitButtonUnload(expenseForm);
+                return completeError(`Hmm... Something's not right. Please reload this page before editing this expense again.`);
 
-        let createExpenseResponse;
-
-        try {
-            createExpenseResponse = await fetch('/api/expenses/new', {
-                method: 'post',
-                headers: {'Content-Type': 'application/json'},
-                signal: AbortSignal.timeout(5000),
-                body: JSON.stringify(formDataJson),
-                credentials: 'same-origin'
-            })
-        } catch (e) {
-            console.error("Failed to send new expense data: ", e);
-            return completeError(`I couldn't create this new expense: ${e.toString()}`)
-        }
-
-        makeFormSubmitButtonUnload(expenseForm);
-        let jsonResponse;
-        try {
-            jsonResponse = await createExpenseResponse.json();
-        } catch (e) {
-            // not JSON
-        }
-        if (createExpenseResponse.status !== 201) {
-            completeError(jsonResponse?.error_message || "An unknown error occured.");
-            createExpenseAlert.style.display = "block";
-        } else {
-            if (jsonResponse) {
+            } else {
+                let editExpenseResponse;
                 try {
-                    const unclaimedAmt = document.getElementById("unclaimed-amt")
-                    const newPendingAmount = currency(unclaimedAmt.dataset.money).add(jsonResponse.expense.amount)
-                    console.log(newPendingAmount);
-                    unclaimedAmt.setAttribute("data-money", newPendingAmount.format({separator: '',symbol: ''}));
-                    unclaimedAmt.innerText = newPendingAmount.format();
+                    editExpenseResponse = await fetch(`/api/expenses/${editExpenseId}/edit`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                        signal: AbortSignal.timeout(5000),
+                        body: JSON.stringify(formDataJson),
+                        credentials: 'same-origin'
+                    })
                 } catch (e) {
-                    console.error("Unable to update Unclaimed amt:", e)
+                    console.error("Failed to send edit expense data: ", e);
+                    return completeError(`I couldn't edit this expense: ${e.toString()}`);
                 }
+                makeFormSubmitButtonUnload(expenseForm);
+                let jsonResponse;
                 try {
-                    document.querySelector(".no-claims").style.display = "none";
+                    jsonResponse = await editExpenseResponse.json();
+                } catch (e) {
+                    return completeError("Hmm... Something isn't right. Reload this page and check if the expense is edited.")
+                }
+                if (editExpenseResponse.ok) {
                     const existingCardElement = document.getElementById(jsonResponse.html.id);
                     if (existingCardElement) {
                         existingCardElement.outerHTML = jsonResponse.html.render
@@ -314,15 +304,78 @@ document.addEventListener('DOMContentLoaded', function() {
                         const expensesSection = document.getElementById("expenses-section");
                         expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
                     }
-                } catch (e) {
-                    console.log("Unable to add new expense card:", e);
+                } else {
+                    completeError(jsonResponse?.error_message || "An unknown error occured.");
+                    return createExpenseAlert.style.display = "block";
                 }
-                expenseForm.reset();
-                createExpenseModal.hide();
-                await openUploadModal(jsonResponse.expense.id, jsonResponse.expense);
-            } else {
-                createExpenseModal.hide();
-                location.reload();
+            }
+            resetExpenseForm();
+            createExpenseModal.hide();
+
+        } else {
+            try {
+                let createExpenseResponse;
+
+                try {
+                    createExpenseResponse = await fetch('/api/expenses/new', {
+                        method: 'post',
+                        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                        signal: AbortSignal.timeout(5000),
+                        body: JSON.stringify(formDataJson),
+                        credentials: 'same-origin'
+                    })
+                } catch (e) {
+                    console.error("Failed to send new expense data: ", e);
+                    return completeError(`I couldn't create this new expense: ${e.toString()}`)
+                }
+
+                makeFormSubmitButtonUnload(expenseForm);
+                let jsonResponse;
+                try {
+                    jsonResponse = await createExpenseResponse.json();
+                } catch (e) {
+                    return completeError("Hmm... Something isn't right. Reload this page and check if the expense is created.")
+                }
+                if (createExpenseResponse.status !== 201) {
+                    completeError(jsonResponse?.error_message || "An unknown error occured.");
+                    createExpenseAlert.style.display = "block";
+                } else {
+                    if (jsonResponse) {
+                        try {
+                            const unclaimedAmt = document.getElementById("unclaimed-amt")
+                            const newPendingAmount = currency(unclaimedAmt.dataset.money).add(jsonResponse.expense.amount)
+                            console.log(newPendingAmount);
+                            unclaimedAmt.setAttribute("data-money", newPendingAmount.format({
+                                separator: '',
+                                symbol: ''
+                            }));
+                            unclaimedAmt.innerText = newPendingAmount.format();
+                        } catch (e) {
+                            console.error("Unable to update Unclaimed amt:", e)
+                        }
+                        try {
+                            document.querySelector(".no-claims").style.display = "none";
+                            const existingCardElement = document.getElementById(jsonResponse.html.id);
+                            if (existingCardElement) {
+                                existingCardElement.outerHTML = jsonResponse.html.render
+                            } else {
+                                const expensesSection = document.getElementById("expenses-section");
+                                expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
+                            }
+                        } catch (e) {
+                            console.log("Unable to add new expense card:", e);
+                        }
+                        resetExpenseForm();
+                        createExpenseModal.hide();
+                        await openUploadModal(jsonResponse.expense.id, jsonResponse.expense);
+                    } else {
+                        createExpenseModal.hide();
+                        location.reload();
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                completeError("An error occured while trying to send your expense. Please try again.");
             }
         }
     })
