@@ -83,6 +83,34 @@ router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response,
     res.status(201).json(return_obj);
 })
 
+router.post("/:expenseId/delete", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const expenseId = req.params.expenseId;
+    const expenseIdActual = parseInt(expenseId, 10);
+    if (isNaN(expenseIdActual)) {
+        return res.status(400).json({error_message: "not a valid expenseId"});
+    }
+    const expense = await prisma.expense.findFirst({where: {userId: req.user.id, id: expenseIdActual}, include: {category: true}});
+    if (!expense) {
+        return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+    }
+    if (expense.claimId) {
+        return res.status(400).json({error_message: `Expense #${expenseIdActual} is already linked to a claim.`});
+    } else if (expense.claimComplete) {
+        return res.status(400).json({error_message: `Expense #${expenseIdActual} has been claimed and can't be deleted for tracking purposes.`});
+    } else {
+        const a = await prisma.expense.delete({where: {userId: req.user.id, id: expense.id}});
+        if (a) {
+            return res.status(200).json({success_message: `Expense #${expenseIdActual} deleted.`});
+        } else {
+            return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+        }
+
+    }
+})
+
 router.get("/:expenseId", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();
@@ -98,6 +126,9 @@ router.get("/:expenseId", redirectAsRequiresLogin, async (req: Request, res: Res
     }
     return res.status(200).json(expense);
 })
+
+
+
 
 
 export default router;

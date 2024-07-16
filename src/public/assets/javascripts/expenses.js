@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleExpenseAction(action, expenseId, target) {
         switch (action) {
             case 'delete':
-                renderDeletePrompt(expenseId);
+                renderDeletePrompt(expenseId).then(() => {})
                 break;
             case 'edit':
                 console.log(`Will show edit modal for expense ${expenseId}`);
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function renderDeletePrompt(expenseId) {
+    async function renderDeletePrompt(expenseId) {
         const card = document.getElementById(`expense-${expenseId}`);
         const promptOverlay = document.createElement("div")
         promptOverlay.className = "overlay";
@@ -132,6 +132,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const cancelBtn = document.createElement("button");
         cancelBtn.className = "btn btn-secondary";
         cancelBtn.innerText = "Cancel";
+
+        deleteBtn.addEventListener("click", async function() {
+            const deleteResult = await fetch(`/api/expenses/${expenseId}/delete`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                signal: AbortSignal.timeout(5000),
+                credentials: 'same-origin'
+            })
+            if (deleteResult.ok) {
+                promptOverlay.remove();
+                pushToast("Expense has been deleted.", "Success", "success");
+                window.location.reload();
+            }
+        })
 
         cancelBtn.addEventListener("click", function() {
             promptOverlay.remove();
