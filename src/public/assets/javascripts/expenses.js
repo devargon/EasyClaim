@@ -97,10 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderDeletePrompt(expenseId).then(() => {})
                 break;
             case 'edit':
-                console.log(`Will show edit modal for expense ${expenseId}`);
-                break;
-            case 'real-delete':
-                console.log(`Will actually delete expense${expenseId}`);
+                if (target) target.setAttribute("disabled", "");
+                renderEditPrompt(expenseId).then(() => {if (target) target.removeAttribute("disabled")})
                 break;
             case 'attachments':
                 if (target) target.setAttribute("disabled", "");
@@ -108,6 +106,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             default:
                 console.error("Event delegation encountered unknown action: ", action);
+        }
+    }
+
+    async function renderEditPrompt(expenseId) {
+        let fetchExpenseResponse;
+        try {
+            fetchExpenseResponse = await fetch('/api/expenses/' + expenseId, {
+                method: 'get',
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5000)
+            })
+        } catch (e) {
+            console.error("Failed to read expense data: ", e);
+            pushToast("I couldn't fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
+            return;
+        }
+        let jsonResponse = null;
+        try {
+            jsonResponse = await fetchExpenseResponse.json();
+        } catch (e) { // not JSON
+            console.error("Failed to read expense data: ", e);
+            pushToast("Could not fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
+            return;
+        }
+        if (fetchExpenseResponse.status !== 200) {
+            console.error("Unexpected status code received: ", fetchExpenseResponse.status);
+            pushToast(jsonResponse?.error_message || "An unknown error occured.", "Couldn't manage attachments", "danger");
+        } else expense_data = jsonResponse;
+
+        if (expense_data) {
+            expenseForm.setAttribute("data-expenseid", expense_data.id);
+            expenseForm.setAttribute("data-purpose", "edit");
+
+            document.getElementById("expense_amt").value = currency(expense_data.amount).format({ separator: '', symbol: '' });
+            document.getElementById("category").value = expense_data.category.id;
+            const now_dt = new Date();
+            document.getElementById("spent_dt").value = new Date(new Date(expense_data.spentOn) - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
+            document.getElementById("description").value = expense_data.description || "";
+            createExpenseModal.show();
+        } else {
+            console.error("Failed to read expense data: ", e);
+            pushToast("Could not fetch details about this expense due to an error.", "Couldn't edit attachment", "danger");
         }
     }
 
