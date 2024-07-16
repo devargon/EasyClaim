@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteBtn.addEventListener("click", async function() {
             const deleteResult = await fetch(`/api/expenses/${expenseId}/delete`, {
                 method: "POST",
-                headers: {'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
                 signal: AbortSignal.timeout(5000),
                 credentials: 'same-origin'
             })
@@ -222,21 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fileDisplay = document.getElementById("expense-attachments-display");
 
-    // populate the datetime field in new expense
-    try {
-        const expenseDateTimePicker = document.getElementById("spent_dt");
-        const now_dt = new Date();
-        expenseDateTimePicker.value = new Date(now_dt.getTime() - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
-    } catch (e) {
-        console.error("Could not populate datetime field with default value:", e)
-    }
-
     let currentExpenseId = 0;
 
     async function openUploadModal(expenseId, expense_data = null) {
         currentExpenseId = expenseId;
         if (!expense_data) {
-            let fetchExpenseResponse
+            let fetchExpenseResponse;
             try {
                 fetchExpenseResponse = await fetch('/api/expenses/' + expenseId, {
                     method: 'get',
@@ -284,6 +275,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const expenseForm = document.getElementById("expense-form");
+
+
+
+    function resetExpenseForm() {
+        expenseForm.reset();
+        expenseForm.removeAttribute("data-expenseid");
+        expenseForm.removeAttribute("data-purpose");
+    }
+
+    resetExpenseForm();
 
     expenseForm.addEventListener("submit", async (event) => {
 
