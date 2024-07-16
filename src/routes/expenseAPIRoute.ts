@@ -11,8 +11,14 @@ function isValidDate(date: any): date is Date {
     return date instanceof Date && !isNaN(date.getTime());
 }
 
-function formatMoney(money: string | number) {
-    return currency(Number(money)).format();
+function formatMoney(money: string | number, stripped_down: boolean = false) {
+    const a = currency(Number(money));
+    let format;
+    if (stripped_down) {
+        return a.format({separator: '', symbol: ''});
+    } else {
+        return a.format();
+    }
 }
 
 function validateExpenseMiddleware(req: Request, res: Response, next: NextFunction) {
