@@ -123,6 +123,64 @@ router.post("/:expenseId/delete", redirectAsRequiresLogin, async (req: Request, 
     }
 })
 
+router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const expenseId = req.params.expenseId;
+    const expenseIdActual = parseInt(expenseId, 10);
+
+    const { amount, category, spent_on, description } = res.locals.expense;
+
+    if (isNaN(expenseIdActual)) {
+        return res.status(400).json({error_message: "not a valid expenseId"});
+    }
+    const expense = await prisma.expense.findFirst({where: {userId: req.user.id, id: expenseIdActual}, include: {category: true}});
+    if (!expense) {
+        return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+    }
+    if (expense.claimId) {
+        return res.status(400).json({error_message: `Expense #${expenseIdActual} can't be edited while it's linked to a claim.`});
+    } else if (expense.claimComplete) {
+        return res.status(400).json({error_message: `Expense #${expenseIdActual} has been claimed and can't be edited for tracking purposes.`});
+    } else {
+        const updatedExpense = await prisma.expense.update({
+            where: {
+                id: expenseIdActual,
+                userId: {
+                    equals: req.user.id
+                }
+            },
+            data: {
+                amount: amount,
+                description: description,
+                categoryId: category,
+                spentOn: spent_on
+            },
+            include: {
+                category: true,
+            }
+        })
+        if (updatedExpense) {
+            const renderedExpenseCard = pug.renderFile("./src/views/components/expense-card.pug", {
+                expense: updatedExpense,
+                formatMoney
+            });
+            const return_obj = {
+                expense: updatedExpense,
+                html: {
+                    id: `expense-${updatedExpense.id}`,
+                    render: renderedExpenseCard
+                },
+            }
+            res.status(200).json(return_obj);
+        } else {
+            return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+        }
+
+    }
+})
+
 router.get("/:expenseId", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();
