@@ -104,3 +104,31 @@
 }
 
 
+.createClaimModal {
+    .claim-expense-entry {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin: 0.25rem 0;
+    }
+
+    .claim-expense-name-container {
+        min-width: 0px;
+
+        .claim-expense-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    }
+
+    .claim-expense-amount {
+        white-space: nowrap; margin-left: 35px; font-weight: bold;
+    }
+
+    .total-section {
+        display: flex;
+        justify-content: flex-end;
+    }
+}

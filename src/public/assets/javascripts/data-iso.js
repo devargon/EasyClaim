@@ -1,3 +1,21 @@
+const formatISOToLocaleDate = (isoDate) => {
+    let date;
+    if (typeof isoDate === 'string') {
+        date = new Date(isoDate);
+    } else {
+        date = isoDate;
+    }
+    const userLocale = navigator.language || navigator.userLanguage;
+    console.log(userLocale);
+
+    const datePart = date.toLocaleDateString(userLocale, {
+        year: '2-digit',
+        month: 'long',
+        day: 'numeric'
+    });
+    return datePart
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const formatISOToLocaleDateTime = (isoDate) => {
         const date = new Date(isoDate);

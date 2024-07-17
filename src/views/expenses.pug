@@ -45,6 +45,68 @@ block content
                                 button.btn.btn-primary(type='submit')
                                     span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
                                     | Submit
+        .modal.fade.modal-lg.createClaimModal#createClaimModal(tabindex='-1')
+            .modal-dialog
+                .modal-content
+                    form()
+                        .modal-header
+                            h5.modal-title Create new claim
+                            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                        .modal-body
+                            .row
+                                div
+                                    .alert.alert-danger.text-center#createClaimAlert(style="display: none", role='alert') A simple warning
+                            .row.mb-5
+                                label(for='claim_offset_amt', class='form-label') Offset claim?
+                                .input-group.input-group-lg
+                                    span.input-group-text - $
+                                    input(type='number', class='form-control', id='claim_offset_amt', name='claim_offset_amt', aria-label='Claim Offset Amount', step='0.01', placeholder='0.00', min='0.00', value='0.00', v-model.number="offset")
+
+                            .row.mb-3.claim-expense-entries
+                                .claim-expense-entry
+                                    .claim-expense-name-container
+                                        .claim-expense-name 16 July 24 · Health Care · Eczema creammmmmmmmmmm
+                                    .claim-expense-amount
+                                        div $1.23
+                                .claim-expense-entry
+                                    .claim-expense-name-container
+                                        .claim-expense-category.text-truncate 16 July 24 · Health Care · Eczema creammmmmmmmmmm
+                                    .claim-expense-amount
+                                        div $1.23
+                                .claim-expense-entry
+                                    .claim-expense-name-container
+                                        .claim-expense-category.text-truncate 16 July 24 · Health Care · Eczema creammmmmmmmmmm
+                                    .claim-expense-amount
+                                        div $1.23
+                                .claim-expense-entry
+                                    .claim-expense-name-container
+                                        .claim-expense-category.text-truncate 16 July 24 · Health Care · Eczema creammmmmmmmmmm
+                                    .claim-expense-amount
+                                        div $1.23
+                                .claim-expense-entry
+                                    .claim-expense-name-container
+                                        .claim-expense-category.text-truncate 16 July 24 · Health Care · Eczema creammmmmmmmmmm
+                                    .claim-expense-amount
+                                        div $1.23
+                            .row.mb-3.claim-calculation
+                                .d-flex.justify-content-end.my-2
+                                    div(v-if="offset <= 0") Total
+                                    div(v-else="") Subtotal
+                                    .claim-expense-amount.claim-total $1.23
+                                .justify-content-end.my-2(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                    div Claim Offset
+                                    .claim-expense-amount
+                                        span.me-2 -
+                                        span.offset-amt $1.23
+                                .justify-content-end.my-2(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                    div Grand Total
+                                    .claim-expense-amount.claim-grandtotal $1.23
+
+                            .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                button.btn.btn-primary(type='submit')
+                                    span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                    | Submit
         .modal.fade.modal-lg#manageExpenseAttachmentsModal(tabindex='-1')
             .modal-dialog
                 .modal-content
@@ -111,7 +173,7 @@ block content
 
                     .d-flex.align-items-center.gap-2.pt-3
                         button.btn.btn-primary.rounded-pill(data-bs-toggle="modal", data-bs-target="#createExpenseModal") New Expense
-                        button.btn.btn-outline-primary.rounded-pill(disabled='') Make Claim
+                        button.btn.btn-outline-primary.rounded-pill#make-claim(:disabled="selectedExpenses.length > 0 ? undefined: true") Make Claim
                 .mt-3
                     nav.nav.nav-pills(style='display: inline-flex')
                         .nav-link.rounded-pill.px-2.py-1.fs-6.clickable-pill(:class="{ active: !showingCompletedExpenses }", @click="showingCompletedExpenses=false") Unclaimed

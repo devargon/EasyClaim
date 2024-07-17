@@ -2,6 +2,7 @@ const app = Vue.createApp({
     data() {
         return {
             selectedExpenses: [],
+            offset: 0.00,
             showingCompletedExpenses: false
         }
     },
@@ -13,6 +14,155 @@ const app = Vue.createApp({
 const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
+
+
+    function handleCurrencyValue(value) {
+        value = value.replace(/[^0-9.]/g, '');
+        if (value === '') {
+            return value;
+        }
+        let parts = value.split('.');
+        console.log(parts);
+
+        // If there are more than 2 decimal places, truncate to 2
+        if (parts.length > 1 && parts[1].length > 2) {
+            parts[1] = parts[1].slice(0, 2);
+        }
+        return parts.join('.');
+    }
+
+    const addExpenseAmountInput = document.getElementById('expense_amt');
+    addExpenseAmountInput.addEventListener("input", () => {
+        if (handleCurrencyValue(addExpenseAmountInput.value) !== addExpenseAmountInput.value) {
+            addExpenseAmountInput.value = handleCurrencyValue(addExpenseAmountInput.value);
+        }
+    })
+
+    const createClaimModalElement = document.getElementById("createClaimModal");
+    const createClaimModal = new bootstrap.Modal(createClaimModalElement);
+    const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
+    const createClaimModalEntriesSection = document.querySelector(".claim-expense-entries");
+    const createClaimButton = document.getElementById("make-claim");
+    createClaimButton.addEventListener("click", function() {
+        if (vm.selectedExpenses.length > 0) {
+            openClaimModal(vm.selectedExpenses);
+        } else {
+            pushToast("You need to select at least one expense to make a claim.", "", "warning");
+        }
+    })
+
+    createClaimModalElement.addEventListener("show.bs.modal", () => {
+        claimOffsetAmtInput.value = ""
+        return claimOffsetAmtInput.dispatchEvent(new Event("input"));
+    })
+
+    claimOffsetAmtInput.addEventListener("input", () => {
+        if (handleCurrencyValue(claimOffsetAmtInput.value) !== claimOffsetAmtInput.value) {
+            claimOffsetAmtInput.value = handleCurrencyValue(claimOffsetAmtInput.value);
+        }
+
+        let newOffsetNumber = Number(claimOffsetAmtInput.value);
+        if (isNaN(newOffsetNumber)) {
+           newOffsetNumber = Number(0);
+        }
+        const claimSubtotalDiv = document.querySelector(".claim-total")
+        let subtotal = Number(claimSubtotalDiv.dataset.subtotal)
+        if (isNaN(subtotal)) {
+            subtotal = Number(0);
+        }
+        if (newOffsetNumber > subtotal) {
+            claimOffsetAmtInput.value = currency(subtotal).format({separator: '', symbol: ''});
+            return claimOffsetAmtInput.dispatchEvent(new Event("input"));
+        }
+        document.querySelector(".offset-amt").innerText = currency(newOffsetNumber).format();
+        const claimGrandtotalDiv = document.querySelector(".claim-grandtotal")
+        claimGrandtotalDiv.innerText = currency(subtotal).subtract(newOffsetNumber).format();
+
+    })
+
+
+    function openClaimModal(expenseIds) {
+        createClaimModalEntriesSection.innerHTML = "";
+        const foundExpenses = [];
+        if (expenseIds.length < 1) {
+           return pushToast("You need to select at least one expense.", "Error creating claim", "danger");
+        }
+        let expenseClaimSubtotal = currency(0.00);
+        expenseIds.forEach(expenseId => {
+            const expenseCard = document.getElementById(`expense-${expenseId}`);
+            if (expenseCard) {
+                let expenseAmount, expenseDate, expenseCategoryName, expenseDescription;
+                const expenseAmountDiv = expenseCard.querySelector(".expense-amount");
+                if (expenseAmountDiv) expenseAmount = expenseAmountDiv.getAttribute("data-money");
+                const expenseDateDiv = expenseCard.querySelector(".expense-date");
+                if (expenseDateDiv) expenseDate = expenseDateDiv.getAttribute("data-iso");
+                const expenseCategoryNameDiv = expenseCard.querySelector(".expense-category-name");
+                if (expenseCategoryNameDiv) expenseCategoryName = expenseCategoryNameDiv.innerText;
+                const expenseDescriptionDiv = expenseCard.querySelector(".expense-description");
+                if (expenseDescriptionDiv) expenseDescription = expenseDescriptionDiv.innerText;
+                const expenseInformalObj = {
+                    amount: currency(expenseAmount),
+                    date: new Date(expenseDate),
+                    categoryName: expenseCategoryName,
+                    description: expenseDescription,
+                }
+                if (!expenseInformalObj.amount) {
+                    console.error(`Could not find expense amount information for #${expenseId}`)
+                } else if (!(expenseInformalObj.categoryName || expenseInformalObj.description)) {
+                    console.error(`Could not find expense cat or desc for ${expenseId}`);
+                } else {
+                    let entryNameArr = [];
+                    if (expenseInformalObj.date) {
+                        if (Object.prototype.toString.call(expenseInformalObj.date) === '[object Date]') {
+                            entryNameArr.push(formatISOToLocaleDate(expenseInformalObj.date));
+                        }
+                    }
+                    if (expenseInformalObj.categoryName) entryNameArr.push(expenseInformalObj.categoryName);
+                    if (expenseInformalObj.description) entryNameArr.push(expenseInformalObj.description);
+
+
+                    const claimExpenseEntryDiv = document.createElement("div")
+                    claimExpenseEntryDiv.className = "claim-expense-entry";
+                    const claimExpenseEntryNameContainerDiv = document.createElement("div");
+                    claimExpenseEntryNameContainerDiv.className = "claim-expense-name-container";
+                    const claimExpenseEntryNameInnerDiv = document.createElement("div");
+                    claimExpenseEntryNameInnerDiv.className = "claim-expense-name-container";
+                    claimExpenseEntryNameInnerDiv.innerText = entryNameArr.join(' \267 ');
+                    claimExpenseEntryNameContainerDiv.appendChild(claimExpenseEntryNameInnerDiv);
+                    const claimExpenseEntryAmtContainer = document.createElement("div");
+                    claimExpenseEntryAmtContainer.className = "claim-expense-amount"
+                    claimExpenseEntryAmtContainer.innerText = expenseInformalObj.amount.format();
+                    claimExpenseEntryDiv.appendChild(claimExpenseEntryNameContainerDiv);
+                    claimExpenseEntryDiv.appendChild(claimExpenseEntryAmtContainer);
+                    createClaimModalEntriesSection.appendChild(claimExpenseEntryDiv);
+                    expenseClaimSubtotal = expenseClaimSubtotal.add(expenseInformalObj.amount);
+
+                    foundExpenses.push(expenseInformalObj);
+                }
+            } else {
+                console.error(`Could not find the Expense Card div for ${expenseId}`);
+            }
+        })
+        if (foundExpenses.length === 0) {
+            console.error("Failed to parse any selected expenses.");
+            return pushToast("Hmm... Something is wrong. I could not find any expenses. Refresh the page and try again.", "Error creating expenses.", "danger");
+        }
+
+        claimOffsetAmtInput.max = expenseClaimSubtotal.format({separator: '', symbol: ''});
+
+        const offsetAmtDiv = document.querySelector(".offset-amt");
+        offsetAmtDiv.innerText = currency(0.00).format();
+        const totalAmountDiv = document.querySelector(".claim-total");
+        totalAmountDiv.innerText = expenseClaimSubtotal.format();
+        totalAmountDiv.setAttribute("data-subtotal", expenseClaimSubtotal.format({separator: '', symbol: ''}))
+
+
+        createClaimModal.show();
+
+    }
+
+
+
 
     function pushToast(message, header, type) {
         let color;
