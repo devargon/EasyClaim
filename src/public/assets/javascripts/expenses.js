@@ -217,11 +217,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const createExpenseModalElement = document.getElementById("createExpenseModal");
     const createExpenseModal = new bootstrap.Modal(createExpenseModalElement);
 
-    createExpenseModalElement.addEventListener("hidden.bs.modal", event => {
+    createExpenseModalElement.addEventListener("hidden.bs.modal", () => {
         resetExpenseForm();
     })
 
-    createExpenseModalElement.addEventListener("show.bs.modal", event => {
+    createExpenseModalElement.addEventListener("show.bs.modal", () => {
         const spentDtInput = document.getElementById("spent_dt");
         if (!spentDtInput.value) {
             const now_dt = new Date();
