@@ -49,6 +49,10 @@ body {
 .expense-card {
     padding: 24px !important;
 
+    .expense-card-selectable-contents * {
+        cursor: pointer;
+    }
+
     .card-identifier {
         align-self: center;
     }

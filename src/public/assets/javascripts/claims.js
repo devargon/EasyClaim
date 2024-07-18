@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         promptOverlay.appendChild(promptOverlayContent);
 
-        card.querySelector(".expense-card-contents").appendChild(promptOverlay);
+        card.querySelector(".expense-claim-card-contents").appendChild(promptOverlay);
     }
 
     let currentExpenseId = 0;

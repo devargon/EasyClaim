@@ -3,7 +3,8 @@
     .card.expense-card.p-2
         if !(expense.claimId || expense.claimComplete)
             input(type="checkbox", id=`ep-checkbox-${expense.id}`, name="select-expense", value=expense.id, v-model="selectedExpenses")
-        .d-flex.flex-column.expense-card-contents
+        .d-flex.flex-column(class=(expense.claimId || expense.claimComplete) ? 'expense-card-contents' : 'expense-card-selectable-contents')
+
             .row.m-2
                 .col.d-flex.justify-content-between
                     .text-start.card-identifier.flex-grow-1
