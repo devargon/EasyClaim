@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const userLocale = navigator.language || navigator.userLanguage;
         console.log(userLocale);
 
-        // Create the date and time parts separately
         const datePart = date.toLocaleDateString(userLocale, {
             year: '2-digit',
             month: 'long',
@@ -33,9 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
             minute: 'numeric'
         });
 
-        // Combine date and time parts without the "at" word
         return `${datePart} ${timePart}`;
     };
+
 
     const updateElementText = (element) => {
         const isoDate = element.getAttribute('data-iso');
@@ -49,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.forEach(updateElementText);
     };
 
-    // Initial update for elements already in the DOM
     updateAllElements();
 
     // MutationObserver to handle future changes in the DOM
@@ -61,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (node.hasAttribute('data-iso')) {
                             updateElementText(node);
                         }
-                        // Also update any children with data-iso attribute
                         const descendants = node.querySelectorAll('[data-iso]');
                         descendants.forEach(updateElementText);
                     }
@@ -72,6 +69,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Observe the entire document for changes
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-iso'] });
 });
