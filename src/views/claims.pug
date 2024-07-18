@@ -37,7 +37,12 @@ block content
                                             .card-entity-value #{claim.expenses.length}
                                         .col-6
                                             .card-entity-name Status
-                                            .claim-status-badge.claim-completed.rounded-pill Completed
+                                            if claim.status === "PENDING"
+                                                .claim-status-badge.claim-pending.rounded-pill Pending
+                                            else if claim.status === "COMPLETE"
+                                                .claim-status-badge.claim-completed.rounded-pill Completed
+                                            else
+                                                .claim-status-badge.claim-unknown.rounded-pill Unknown
                                     .row.m-2
 
                                         each expense in expenses_short
