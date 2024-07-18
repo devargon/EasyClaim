@@ -15,6 +15,7 @@ const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    let currentSelectedExpensesForClaim = [];
 
     function handleCurrencyValue(value) {
         value = value.replace(/[^0-9.]/g, '');
@@ -77,6 +78,52 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector(".offset-amt").innerText = currency(newOffsetNumber).format();
         const claimGrandtotalDiv = document.querySelector(".claim-grandtotal")
         claimGrandtotalDiv.innerText = currency(subtotal).subtract(newOffsetNumber).format();
+
+    })
+
+    const createClaimForm = document.getElementById("createClaimForm")
+    createClaimForm.addEventListener("submit", async (event) => {
+        function completeError(error_message) {
+            const createClaimAlert = document.getElementById("createClaimAlert");
+            createClaimAlert.innerHTML = error_message;
+            createClaimAlert.style.display = "block";
+        }
+        event.preventDefault();
+
+        let offsetAmount = Number(claimOffsetAmtInput.value);
+        if (isNaN(offsetAmount)) offsetAmount = Number(0);
+        if (offsetAmount < 0) {
+            makeFormSubmitButtonUnload(createClaimForm);
+            return completeError("Your offset amount cannot be lesser than $0.00.")
+        }
+        let newClaimResponse;
+        try {
+            newClaimResponse = await fetch("/api/claims/new", {
+                method: "POST",
+                body: JSON.stringify({
+                    expenses: currentSelectedExpensesForClaim,
+                    offsetAmount: offsetAmount
+                }),
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5000)
+            })
+        } catch (e) {
+            return res.status(500).json({error_message: `Failed to create claim: ${e.toString()}`});
+        } finally {
+            makeFormSubmitButtonUnload(createClaimForm);
+        }
+        if (newClaimResponse.ok) {
+            // window.location.href = "/claims";
+            return completeError("OK");
+        } else {
+            try {
+                const json_content = await newClaimResponse.json();
+                return completeError(json_content.error_message || "Unable to create a claim. Please try again later.");
+            } catch (error) {
+                return completeError(`Unable to create a claim. Please try again later.`);
+            }
+        }
 
     })
 
@@ -156,13 +203,9 @@ document.addEventListener('DOMContentLoaded', function() {
         totalAmountDiv.innerText = expenseClaimSubtotal.format();
         totalAmountDiv.setAttribute("data-subtotal", expenseClaimSubtotal.format({separator: '', symbol: ''}))
 
-
+        currentSelectedExpensesForClaim = expenseIds;
         createClaimModal.show();
-
     }
-
-
-
 
     function pushToast(message, header, type) {
         let color;
