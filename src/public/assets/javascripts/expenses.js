@@ -240,7 +240,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handled on its own
         } else {
             target = target.closest('.expense-card');
-            handleCardTouch(target);
+            if (target) {
+                handleCardTouch(target);
+            }
+
         }
     });
 
