@@ -1,27 +1,10 @@
 import express, {Request, Response, NextFunction} from 'express';
 import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
-import prisma from "../config/db";
 import currency from "currency.js";
-import pug from "pug";
-import {Decimal} from "@prisma/client/runtime/library";
-import {findExpenseById, findExpenseByIdAndUser} from "../services/expenseService";
+import {findExpenseByIdAndUser} from "../services/expenseService";
 import {createClaim} from "../services/claimService";
 
 const router = express.Router();
-
-function isValidDate(date: any): date is Date {
-    return date instanceof Date && !isNaN(date.getTime());
-}
-
-function formatMoney(money: string | number, stripped_down: boolean = false) {
-    const a = currency(Number(money));
-    let format;
-    if (stripped_down) {
-        return a.format({separator: '', symbol: ''});
-    } else {
-        return a.format();
-    }
-}
 
 // noinspection JSUnusedLocalSymbols
 router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
