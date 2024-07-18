@@ -11,6 +11,7 @@ import accountsRouter from './routes/accountRoute';
 import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
 import expenseAPIRouter from './routes/expenseAPIRoute';
+import claimAPIRouter from './routes/claimAPIRoute';
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
 import connectSessionSequelize from "connect-session-sequelize";
@@ -56,6 +57,7 @@ app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
 app.use('/api/expenses', expenseAPIRouter);
+app.use('/api/claims', claimAPIRouter);
 
 app.get('/500', function(req: Request, res: Response, next: NextFunction) {
   return res.render('500')
