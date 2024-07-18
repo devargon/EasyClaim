@@ -1,40 +1,10 @@
 extends layout
 
+block head
+    script(src="https://unpkg.com/currency.js@~2.0.0/dist/currency.min.js")
+    script(src="/assets/javascripts/data-iso.js")
+
 block content
-    .modal.modal-lg#myModal(tabindex='-1')
-        .modal-dialog
-            .modal-content
-                form(action="/expense/new", method="post")
-                    .modal-header
-                        h5.modal-title Add new expense
-                        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                    .modal-body
-                        .row.mb-3
-                            label(for='expense_amt', class='form-label') Expense amount
-                            .input-group.input-group-lg
-                                span.input-group-text $
-                                input(type='number', class='form-control', id='expense_amt', name='expense_amt', aria-label='Expense amount', step='0.01', placeholder='0.00')
-
-                        .row.mb-3
-                            .col-6
-                                label(for='category', class='form-label') Category
-                                select(class='form-select', aria-label='Category', name='category', id='category')
-                            .col-6
-                                label(for='spent_date', class='form-label') Spent on
-                                input(type='date', class='form-control', id='spent_date', name='description', aria-label='Spent on')
-                        .row.mb-3
-                            .col
-                                label(for='description', class='form-label') Description
-                                input(type='text', class='form-control', placeholder='Explain your expense briefly', id='description', name='description', aria-label='First name')
-                        .row.mb-3
-                            .col
-                                label(for='add_files', class='form-label') Add files
-                                input(type='text', class='form-control', placeholder='Explain your expense briefly', id='add_files', name='add_files', aria-label='First name')
-                    .modal-footer
-                        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
-                        button.btn.btn-primary(type='submit') Submit
-
-
     section.py-3
         .container.py-5
             .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
@@ -51,255 +21,48 @@ block content
             p.mt-3 Submitting a claim is done through the Expenses page.
             .container.mt-5.claim-container
                 .row
-                    .col-sm-12.col-lg-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-5
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-3
-                                    .card-entity-name Items
-                                    .card-entity-value 4
-                                .col-4
-                                    .card-entity-name Status
-                                    .claim-status-badge.claim-completed.rounded-pill Completed
-                            .row.m-2
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .plus-one-more +1 more...
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Claim Offset
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div - $1.23
+                    for claim in claims
+                        - let expenses_short = claim.expenses.slice(0, 5)
+                        .col-sm-12.col-lg-6.col-xl-4.mb-4(id=`claim-${claim.id}`)
+                            .card.expense-card.p-2
+                                .d-flex.flex-column.expense-card-contents
+                                    .row.m-2
+                                        .col.d-flex.justify-content-between
+                                            .text-start.card-identifier.flex-grow-1
+                                                span.card-created-date.expense-date(data-iso=claim.submittedAt.toISOString()) #{claim.submittedAt.toUTCString()}
+                                            .text-end.card-amount.expense-amount(data-money=formatMoney(claim.totalAmountAfterOffset, true)) #{formatMoney(claim.totalAmountAfterOffset)}
+                                    .row.m-2
+                                        .col-6
+                                            .card-entity-name Items
+                                            .card-entity-value #{claim.expenses.length}
+                                        .col-6
+                                            .card-entity-name Status
+                                            .claim-status-badge.claim-completed.rounded-pill Completed
+                                    .row.m-2
+
+                                        each expense in expenses_short
+                                            .d-flex.justify-content-between.align-items-end.my-1
+                                                .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                                    .claim-expense-category.me-1 #{expense.category.name}
+                                                    if expense.description
+                                                        .claim-expense-description.text-truncate #{expense.description}
+                                                .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                                    div #{formatMoney(expense.amount)}
+                                        if claim.expenses.length > 5
+                                            .plus-one-more +#{claim.expenses.length - 5} more...
+                                        if claim.claimOffset > 0
+                                            .d-flex.justify-content-between.align-items-end.my-1
+                                                .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
+                                                    .claim-expense-category.me-1 Claim Offset
+                                                .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
+                                                    div - #{formatMoney(claim.claimOffset)}
 
 
 
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Expand
-                                    button.btn.btn-outline-danger Cancel
-                                    button.btn.btn-outline-primary
-                                        i.bi-share
-                    .col-sm-12.col-lg-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-5
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-3
-                                    .card-entity-name Items
-                                    .card-entity-value 4
-                                .col-4
-                                    .card-entity-name Status
-                                    .claim-status-badge.claim-pending.rounded-pill Pending
-                            .row.m-2
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .plus-one-more +1 more...
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Claim Offset
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div - $1.23
-
-
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Expand
-                                    button.btn.btn-outline-danger Cancel
-                                    button.btn.btn-outline-primary
-                                        i.bi-share
-                    .col-sm-12.col-lg-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-5
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-3
-                                    .card-entity-name Items
-                                    .card-entity-value 4
-                                .col-4
-                                    .card-entity-name Status
-                                    .claim-status-badge.claim-pending.rounded-pill Pending
-                            .row.m-2
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .plus-one-more +1 more...
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Claim Offset
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div - $1.23
-
-
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Expand
-                                    button.btn.btn-outline-danger Cancel
-                                    button.btn.btn-outline-primary
-                                        i.bi-share
-                    .col-sm-12.col-lg-6.col-xl-4.mb-4
-                        .card.expense-card.p-2
-                            .row.m-2
-                                .col.text-start.card-identifier
-                                    span #
-                                    span 123
-                                .col.text-end.card-amount $123.45
-                            .row.m-2
-                                .col-5
-                                    .card-entity-name Submitted
-                                    .card-entity-value 2023-04-16
-                                .col-3
-                                    .card-entity-name Items
-                                    .card-entity-value 4
-                                .col-4
-                                    .card-entity-name Status
-                                    .claim-status-badge.claim-red.rounded-pill Canceled
-                            .row.m-2
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Amongus
-                                        .claim-expense-description.text-truncate Amongusasdasdasdasdasdasdasdasd
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div Second Text
-                                .plus-one-more +1 more...
-                                .d-flex.justify-content-between.align-items-end.my-1
-                                    .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                        .claim-expense-category.me-1 Claim Offset
-                                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                        div - $1.23
-
-
-
-                            .row.m-2
-                                .d-flex.gap-2
-                                    button.btn.btn-outline-primary Expand
-                                    button.btn.btn-outline-danger Cancel
-                                    button.btn.btn-outline-primary
-                                        i.bi-share
+                                    .row.m-2
+                                        .d-flex.gap-2
+                                            button.btn.btn-outline-primary.action-button(data-action="expand", data-claim-id=claim.id) Expand
+                                            button.btn.btn-outline-danger.action-button(data-action="cancel", data-claim-id=claim.id) Cancel
+                                            button.btn.btn-outline-primary.action-button(data-action="share", data-claim-id=claim.id)
+                                                i.bi-share
+    script(src="/assets/javascripts/claims.js")

@@ -1,11 +1,13 @@
 import prisma from '../config/db';
+import currency from "currency.js";
 
-export function createClaim(userId: number, affectedExpenseIds: number[], offsetAmount: number) {
+export function createClaim(userId: number, affectedExpenseIds: number[], totalExpenseAmount: number, offsetAmount: number) {
     return prisma.$transaction(async (tx) => {
         const claim = await tx.claim.create({
             data: {
                 userId: userId,
-                claimOffset: offsetAmount
+                claimOffset: offsetAmount,
+                totalAmount: totalExpenseAmount
             }
         });
 
@@ -27,6 +29,42 @@ export function createClaim(userId: number, affectedExpenseIds: number[], offset
             }
         });
     })
+}
+
+export async function findAllClaimsByUserId(userId: number) {
+    const claims = await prisma.claim.findMany({
+        where: {
+            userId: userId
+        },
+        include: {
+            expenses: {
+                include: {
+                    category: true,
+                },
+            }
+        }
+    });
+    return claims.map(claim => {
+        return {
+            ...claim,
+            totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
+        };
+    });
+}
+export async function findClaimByIdAndUserId(claimId: number, userId: number) {
+    return prisma.claim.findUnique({
+        where: {
+            id: claimId,
+            userId: userId
+        },
+        include: {
+            expenses: {
+                include: {
+                    category: true,
+                },
+            }
+        }
+    });
 }
 
 export function deleteClaim(claimId: number) {
