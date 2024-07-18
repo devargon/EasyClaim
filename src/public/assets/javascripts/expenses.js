@@ -482,6 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formDataJson = formToJSObject(expenseForm);
             formDataJson.spent_dt = new Date(document.getElementById("spent_dt").value).toISOString();
         } catch (e) {
+            makeFormSubmitButtonUnload(expenseForm);
             completeError("An error occured while trying to send your expense. Please try again later.");
             return console.error("Failed to create form data for sending: ", e)
         }
@@ -504,6 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         credentials: 'same-origin'
                     })
                 } catch (e) {
+                    makeFormSubmitButtonUnload(expenseForm);
                     console.error("Failed to send edit expense data: ", e);
                     return completeError(`I couldn't edit this expense: ${e.toString()}`);
                 }
