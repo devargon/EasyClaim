@@ -333,17 +333,32 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelBtn.innerText = "Cancel";
 
         deleteBtn.addEventListener("click", async function() {
-            const deleteResult = await fetch(`/api/expenses/${expenseId}/delete`, {
-                method: "POST",
-                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-                signal: AbortSignal.timeout(5000),
-                credentials: 'same-origin'
-            })
-            if (deleteResult.ok) {
-                promptOverlay.remove();
-                pushToast("Expense has been deleted.", "Success", "success");
-                window.location.reload();
+            try {
+                const deleteResult = await fetch(`/api/expenses/${expenseId}/delete`, {
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                    signal: AbortSignal.timeout(5000),
+                    credentials: 'same-origin'
+                })
+                if (deleteResult.ok) {
+                    promptOverlay.remove();
+                    pushToast("Expense has been deleted.", "Success", "success");
+                    window.location.reload();
+                } else {
+                    let error_message = "An error occured while deleting this expense."
+                    try {
+                        const jsonError = await deleteResult.json();
+                        if (jsonError.error_message) {
+                            error_message = `This expense can't be deleted: ${jsonError.error_message}`;
+                        }
+                    } catch {}
+                    pushToast(error_message, "Error", "danger");
+                }
+            } catch (e) {
+                console.error(e);
+                pushToast("An error occured while deleting this expense.", "Error", "danger");
             }
+
         })
 
         cancelBtn.addEventListener("click", function() {
