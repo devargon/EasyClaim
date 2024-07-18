@@ -292,8 +292,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleCardTouch(target) {
         const card_checkbox = target.querySelector('input[type="checkbox"]');
-        card_checkbox.click();``
-        target.classList.toggle('selected-card', card_checkbox.checked);
+        if (card_checkbox) {
+            card_checkbox.click();
+            target.classList.toggle('selected-card', card_checkbox.checked);
+        }
     }
 
     function handleExpenseAction(action, expenseId, target) {

@@ -1,7 +1,8 @@
 
 .col-sm-12.col-md-6.col-xl-4.mb-4(id=`expense-${expense.id}`)
     .card.expense-card.p-2
-        input(type="checkbox", id=`ep-checkbox-${expense.id}`, name="select-expense", value=expense.id, v-model="selectedExpenses")
+        if !(expense.claimId || expense.claimComplete)
+            input(type="checkbox", id=`ep-checkbox-${expense.id}`, name="select-expense", value=expense.id, v-model="selectedExpenses")
         .d-flex.flex-column.expense-card-contents
             .row.m-2
                 .col.d-flex.justify-content-between
