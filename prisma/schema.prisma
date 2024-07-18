@@ -30,9 +30,10 @@ model Claim {
   userId Int
   submittedAt DateTime @default(now())
   status Status @default(PENDING)
-  claimOffset Decimal? @db.Decimal(10, 2)
+  claimOffset Decimal @db.Decimal(10, 2) @default(0.00)
   expenses Expense[]
   user User? @relation(fields: [userId], references: [id])
+  totalAmount Decimal @db.Decimal(10, 2) @default(0.00)
 }
 
 model Category {
