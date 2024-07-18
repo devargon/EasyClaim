@@ -13,11 +13,11 @@ block content
                     .row.mt-2
                         .col-sm-6
                             .fw-medium Pending
-                                .fw-medium.fs-2 $3,456.78
+                                .fw-medium.fs-2 #{formatMoney(pendingClaimAmt)}
 
                         .col-sm-6
                             .fw-medium Completed
-                                .fw-medium.fs-2 $3,456.78
+                                .fw-medium.fs-2 #{formatMoney(completedClaimAmt)}
             p.mt-3 Submitting a claim is done through the Expenses page.
             .container.mt-5.claim-container
                 .row
