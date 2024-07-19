@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const claimExpenseEntryNameContainerDiv = document.createElement("div");
                     claimExpenseEntryNameContainerDiv.className = "claim-expense-name-container";
                     const claimExpenseEntryNameInnerDiv = document.createElement("div");
-                    claimExpenseEntryNameInnerDiv.className = "claim-expense-name-container";
+                    claimExpenseEntryNameInnerDiv.className = "claim-expense-name";
                     claimExpenseEntryNameInnerDiv.innerText = entryNameArr.join(' \267 ');
                     claimExpenseEntryNameContainerDiv.appendChild(claimExpenseEntryNameInnerDiv);
                     const claimExpenseEntryAmtContainer = document.createElement("div");
