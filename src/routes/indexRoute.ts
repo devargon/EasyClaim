@@ -24,22 +24,4 @@ router.get('/api/attachments/delete', (req: Request, res: Response, next: NextFu
   res.status(200).send();
 });
 
-router.get('/claims', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).send();
-  }
-  const claims = await findAllClaimsByUserId(req.user.id);
-  let pendingClaimAmt = currency(0.00);
-  let completedClaimAmt = currency(0.00);
-  claims.forEach(claim => {
-    const amount = Number(claim.totalAmountAfterOffset);
-    if (claim.status === "PENDING") {
-      pendingClaimAmt = pendingClaimAmt.add(amount);
-    } else if (claim.status === "COMPLETED") {
-      completedClaimAmt = completedClaimAmt.add(amount);
-    }
-  });
-  res.render('claims', {title: 'Claims', claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
-});
-
 export default router;

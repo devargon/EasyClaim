@@ -12,9 +12,11 @@ import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
 import expenseAPIRouter from './routes/expenseAPIRoute';
 import claimAPIRouter from './routes/claimAPIRoute';
+import claimRoute from './routes/claimRoute';
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
 import connectSessionSequelize from "connect-session-sequelize";
+import {findUserById} from "./services/accountService";
 
 // Sequelize connection as URL:
 const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: false});
@@ -51,11 +53,16 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(fetchUser);
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.locals.showHeader = true;
+  next();
+});
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
+app.use('/claims', claimRoute);
 app.use('/api/expenses', expenseAPIRouter);
 app.use('/api/claims', claimAPIRouter);
 
