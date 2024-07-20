@@ -15,166 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return parts.join('.');
     }
 
-    // const createClaimModalElement = document.getElementById("createClaimModal");
-    // const createClaimModal = new bootstrap.Modal(createClaimModalElement);
-    // const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
-    // const createClaimModalEntriesSection = document.querySelector(".claim-expense-entries");
-    // const createClaimButton = document.getElementById("make-claim");
-    //
-    // createClaimModalElement.addEventListener("show.bs.modal", () => {
-    //     claimOffsetAmtInput.value = ""
-    //     return claimOffsetAmtInput.dispatchEvent(new Event("input"));
-    // })
-    //
-    // claimOffsetAmtInput.addEventListener("input", () => {
-    //     if (handleCurrencyValue(claimOffsetAmtInput.value) !== claimOffsetAmtInput.value) {
-    //         claimOffsetAmtInput.value = handleCurrencyValue(claimOffsetAmtInput.value);
-    //     }
-    //
-    //     let newOffsetNumber = Number(claimOffsetAmtInput.value);
-    //     if (isNaN(newOffsetNumber)) {
-    //        newOffsetNumber = Number(0);
-    //     }
-    //     const claimSubtotalDiv = document.querySelector(".claim-total")
-    //     let subtotal = Number(claimSubtotalDiv.dataset.subtotal)
-    //     if (isNaN(subtotal)) {
-    //         subtotal = Number(0);
-    //     }
-    //     if (newOffsetNumber > subtotal) {
-    //         claimOffsetAmtInput.value = currency(subtotal).format({separator: '', symbol: ''});
-    //         return claimOffsetAmtInput.dispatchEvent(new Event("input"));
-    //     }
-    //     document.querySelector(".offset-amt").innerText = currency(newOffsetNumber).format();
-    //     const claimGrandtotalDiv = document.querySelector(".claim-grandtotal")
-    //     claimGrandtotalDiv.innerText = currency(subtotal).subtract(newOffsetNumber).format();
-    //
-    // })
-    //
-    // const createClaimForm = document.getElementById("createClaimForm")
-    // createClaimForm.addEventListener("submit", async (event) => {
-    //     function completeError(error_message) {
-    //         const createClaimAlert = document.getElementById("createClaimAlert");
-    //         createClaimAlert.innerHTML = error_message;
-    //         createClaimAlert.style.display = "block";
-    //     }
-    //     event.preventDefault();
-    //
-    //     let offsetAmount = Number(claimOffsetAmtInput.value);
-    //     if (isNaN(offsetAmount)) offsetAmount = Number(0);
-    //     if (offsetAmount < 0) {
-    //         makeFormSubmitButtonUnload(createClaimForm);
-    //         return completeError("Your offset amount cannot be lesser than $0.00.")
-    //     }
-    //     let newClaimResponse;
-    //     try {
-    //         newClaimResponse = await fetch("/api/claims/new", {
-    //             method: "POST",
-    //             body: JSON.stringify({
-    //                 expenses: currentSelectedExpensesForClaim,
-    //                 offsetAmount: offsetAmount
-    //             }),
-    //             headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-    //             credentials: 'same-origin',
-    //             signal: AbortSignal.timeout(5000)
-    //         })
-    //     } catch (e) {
-    //         return res.status(500).json({error_message: `Failed to create claim: ${e.toString()}`});
-    //     } finally {
-    //         makeFormSubmitButtonUnload(createClaimForm);
-    //     }
-    //     if (newClaimResponse.ok) {
-    //         // window.location.href = "/claims";
-    //         return completeError("OK");
-    //     } else {
-    //         try {
-    //             const json_content = await newClaimResponse.json();
-    //             return completeError(json_content.error_message || "Unable to create a claim. Please try again later.");
-    //         } catch (error) {
-    //             return completeError(`Unable to create a claim. Please try again later.`);
-    //         }
-    //     }
-    //
-    // })
-    //
-    //
-    // function openClaimModal(expenseIds) {
-    //     createClaimModalEntriesSection.innerHTML = "";
-    //     const foundExpenses = [];
-    //     if (expenseIds.length < 1) {
-    //        return pushToast("You need to select at least one expense.", "Error creating claim", "danger");
-    //     }
-    //     let expenseClaimSubtotal = currency(0.00);
-    //     expenseIds.forEach(expenseId => {
-    //         const expenseCard = document.getElementById(`expense-${expenseId}`);
-    //         if (expenseCard) {
-    //             let expenseAmount, expenseDate, expenseCategoryName, expenseDescription;
-    //             const expenseAmountDiv = expenseCard.querySelector(".expense-amount");
-    //             if (expenseAmountDiv) expenseAmount = expenseAmountDiv.getAttribute("data-money");
-    //             const expenseDateDiv = expenseCard.querySelector(".expense-date");
-    //             if (expenseDateDiv) expenseDate = expenseDateDiv.getAttribute("data-iso");
-    //             const expenseCategoryNameDiv = expenseCard.querySelector(".expense-category-name");
-    //             if (expenseCategoryNameDiv) expenseCategoryName = expenseCategoryNameDiv.innerText;
-    //             const expenseDescriptionDiv = expenseCard.querySelector(".expense-description");
-    //             if (expenseDescriptionDiv) expenseDescription = expenseDescriptionDiv.innerText;
-    //             const expenseInformalObj = {
-    //                 amount: currency(expenseAmount),
-    //                 date: new Date(expenseDate),
-    //                 categoryName: expenseCategoryName,
-    //                 description: expenseDescription,
-    //             }
-    //             if (!expenseInformalObj.amount) {
-    //                 console.error(`Could not find expense amount information for #${expenseId}`)
-    //             } else if (!(expenseInformalObj.categoryName || expenseInformalObj.description)) {
-    //                 console.error(`Could not find expense cat or desc for ${expenseId}`);
-    //             } else {
-    //                 let entryNameArr = [];
-    //                 if (expenseInformalObj.date) {
-    //                     if (Object.prototype.toString.call(expenseInformalObj.date) === '[object Date]') {
-    //                         entryNameArr.push(formatISOToLocaleDate(expenseInformalObj.date));
-    //                     }
-    //                 }
-    //                 if (expenseInformalObj.categoryName) entryNameArr.push(expenseInformalObj.categoryName);
-    //                 if (expenseInformalObj.description) entryNameArr.push(expenseInformalObj.description);
-    //
-    //
-    //                 const claimExpenseEntryDiv = document.createElement("div")
-    //                 claimExpenseEntryDiv.className = "claim-expense-entry";
-    //                 const claimExpenseEntryNameContainerDiv = document.createElement("div");
-    //                 claimExpenseEntryNameContainerDiv.className = "claim-expense-name-container";
-    //                 const claimExpenseEntryNameInnerDiv = document.createElement("div");
-    //                 claimExpenseEntryNameInnerDiv.className = "claim-expense-name-container";
-    //                 claimExpenseEntryNameInnerDiv.innerText = entryNameArr.join(' \267 ');
-    //                 claimExpenseEntryNameContainerDiv.appendChild(claimExpenseEntryNameInnerDiv);
-    //                 const claimExpenseEntryAmtContainer = document.createElement("div");
-    //                 claimExpenseEntryAmtContainer.className = "claim-expense-amount"
-    //                 claimExpenseEntryAmtContainer.innerText = expenseInformalObj.amount.format();
-    //                 claimExpenseEntryDiv.appendChild(claimExpenseEntryNameContainerDiv);
-    //                 claimExpenseEntryDiv.appendChild(claimExpenseEntryAmtContainer);
-    //                 createClaimModalEntriesSection.appendChild(claimExpenseEntryDiv);
-    //                 expenseClaimSubtotal = expenseClaimSubtotal.add(expenseInformalObj.amount);
-    //
-    //                 foundExpenses.push(expenseInformalObj);
-    //             }
-    //         } else {
-    //             console.error(`Could not find the Expense Card div for ${expenseId}`);
-    //         }
-    //     })
-    //     if (foundExpenses.length === 0) {
-    //         console.error("Failed to parse any selected expenses.");
-    //         return pushToast("Hmm... Something is wrong. I could not find any expenses. Refresh the page and try again.", "Error creating expenses.", "danger");
-    //     }
-    //
-    //     claimOffsetAmtInput.max = expenseClaimSubtotal.format({separator: '', symbol: ''});
-    //
-    //     const offsetAmtDiv = document.querySelector(".offset-amt");
-    //     offsetAmtDiv.innerText = currency(0.00).format();
-    //     const totalAmountDiv = document.querySelector(".claim-total");
-    //     totalAmountDiv.innerText = expenseClaimSubtotal.format();
-    //     totalAmountDiv.setAttribute("data-subtotal", expenseClaimSubtotal.format({separator: '', symbol: ''}))
-    //
-    //     currentSelectedExpensesForClaim = expenseIds;
-    //     createClaimModal.show();
-    // }
+    const viewClaimModalElement = document.getElementById("viewClaimModal");
+    const viewClaimModal = new bootstrap.Modal(viewClaimModalElement);
+    const claimIframe = document.getElementById("viewClaimIframe");
 
     function pushToast(message, header, type) {
         let color;
@@ -260,9 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (target) target.setAttribute("disabled", "");
                 renderEditPrompt(claimId).then(() => {if (target) target.removeAttribute("disabled")})
                 break;
-            case 'expand':
+            case 'view':
                 if (target) target.setAttribute("disabled", "");
-                renderExtendedClaimDetails(claimId).then(() => {if (target) target.removeAttribute("disabled")});
+                renderShowClaim(claimId).then(() => {if (target) target.removeAttribute("disabled")});
                 break;
             case 'share':
                 if (target) target.setAttribute("disabled", "");
@@ -383,7 +226,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentExpenseId = 0;
 
-    async function renderExtendedClaimDetails(claimId) {}
+    async function renderShowClaim(shareId) {
+        claimIframe.src = `/claims/shared/${shareId}`
+        viewClaimModal.show();
+    }
+
+    viewClaimModalElement.addEventListener("hidden.bs.modal", event => {
+        claimIframe.src = "about:blank";
+        console.log("iFrame has nthing now")
+    })
 
     async function renderShareModal(claimId) {}
 })

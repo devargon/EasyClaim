@@ -1,0 +1,11 @@
+#viewClaimIframe {
+    width: 100%;
+    height: 80vh;
+
+}
+
+@media (max-width: 1024px) {
+    #viewClaimIframe {
+        height: 75vh;
+    }
+}
