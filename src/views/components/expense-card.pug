@@ -1,5 +1,5 @@
 
-.mb-4(class= showHeader?"col-sm-12 col-md-6 col-xl-4":"col", id=`expense-${expense.id}`)
+.mb-4(class= showHeader?"col-sm-12 col-md-6 col-xl-4":"col-12 col-xxl-6", id=`expense-${expense.id}`)
     .card.expense-card.p-2
         if !(expense.claimId || expense.claimComplete)
             input(type="checkbox", id=`ep-checkbox-${expense.id}`, name="select-expense", value=expense.id, v-model="selectedExpenses")
