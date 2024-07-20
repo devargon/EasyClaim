@@ -37,40 +37,41 @@ html
     block head
   body
     .toast-container.position-fixed.top-0.end-0.p-3(style="z-index: 1021;")
-    nav.navbar.navbar-expand-md.sticky-top.navbar-shrink.py-3.border-bottom#mainNav
-      .container
-        a.navbar-brand.d-flex.align-items-center(href="/")
-          // span.bs-icon-sm.bs-icon-circle.bs-icon-primary.shadow.d-flex.justify-content-center.align-items-center.me-2
-          img.me-2(src='/assets/icons/main.png', width=40, height=40)
+    if showHeader
+      nav.navbar.navbar-expand-md.sticky-top.navbar-shrink.py-3.border-bottom#mainNav
+        .container
+          a.navbar-brand.d-flex.align-items-center(href="/")
+            // span.bs-icon-sm.bs-icon-circle.bs-icon-primary.shadow.d-flex.justify-content-center.align-items-center.me-2
+            img.me-2(src='/assets/icons/main.png', width=40, height=40)
 
-          span EasyClaim
-        button.navbar-toggler(data-bs-toggle="collapse", data-bs-target="#navcol-1")
-          span.visually-hidden Toggle navigation
-          span.navbar-toggler-icon
-        .collapse.navbar-collapse#navcol-1
-          ul.navbar-nav.mx-auto
-            li.nav-item
-              a.nav-link(href="/") Home
-            li.nav-item
-              a.nav-link(href="/expenses") Expenses
-            li.nav-item
-              a.nav-link(href="/claims") Claims
-            li.nav-item
-          if user
-            .dropdown
-              button.btn.btn-lg.btn-outline-secondary.dropdown-toggle(type="button", data-bs-toggle="dropdown") #{user.name || 'Your account'}
-              ul.dropdown-menu
-                li
-                  a.dropdown-item(href="/settings", target="_blank", type="button")
-                    i.bi.bi-gear.me-1
-                    | Settings
-                  a.dropdown-item(href="/accounts/logout", type="button")
-                    i.bi.bi-box-arrow-left.me-1
-                    | Log out
-          else
-            div.d-flex.align-items-center
-              a.btn.btn-primary.btn-lg.shadow.rounded-pill(role="button", href="/accounts/signup") Sign up
-              span.mx-2.fs-4.text-primary(style="font-weight: 500") or
-              a.btn.btn-primary.btn-lg.shadow.rounded-pill(role="button", href="/accounts/login") Log in
+            span EasyClaim
+          button.navbar-toggler(data-bs-toggle="collapse", data-bs-target="#navcol-1")
+            span.visually-hidden Toggle navigation
+            span.navbar-toggler-icon
+          .collapse.navbar-collapse#navcol-1
+            ul.navbar-nav.mx-auto
+              li.nav-item
+                a.nav-link(href="/") Home
+              li.nav-item
+                a.nav-link(href="/expenses") Expenses
+              li.nav-item
+                a.nav-link(href="/claims") Claims
+              li.nav-item
+            if user
+              .dropdown
+                button.btn.btn-lg.btn-outline-secondary.dropdown-toggle(type="button", data-bs-toggle="dropdown") #{user.name || 'Your account'}
+                ul.dropdown-menu
+                  li
+                    a.dropdown-item(href="/settings", target="_blank", type="button")
+                      i.bi.bi-gear.me-1
+                      | Settings
+                    a.dropdown-item(href="/accounts/logout", type="button")
+                      i.bi.bi-box-arrow-left.me-1
+                      | Log out
+            else
+              div.d-flex.align-items-center
+                a.btn.btn-primary.btn-lg.shadow.rounded-pill(role="button", href="/accounts/signup") Sign up
+                span.mx-2.fs-4.text-primary(style="font-weight: 500") or
+                a.btn.btn-primary.btn-lg.shadow.rounded-pill(role="button", href="/accounts/login") Log in
     block content
     script(src="/assets/javascripts/main.js")
