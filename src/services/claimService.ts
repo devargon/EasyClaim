@@ -1,13 +1,14 @@
 import prisma from '../config/db';
 import currency from "currency.js";
 
-export function createClaim(userId: number, affectedExpenseIds: number[], totalExpenseAmount: number, offsetAmount: number) {
+export function createClaim(userId: number, affectedExpenseIds: number[], totalExpenseAmount: number, offsetAmount: number, uuid: string) {
     return prisma.$transaction(async (tx) => {
         const claim = await tx.claim.create({
             data: {
                 userId: userId,
                 claimOffset: offsetAmount,
-                totalAmount: totalExpenseAmount
+                totalAmount: totalExpenseAmount,
+                shareId: uuid
             }
         });
 
@@ -51,6 +52,8 @@ export async function findAllClaimsByUserId(userId: number) {
         };
     });
 }
+
+
 export async function findClaimByIdAndUserId(claimId: number, userId: number) {
     return prisma.claim.findUnique({
         where: {
@@ -65,6 +68,31 @@ export async function findClaimByIdAndUserId(claimId: number, userId: number) {
             }
         }
     });
+}
+
+
+export async function findClaimByShareId(shareId: string) {
+    const claim = await prisma.claim.findUnique({
+        where: {
+            shareId: shareId
+        },
+        include: {
+            expenses: {
+                include: {
+                    category: true,
+                },
+            }
+        }
+    });
+    if (claim) {
+        return {
+            ...claim,
+            totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
+        };
+    } else {
+        return null
+    }
+
 }
 
 export function deleteClaim(claimId: number) {
