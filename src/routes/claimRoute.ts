@@ -1,7 +1,7 @@
 import 'express-async-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
-import {findAllClaimsByUserId} from "../services/claimService";
+import {findAllClaimsByUserId, findClaimByShareId} from "../services/claimService";
 import currency from "currency.js";
 const router = express.Router();
 
@@ -32,6 +32,17 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
         }
     });
     res.render('claims', {title: 'Claims', claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
+});
+
+router.get('/shared/:shareId', async (req: Request, res: Response, next: NextFunction) => {
+    res.locals.showHeader = false;
+    const claim = await findClaimByShareId(req.params.shareId || "");
+    if (claim) {
+        res.render('public_claim', {formatMoney, claim}, );
+    } else {
+        next();
+    }
+
 });
 
 export default router;

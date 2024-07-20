@@ -104,7 +104,7 @@
 }
 
 
-.createClaimModal {
+.createClaimModal, .claim-share {
     .claim-expense-entry {
         display: flex;
         justify-content: space-between;

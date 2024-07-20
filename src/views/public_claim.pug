@@ -3,71 +3,54 @@ extends layout
 block head
     script(src="https://unpkg.com/currency.js@~2.0.0/dist/currency.min.js")
     script(src="/assets/javascripts/data-iso.js")
+    link(href="/assets/stylesheets/expenses.css", rel="stylesheet")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com" crossorigin="")
+    link(href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap", rel="stylesheet")
 
 block content
-    section.py-3
-        .container.py-5
-            .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
-                div
-                    h1.fw-medium Claims
-                    .row.mt-2
-                        .col-sm-6
-                            .fw-medium Pending
-                                .fw-medium.fs-2 #{formatMoney(pendingClaimAmt)}
+    .container.px-3.px-md-4.px-lg-5
+        .row
+            .col-12.col-md-10.col-lg-8.mx-auto.claim-share
+                p.mt-3.text-center.text-body-secondary John Doe is claiming the following expenses from you.
+                h1.total-amount #{formatMoney(claim.totalAmountAfterOffset)}
+                h1.text-center Expenses
+                .container.mt-5.claim-container(style="margin-top: 30px !important")
+                    .row
+                        for expense in claim.expenses
+                            include components/expense-card
+                hr
+                .d-flex.flex-column
+                    for expense in claim.expenses
+                        .d-flex.justify-content-between.align-items-end.my-1(style="font-size: 19px")
+                            .d-flex.claim-expense-item.align-items-baseline(style='min-width: 0;')
+                                .claim-expense-category.me-1 #{expense.category.name}
+                                if expense.description
+                                    .claim-expense-description.text-truncate #{expense.description}
+                            .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;') #{formatMoney(claim.totalAmount)}
+                if claim.claimOffset > 0
+                    hr
+                    .d-flex.justify-content-between.align-items-end.my-1(style="font-size: 19px")
+                        .d-flex.claim-expense-item.align-items-baseline(style='min-width: 0;')
+                            .claim-expense-category.me-1 Subtotal
+                        .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;') #{formatMoney(claim.totalAmount)}
+                    hr
+                    .d-flex.justify-content-between.align-items-end.my-1(style="font-size: 19px")
+                        .d-flex.claim-expense-item.align-items-baseline(style='min-width: 0;')
+                            .claim-expense-category.me-1 Claim offset
+                        .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;') - #{formatMoney(claim.claimOffset)}
+                hr
+                .d-flex.justify-content-between.align-items-end.my-1(style="font-size: 19px")
+                    .d-flex.claim-expense-item.align-items-baseline(style='min-width: 0;')
+                        .claim-expense-category.me-1 #{claim.claimOffset > 0 ? "Grand Total" : "Total"}
+                    .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;') #{formatMoney(claim.totalAmountAfterOffset)}
+                .text-body-secondary.mt-3.text-center
+                    p These expenses were tracked with EasyClaim.
+                    p Start tracking your own expenses, and make easy-to-share claims by#{' '}
+                        a(href="/accounts/signup") signing up here.
+                    p For free.
 
-                        .col-sm-6
-                            .fw-medium Completed
-                                .fw-medium.fs-2 #{formatMoney(completedClaimAmt)}
-            p.mt-3 Submitting a claim is done through the Expenses page.
-            .container.mt-5.claim-container
-                .row
-                    for claim in claims
-                        - let expenses_short = claim.expenses.slice(0, 5)
-                        .col-sm-12.col-lg-6.col-xl-4.mb-4(id=`claim-${claim.id}`)
-                            .card.expense-card.p-2
-                                .d-flex.flex-column.expense-claim-card-contents
-                                    .row.m-2
-                                        .col.d-flex.justify-content-between
-                                            .text-start.card-identifier.flex-grow-1
-                                                span.card-created-date.expense-date(data-iso=claim.submittedAt.toISOString()) #{claim.submittedAt.toUTCString()}
-                                            .text-end.card-amount.expense-amount(data-money=formatMoney(claim.totalAmountAfterOffset, true)) #{formatMoney(claim.totalAmountAfterOffset)}
-                                    .row.m-2
-                                        .col-6
-                                            .card-entity-name Items
-                                            .card-entity-value #{claim.expenses.length}
-                                        .col-6
-                                            .card-entity-name Status
-                                            if claim.status === "PENDING"
-                                                .claim-status-badge.claim-pending.rounded-pill Pending
-                                            else if claim.status === "COMPLETE"
-                                                .claim-status-badge.claim-completed.rounded-pill Completed
-                                            else
-                                                .claim-status-badge.claim-unknown.rounded-pill Unknown
-                                    .row.m-2
-
-                                        each expense in expenses_short
-                                            .d-flex.justify-content-between.align-items-end.my-1
-                                                .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                                    .claim-expense-category.me-1 #{expense.category.name}
-                                                    if expense.description
-                                                        .claim-expense-description.text-truncate #{expense.description}
-                                                .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                                    div #{formatMoney(expense.amount)}
-                                        if claim.expenses.length > 5
-                                            .plus-one-more +#{claim.expenses.length - 5} more...
-                                        if claim.claimOffset > 0
-                                            .d-flex.justify-content-between.align-items-end.my-1
-                                                .d-flex.claim-expense-item.align-items-end(style='min-width: 0;')
-                                                    .claim-expense-category.me-1 Claim Offset
-                                                .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;')
-                                                    div - #{formatMoney(claim.claimOffset)}
+                    h1 ADD EASYCLAIM LOGO HERE
 
 
-
-                                    .row.m-2
-                                        .d-flex.gap-2
-                                            button.btn.btn-outline-primary.action-button(data-action="expand", data-claim-id=claim.id) Expand
-                                            button.btn.btn-outline-danger.action-button(data-action="cancel", data-claim-id=claim.id) Cancel
-                                            button.btn.btn-outline-primary.action-button(data-action="share", data-claim-id=claim.id)
-                                                i.bi-share
     script(src="/assets/javascripts/claims.js")

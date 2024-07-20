@@ -46,7 +46,7 @@ body {
     padding: 0 !important;
 }
 
-.expense-card {
+.expense-card, .claim-share {
     padding: 24px !important;
 
     .expense-category-name {
@@ -190,4 +190,14 @@ body {
 
 .clickable-pill:hover {
     cursor: pointer;
+}
+
+.claim-share {
+    .total-amount {
+        font-family: 'Nunito', 'Inter', 'Arial', sans-serif;
+        font-weight: 700;
+        text-align: center;
+        font-size: 70px;
+        margin: 50px 0;
+    }
 }
