@@ -34,6 +34,7 @@ model Claim {
   expenses Expense[]
   user User? @relation(fields: [userId], references: [id])
   totalAmount Decimal @db.Decimal(10, 2) @default(0.00)
+  shareId String @default("00000000-0000-0000-0000-000000000000") @unique
 }
 
 model Category {
