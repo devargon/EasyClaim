@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const createClaimModalElement = document.getElementById("createClaimModal");
     const createClaimModal = new bootstrap.Modal(createClaimModalElement);
     const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
-    const createClaimModalEntriesSection = document.querySelector(".claim-expense-entries");
+    const createClaimModalEntriesSection = document.getElementById("actualClaimExpenseList");
     const createClaimButton = document.getElementById("make-claim");
     createClaimButton.addEventListener("click", function() {
         if (vm.selectedExpenses.length > 0) {
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
            return pushToast("You need to select at least one expense.", "Error creating claim", "danger");
         }
         let expenseClaimSubtotal = currency(0.00);
-        expenseIds.forEach(expenseId => {
+        expenseIds.reverse().forEach(expenseId => {
             const expenseCard = document.getElementById(`expense-${expenseId}`);
             if (expenseCard) {
                 let expenseAmount, expenseDate, expenseCategoryName, expenseDescription;
@@ -164,20 +164,26 @@ document.addEventListener('DOMContentLoaded', function() {
                             entryNameArr.push(formatISOToLocaleDate(expenseInformalObj.date));
                         }
                     }
-                    if (expenseInformalObj.categoryName) entryNameArr.push(expenseInformalObj.categoryName);
                     if (expenseInformalObj.description) entryNameArr.push(expenseInformalObj.description);
 
 
                     const claimExpenseEntryDiv = document.createElement("div")
-                    claimExpenseEntryDiv.className = "claim-expense-entry";
+                    claimExpenseEntryDiv.className = "claim-expense-item";
                     const claimExpenseEntryNameContainerDiv = document.createElement("div");
-                    claimExpenseEntryNameContainerDiv.className = "claim-expense-name-container";
-                    const claimExpenseEntryNameInnerDiv = document.createElement("div");
-                    claimExpenseEntryNameInnerDiv.className = "claim-expense-name";
-                    claimExpenseEntryNameInnerDiv.innerText = entryNameArr.join(' \267 ');
-                    claimExpenseEntryNameContainerDiv.appendChild(claimExpenseEntryNameInnerDiv);
+                    claimExpenseEntryNameContainerDiv.className = "claim-expense-properties";
+                    const claimExpenseCategoryDiv = document.createElement("div");
+                    claimExpenseCategoryDiv.className = "claim-expense-category";
+                    claimExpenseCategoryDiv.innerText = expenseInformalObj.categoryName;
+                    claimExpenseEntryNameContainerDiv.appendChild(claimExpenseCategoryDiv);
+                    if (entryNameArr.length > 0) {
+                        const claimExpenseDescriptionDiv = document.createElement("div");
+                        claimExpenseDescriptionDiv.innerText = entryNameArr.join(' \267 ');
+                        claimExpenseDescriptionDiv.className = "claim-expense-description";
+                        claimExpenseEntryNameContainerDiv.appendChild(claimExpenseDescriptionDiv);
+                    }
+
                     const claimExpenseEntryAmtContainer = document.createElement("div");
-                    claimExpenseEntryAmtContainer.className = "claim-expense-amount"
+                    claimExpenseEntryAmtContainer.className = "claim-expense-amount";
                     claimExpenseEntryAmtContainer.innerText = expenseInformalObj.amount.format();
                     claimExpenseEntryDiv.appendChild(claimExpenseEntryNameContainerDiv);
                     claimExpenseEntryDiv.appendChild(claimExpenseEntryAmtContainer);

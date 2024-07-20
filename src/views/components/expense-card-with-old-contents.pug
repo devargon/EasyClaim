@@ -1,0 +1,43 @@
+
+.col-sm-12.col-md-6.col-xl-4.mb-4(id=`expense-${expense.id}`)
+    .card.expense-card.p-2
+        .d-flex.flex-column.expense-card-contents
+            .row.m-2
+                .col.d-flex.justify-content-between
+                    .text-start.card-identifier.flex-grow-1
+                        //span #
+                        //span #{expense.id}
+                        //span.card-created-date(data-date=expense.submittedAt.toISOString().split("T")[0]) #{expense.submittedAt.toISOString().split("T")[0]}
+                        span.card-created-date(data-iso=expense.spentOn.toISOString()) #{expense.spentOn.toUTCString()}
+                    .text-end.card-amount #{formatMoney(expense.amount)}
+            .row.m-2
+                .col-6
+                    .card-entity-name Claim
+                    .card-entity-value
+                        i(class=`bi bi-${expense.category.icon}`)
+                        .inline #{expense.category.name}
+                    if expense.description
+                        .card-entity-desc #{expense.description}
+                //.col-6
+                //    .card-entity-name Spent On
+                //    .card-entity-value(data-date=expense.spentOn.toISOString()) #{expense.spentOn.toISOString()}
+                .col-6
+                    .card-entity-name Attachments
+                    .card-entity-desc Tap to open
+                    .d-flex.flex-wrap.gap-2.mt-2
+                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+                        .rounded-3(style="width: 50px; height: 50px; outline: grey solid 2px;")
+                            img(style="width: 100%; height: 100%; object-fit: cover; overflow: hidden;", src="https://ocr.space/Content/Images/receipt-ocr-original.webp")
+            .row.m-2
+                .d-flex.gap-2
+                    button.btn.btn-outline-primary.rounded-pill.action-button(data-action='edit', data-expense-id=expense.id)
+                        i.bi.bi-pencil-fill
+                    button.btn.btn-outline-secondary.rounded-pill.action-button(data-action='attachments', data-expense-id=expense.id)
+                        i.bi.bi-paperclip
+                    button.btn.btn-outline-danger.rounded-pill.action-button(data-action='delete', data-expense-id=expense.id)
+                        i.bi.bi-trash3-fill
+
+

@@ -95,24 +95,6 @@ body {
         font-size: 15px;
     }
 
-    .claim-expense-category {
-        font-size: 1em;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
-    .claim-expense-description {
-        font-size: 0.85em;
-        color: rgba(0, 0, 0, 0.5);
-        font-weight: 400;
-    }
-
-    .claim-expense-amount {
-        white-space: nowrap;
-        margin-left: 10px;
-        font-weight: bold;
-    }
-
     .plus-one-more {
         font-size: 0.85em;
         font-weight: 500;
@@ -199,5 +181,56 @@ body {
         text-align: center;
         font-size: 70px;
         margin: 50px 0;
+    }
+}
+
+.claim-expense-list-container {
+    .claim-expense-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin: 0.25rem 0; /* Equivalent to .my-1 */
+    }
+
+    .claim-expense-item-right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        margin: 0.25rem 0; /* Equivalent to .my-1 */
+    }
+
+    .claim-expense-properties {
+        display: flex;
+        align-items: baseline;
+        min-width: 0;
+    }
+
+    .claim-expense-properties-right {
+        display: flex;
+        align-items: baseline;
+        min-width: 0;
+        margin-right: auto;
+    }
+
+    .claim-expense-category {
+        margin-right: 0.25rem; /* Equivalent to .me-1 */
+        font-size: 1em;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .claim-expense-description {
+        white-space: nowrap; /* Added based on the class name */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.85em;
+        color: rgba(0, 0, 0, 0.5);
+        font-weight: 400;
+    }
+
+    .claim-expense-amount {
+        white-space: nowrap;
+        margin-left: 10px;
+        font-weight: bold;
     }
 }

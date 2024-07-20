@@ -62,18 +62,18 @@ block content
                                     span.input-group-text - $
                                     input(type='number', class='form-control', id='claim_offset_amt', name='claim_offset_amt', aria-label='Claim Offset Amount', step='0.01', placeholder='0.00', min='0.00', value='0.00', v-model.number="offset")
 
-                            .row.mb-3.claim-expense-entries
-                            .row.mb-3.claim-calculation
-                                .d-flex.justify-content-end.my-2
+                            .row.mb-3.claim-expense-list-container#actualClaimExpenseList
+                            .row.mb-3.claim-expense-list-container
+                                .claim-expense-item-right
                                     div(v-if="offset <= 0") Total
                                     div(v-else="") Subtotal
                                     .claim-expense-amount.claim-total $0.00
-                                .justify-content-end.my-2(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                .claim-expense-item-right(:class="{'d-flex': offset > 0}", v-show="offset > 0")
                                     div Claim Offset
                                     .claim-expense-amount
                                         span.me-2 -
                                         span.offset-amt $0.00
-                                .justify-content-end.my-2(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                .claim-expense-item-right(:class="{'d-flex': offset > 0}", v-show="offset > 0")
                                     div Grand Total
                                     .claim-expense-amount.claim-grandtotal $1.23
 
