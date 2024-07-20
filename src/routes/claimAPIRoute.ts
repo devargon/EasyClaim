@@ -5,6 +5,8 @@ import {findExpenseByIdAndUser} from "../services/expenseService";
 import {createClaim, deleteClaim, findClaimByIdAndUserId} from "../services/claimService";
 import prisma from "../config/db";
 
+import { v4 as uuidv4 } from 'uuid';
+
 const router = express.Router();
 
 // noinspection JSUnusedLocalSymbols
@@ -72,7 +74,7 @@ router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response,
         return res.status(400).json({error_message: "Offset amount is more than the total amount of the expenses."});
     }
 
-    const claim = await createClaim(req.user.id, foundExpensesIds, expenseTotal.value, offsetAmount);
+    const claim = await createClaim(req.user.id, foundExpensesIds, expenseTotal.value, offsetAmount, uuidv4());
     if (claim) {
         return res.status(200).json(claim);
     } else {
