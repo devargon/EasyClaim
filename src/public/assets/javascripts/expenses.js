@@ -425,6 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const filesInUpload = [];
+    console.log(filesInUpload);
 
     const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
     const createExpenseModalElement = document.getElementById("createExpenseModal");
