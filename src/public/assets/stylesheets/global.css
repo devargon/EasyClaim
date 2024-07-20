@@ -49,6 +49,12 @@ body {
 .expense-card {
     padding: 24px !important;
 
+    .expense-category-name {
+        /*text-overflow: ellipsis;*/
+        overflow: hidden;
+        /*white-space: nowrap;*/
+    }
+
     .expense-card-selectable-contents * {
         cursor: pointer;
     }
@@ -80,7 +86,7 @@ body {
     .card-entity-value {
         display: flex;
         font-weight: 500;
-        font-size: 20px;
+        font-size: 19px;
         column-gap: 0.4rem;
     }
 
@@ -90,13 +96,13 @@ body {
     }
 
     .claim-expense-category {
-        font-size: 16px;
+        font-size: 1em;
         font-weight: 500;
         white-space: nowrap;
     }
 
     .claim-expense-description {
-        font-size: 13px;
+        font-size: 0.85em;
         color: rgba(0, 0, 0, 0.5);
         font-weight: 400;
     }
@@ -108,7 +114,7 @@ body {
     }
 
     .plus-one-more {
-        font-size: 13px;
+        font-size: 0.85em;
         font-weight: 500;
         margin-top: 3px;
     }
