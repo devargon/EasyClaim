@@ -2,7 +2,7 @@ import express, {Request, Response, NextFunction} from 'express';
 import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
 import currency from "currency.js";
 import {findExpenseByIdAndUser} from "../services/expenseService";
-import {createClaim, deleteClaim, findClaimByIdAndUserId} from "../services/claimService";
+import {createClaim, deleteClaim, findClaimByIdAndUserId, updateClaim} from "../services/claimService";
 import prisma from "../config/db";
 
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +10,25 @@ import { v4 as uuidv4 } from 'uuid';
 const router = express.Router();
 
 // noinspection JSUnusedLocalSymbols
+
+router.get('/:claimId', redirectAsRequiresLogin, async(req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+
+    const claimId = parseInt(req.params.claimId, 10);
+    if (isNaN(claimId)) {
+        return res.status(404).json({error_message: "Claim not found"});
+    }
+
+    const claim = await findClaimByIdAndUserId(claimId, req.user.id)
+    console.log(claim);
+    if (!claim) {
+        return res.status(404).json({error_message: "Claim not found"});
+    } else {
+        return res.status(200).json(claim);
+    }
+})
 
 router.post("/:claimId/cancel", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -32,6 +51,35 @@ router.post("/:claimId/cancel", redirectAsRequiresLogin, async (req: Request, re
             return res.status(200).json({success_message: `Expense #${claimIdActual} deleted.`});
         } else {
             return res.status(404).json({error_message: `Expense #${claimIdActual} not found.`});
+        }
+    }
+})
+
+router.post("/:claimId/edit", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const offsetAmount = Number(req.body.offsetAmount);
+    if (isNaN(offsetAmount)) {
+        return res.status(404).json({error_message: `Offset amount is not a valid number.`});
+    }
+    const claimId = parseInt(req.params.claimId, 10);
+    if (isNaN(claimId)) {
+        return res.status(404).json({error_message: `Claim ${claimId} not found.`});
+    }
+
+    const existingClaim = await findClaimByIdAndUserId(claimId, req.user.id)
+    if (!existingClaim) {
+        return res.status(404).json({error_message: `Claim #${claimId} not found.`});
+    }
+    if (existingClaim.status === "COMPLETED") {
+        return res.status(400).json({error_message: `Claim #${claimId} is complete and can't be deleted.`});
+    } else {
+        const updatedClaim = await updateClaim(existingClaim.id, offsetAmount);
+        if (updatedClaim) {
+            return res.status(200).json(updatedClaim);
+        } else {
+            return res.status(404).json({error_message: `Expense #${claimId} not found.`});
         }
     }
 })

@@ -2,13 +2,17 @@ import prisma from '../config/db';
 import currency from "currency.js";
 
 export function createClaim(userId: number, affectedExpenseIds: number[], totalExpenseAmount: number, offsetAmount: number, uuid: string) {
+    let totalAmountAfterOffset = 0;
+    if (offsetAmount) totalAmountAfterOffset = currency(totalExpenseAmount).subtract(offsetAmount).value;
     return prisma.$transaction(async (tx) => {
         const claim = await tx.claim.create({
             data: {
                 userId: userId,
                 claimOffset: offsetAmount,
                 totalAmount: totalExpenseAmount,
+                totalAmountAfterOffset: totalAmountAfterOffset,
                 shareId: uuid
+
             }
         });
 
@@ -33,10 +37,7 @@ export function createClaim(userId: number, affectedExpenseIds: number[], totalE
 }
 
 export async function findAllClaimsByUserId(userId: number) {
-    const claims = await prisma.claim.findMany({
-        where: {
-            userId: userId
-        },
+    return prisma.claim.findMany({
         include: {
             expenses: {
                 include: {
@@ -45,12 +46,12 @@ export async function findAllClaimsByUserId(userId: number) {
             }
         }
     });
-    return claims.map(claim => {
-        return {
-            ...claim,
-            totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
-        };
-    });
+    // return claims.map(claim => {
+    //     return {
+    //         ...claim,
+    //         totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
+    //     };
+    // });
 }
 
 
@@ -72,7 +73,7 @@ export async function findClaimByIdAndUserId(claimId: number, userId: number) {
 
 
 export async function findClaimByShareId(shareId: string) {
-    const claim = await prisma.claim.findUnique({
+    return prisma.claim.findUnique({
         where: {
             shareId: shareId
         },
@@ -84,14 +85,14 @@ export async function findClaimByShareId(shareId: string) {
             }
         }
     });
-    if (claim) {
-        return {
-            ...claim,
-            totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
-        };
-    } else {
-        return null
-    }
+    // if (claim) {
+    //     return {
+    //         ...claim,
+    //         totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
+    //     };
+    // } else {
+    //     return null
+    // }
 
 }
 
@@ -113,4 +114,25 @@ export function deleteClaim(claimId: number) {
             }
         });
     })
+}
+
+export async function updateClaim(claimId: number, offsetAmount: number) {
+    await prisma.$executeRaw`
+        UPDATE claim
+        SET claimOffset            = ${offsetAmount},
+            totalAmountAfterOffset = totalAmount - claimOffset
+        WHERE id = ${claimId}
+    `;
+    return prisma.claim.findUnique({
+        where: {
+            id: claimId
+        },
+        include: {
+            expenses: {
+                include: {
+                    category: true,
+                },
+            }
+        }
+    });
 }

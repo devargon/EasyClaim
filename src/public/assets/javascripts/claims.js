@@ -1,4 +1,143 @@
+const app = Vue.createApp({
+    data() {
+        return {
+            offset: 0.00,
+        }
+    },
+    methods: {
+    }
+});
+
+const vm = app.mount('#app');
+
 document.addEventListener('DOMContentLoaded', function() {
+
+    const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
+    const createClaimModalEntriesSection = document.getElementById("actualClaimExpenseList");
+    const editClaimModalElement = document.getElementById("editClaimModal");
+    const editClaimModal = new bootstrap.Modal(editClaimModalElement)
+    const claimGrandtotalDiv = document.querySelector(".claim-grandtotal")
+
+    claimOffsetAmtInput.addEventListener("input", () => {
+        if (handleCurrencyValue(claimOffsetAmtInput.value) !== claimOffsetAmtInput.value) {
+            claimOffsetAmtInput.value = handleCurrencyValue(claimOffsetAmtInput.value);
+            vm.offset = Number(claimOffsetAmtInput.value);
+        }
+
+        let newOffsetNumber = Number(claimOffsetAmtInput.value);
+        if (isNaN(newOffsetNumber)) {
+            newOffsetNumber = Number(0);
+        }
+        const claimSubtotalDiv = document.querySelector(".claim-total")
+        let subtotal = Number(claimSubtotalDiv.dataset.subtotal)
+        if (isNaN(subtotal)) {
+            subtotal = Number(0);
+        }
+        if (newOffsetNumber > subtotal) {
+            claimOffsetAmtInput.value = currency(subtotal).format({separator: '', symbol: ''});
+            return claimOffsetAmtInput.dispatchEvent(new Event("input"));
+        }
+        document.querySelector(".offset-amt").innerText = currency(newOffsetNumber).format();
+        claimGrandtotalDiv.innerText = currency(subtotal).subtract(newOffsetNumber).format();
+    })
+
+    const editClaimForm = document.getElementById("editClaimForm")
+    editClaimForm.addEventListener("submit", async (event) => {
+
+        function completeError(error_message) {
+            const editClaimAlert = document.getElementById("editClaimAlert");
+            editClaimAlert.innerHTML = error_message;
+            editClaimAlert.style.display = "block";
+        }
+        event.preventDefault();
+        const claimId = parseInt(editClaimForm.dataset.claimid);
+        if (isNaN(claimId)) {
+            makeFormSubmitButtonUnload();
+            return completeError("Hmm... Something went wrong. Please refresh the page and try again.");
+        }
+
+        let offsetAmount = Number(claimOffsetAmtInput.value);
+        if (isNaN(offsetAmount)) offsetAmount = Number(0);
+        if (offsetAmount < 0) {
+            makeFormSubmitButtonUnload(editClaimForm);
+            return completeError("Your offset amount cannot be lesser than $0.00.")
+        }
+        let newClaimResponse;
+        try {
+            newClaimResponse = await fetch(`/api/claims/${claimId}/edit`, {
+                method: "POST",
+                body: JSON.stringify({
+                    offsetAmount: offsetAmount
+                }),
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5000)
+            })
+        } catch (e) {
+            return res.status(500).json({error_message: `Failed to edit claim: ${e.toString()}`});
+        } finally {
+            makeFormSubmitButtonUnload(editClaimForm);
+        }
+        if (newClaimResponse.ok) {
+            return window.location.href = "/claims";
+        } else {
+            try {
+                const json_content = await newClaimResponse.json();
+                return completeError(json_content.error_message || "Unable to edit your claim. Please try again later.");
+            } catch (error) {
+                return completeError(`Unable to edit your claim. Please try again later.`);
+            }
+        }
+    })
+
+
+    async function openClaimModal(claimId) {
+        let getClaimResponse;
+        try {
+            getClaimResponse = await fetch(`/api/claims/${claimId}`, {
+                method: "GET",
+                headers: {'Accept': 'application/json'},
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5000)
+            });
+        } catch (e) {
+            console.error("Failed to get claim data: ", e);
+            return pushToast("I couldn't fetch details about this claim due to an error.", "Couldn't manage claim", "danger");
+        }
+        if (!getClaimResponse.ok) {
+            console.error(`Failed to get claim data: Server returned ${getClaimResponse.status}`);
+            return pushToast(`I couldn't fetch details about this claim due to an error. (Server returned ${getClaimResponse.status})`, "Couldn't manage claim", "danger");
+        }
+        let jsonResponse;
+        try {
+            jsonResponse = await getClaimResponse.json();
+        } catch (e) {
+            console.error("Failed to get claim data: ", e);
+            return pushToast(`Hmm... Something's not right. I couldn't fetch details about this claim. `, "Couldn't manage claim", "danger");
+        }
+        try {
+            createClaimModalEntriesSection.innerHTML = "";
+            editClaimForm.setAttribute("data-claimid", jsonResponse.id);
+            generateExpenseDivForClaimModal(jsonResponse.expenses, createClaimModalEntriesSection);
+
+
+            claimOffsetAmtInput.max = currency(jsonResponse.totalAmount).format({separator: '', symbol: ''});
+            claimOffsetAmtInput.value = currency(jsonResponse.claimOffset).format({separator: '', symbol: ''});
+            vm.offset = Number(jsonResponse.claimOffset);
+
+            const offsetAmtDiv = document.querySelector(".offset-amt");
+            offsetAmtDiv.innerText = currency(jsonResponse.claimOffset).format();
+            const totalAmountDiv = document.querySelector(".claim-total");
+            totalAmountDiv.innerText = currency(jsonResponse.totalAmount).format();
+            totalAmountDiv.setAttribute("data-subtotal", currency(jsonResponse.totalAmount).format({separator: '', symbol: ''}));
+            claimGrandtotalDiv.innerText = currency(jsonResponse.totalAmountAfterOffset).format();
+            editClaimModal.show();
+        } catch (e) {
+            console.error("Failed to render modal contents: ", e);
+            return pushToast(`An error occured while trying to let you edit the claim. Please try again later.`, "Couldn't manage claim", "danger");
+        }
+
+    }
 
     function handleCurrencyValue(value) {
         value = value.replace(/[^0-9.]/g, '');
@@ -101,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'edit':
                 if (target) target.setAttribute("disabled", "");
-                renderEditPrompt(claimId).then(() => {if (target) target.removeAttribute("disabled")})
+                openClaimModal(claimId).then(() => {if (target) target.removeAttribute("disabled")})
                 break;
             case 'view':
                 if (target) target.setAttribute("disabled", "");
@@ -113,49 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             default:
                 console.error("Event delegation encountered unknown action: ", action);
-        }
-    }
-
-    async function renderEditPrompt(claimId) {
-        return;
-        let fetchExpenseResponse;
-        try {
-            fetchExpenseResponse = await fetch('/api/expenses/' + claimId, {
-                method: 'get',
-                credentials: 'same-origin',
-                signal: AbortSignal.timeout(5000)
-            })
-        } catch (e) {
-            console.error("Failed to read expense data: ", e);
-            pushToast("I couldn't fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
-            return;
-        }
-        let jsonResponse = null;
-        try {
-            jsonResponse = await fetchExpenseResponse.json();
-        } catch (e) { // not JSON
-            console.error("Failed to read expense data: ", e);
-            pushToast("Could not fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
-            return;
-        }
-        if (fetchExpenseResponse.status !== 200) {
-            console.error("Unexpected status code received: ", fetchExpenseResponse.status);
-            pushToast(jsonResponse?.error_message || "An unknown error occured.", "Couldn't manage attachments", "danger");
-        } else expense_data = jsonResponse;
-
-        if (expense_data) {
-            expenseForm.setAttribute("data-expenseid", expense_data.id);
-            expenseForm.setAttribute("data-purpose", "edit");
-
-            document.getElementById("expense_amt").value = currency(expense_data.amount).format({ separator: '', symbol: '' });
-            document.getElementById("category").value = expense_data.category.id;
-            const now_dt = new Date();
-            document.getElementById("spent_dt").value = new Date(new Date(expense_data.spentOn) - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
-            document.getElementById("description").value = expense_data.description || "";
-            createExpenseModal.show();
-        } else {
-            console.error("Failed to read expense data: ", e);
-            pushToast("Could not fetch details about this expense due to an error.", "Couldn't edit attachment", "danger");
         }
     }
 

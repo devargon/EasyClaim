@@ -3,81 +3,122 @@ extends layout
 block head
     script(src="https://unpkg.com/currency.js@~2.0.0/dist/currency.min.js")
     script(src="/assets/javascripts/data-iso.js")
+    script(src="https://unpkg.com/vue@3/dist/vue.global.js")
     link(rel="stylesheet", href="/assets/stylesheets/claims.css")
 
 block content
-    .modal.fade.modal-lg#viewClaimModal(tabindex='-1')
-        .modal-dialog
-            .modal-content
-                .modal-header
-                    h5.modal-title View Claim
-                    button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                .modal-body
-                    iframe#viewClaimIframe(src="http://192.168.50.140:3000/claims/shared/164b3bda-45a9-11ef-a36e-d85ed37db0df", loading="lazy", referrerpolicy="no-referrer", sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox", allow="geolocation 'none'; microphone 'none'; camera 'none';")
-    section.py-3
-        .container.py-5
-            .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
-                div
-                    h1.fw-medium Claims
-                    .row.mt-2
-                        .col-sm-6
-                            .fw-medium Pending
-                                .fw-medium.fs-2 #{formatMoney(pendingClaimAmt)}
+    #app
+        .modal.fade.modal-lg#viewClaimModal(tabindex='-1')
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        h5.modal-title View Claim
+                        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                    .modal-body
+                        iframe#viewClaimIframe(src="http://192.168.50.140:3000/claims/shared/164b3bda-45a9-11ef-a36e-d85ed37db0df", loading="lazy", referrerpolicy="no-referrer", sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox", allow="geolocation 'none'; microphone 'none'; camera 'none';")
+        .modal.fade.modal-lg.createClaimModal#editClaimModal(tabindex='-1')
+            .modal-dialog
+                .modal-content
+                    form#editClaimForm()
+                        .modal-header
+                            h5.modal-title Edit Claim
+                            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                        .modal-body
+                            .row
+                                div
+                                    .alert.alert-danger.text-center#editClaimAlert(style="display: none", role='alert')
+                            .row.mb-5
+                                label(for='claim_offset_amt', class='form-label') Offset claim?
+                                .input-group.input-group-lg
+                                    span.input-group-text - $
+                                    input(type='number', class='form-control', id='claim_offset_amt', name='claim_offset_amt', aria-label='Claim Offset Amount', step='0.01', placeholder='0.00', min='0.00', value='0.00', v-model.number="offset")
 
-                        .col-sm-6
-                            .fw-medium Completed
-                                .fw-medium.fs-2 #{formatMoney(completedClaimAmt)}
-            p.mt-3 You can submit a claim through the Expenses page.
-            .container.mt-5.claim-container
-                if claims.length < 1
-                    h1.fw-bold.text-center You haven't made any claims.
-                    p.mt-2.text-center Select multiple expenses to create one.
-                else
-                    .row
-                        for claim in claims
-                            - let expenses_short = claim.expenses.slice(0, 5)
-                            .col-sm-12.col-lg-6.col-xl-4.mb-4(id=`claim-${claim.id}`)
-                                .card.expense-card.p-2
-                                    .d-flex.flex-column.expense-claim-card-contents
-                                        .row.m-2
-                                            .col.d-flex.justify-content-between
-                                                .text-start.card-identifier.flex-grow-1
-                                                    span.card-created-date.expense-date(data-iso=claim.submittedAt.toISOString()) #{claim.submittedAt.toUTCString()}
-                                                .text-end.card-amount.expense-amount(data-money=formatMoney(claim.totalAmountAfterOffset, true)) #{formatMoney(claim.totalAmountAfterOffset)}
-                                        .row.m-2
-                                            .col-6
-                                                .card-entity-name Items
-                                                .card-entity-value #{claim.expenses.length}
-                                            .col-6
-                                                .card-entity-name Status
-                                                if claim.status === "PENDING"
-                                                    .claim-status-badge.claim-pending.rounded-pill Pending
-                                                else if claim.status === "COMPLETE"
-                                                    .claim-status-badge.claim-completed.rounded-pill Completed
-                                                else
-                                                    .claim-status-badge.claim-unknown.rounded-pill Unknown
-                                        .row.m-2.claim-expense-list-container
-                                            each expense in expenses_short
-                                                .claim-expense-item
-                                                    .claim-expense-properties
-                                                        .claim-expense-category #{expense.category.name}
-                                                        if expense.description
-                                                            .claim-expense-description #{expense.description}
-                                                    .claim-expense-amount #{formatMoney(expense.amount)}
-                                            if claim.expenses.length > 5
-                                                .plus-one-more +#{claim.expenses.length - 5} more...
-                                            if claim.claimOffset > 0
-                                                .claim-expense-item.mt-2
-                                                    .claim-expense-properties
-                                                        .claim-expense-category Claim Offset
-                                                    .claim-expense-amount - #{formatMoney(claim.claimOffset)}
+                            .row.mb-3.claim-expense-list-container#actualClaimExpenseList
+                            .row.mb-3.claim-expense-list-container
+                                .claim-expense-item-right
+                                    div(v-if="offset <= 0") Total
+                                    div(v-else="") Subtotal
+                                    .claim-expense-amount.claim-total $0.00
+                                .claim-expense-item-right(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                    div Claim Offset
+                                    .claim-expense-amount
+                                        span.me-2 -
+                                        span.offset-amt $0.00
+                                .claim-expense-item-right(:class="{'d-flex': offset > 0}", v-show="offset > 0")
+                                    div Grand Total
+                                    .claim-expense-amount.claim-grandtotal $0.00
+
+                            .d-grid.gap-2.d-md-flex.justify-content-md-end.mt-2
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                button.btn.btn-primary(type='submit')
+                                    span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                    | Submit
+        section.py-3
+            .container.py-5
+                .d-flex.flex-column.flex-md-row.align-items-center.justify-content-between.mb-4
+                    div
+                        h1.fw-medium Claims
+                        .row.mt-2
+                            .col-sm-6
+                                .fw-medium Pending
+                                    .fw-medium.fs-2 #{formatMoney(pendingClaimAmt)}
+
+                            .col-sm-6
+                                .fw-medium Completed
+                                    .fw-medium.fs-2 #{formatMoney(completedClaimAmt)}
+                p.mt-3 You can submit a claim through the Expenses page.
+                .container.mt-5.claim-container
+                    if claims.length < 1
+                        h1.fw-bold.text-center You haven't made any claims.
+                        p.mt-2.text-center Select multiple expenses to create one.
+                    else
+                        .row
+                            for claim in claims
+                                - let expenses_short = claim.expenses.slice(0, 5)
+                                .col-sm-12.col-lg-6.col-xl-4.mb-4(id=`claim-${claim.id}`)
+                                    .card.expense-card.p-2
+                                        .d-flex.flex-column.expense-claim-card-contents
+                                            .row.m-2
+                                                .col.d-flex.justify-content-between
+                                                    .text-start.card-identifier.flex-grow-1
+                                                        span.card-created-date.expense-date(data-iso=claim.submittedAt.toISOString()) #{claim.submittedAt.toUTCString()}
+                                                    .text-end.card-amount.expense-amount(data-money=formatMoney(claim.totalAmountAfterOffset, true)) #{formatMoney(claim.totalAmountAfterOffset)}
+                                            .row.m-2
+                                                .col-6
+                                                    .card-entity-name Items
+                                                    .card-entity-value #{claim.expenses.length}
+                                                .col-6
+                                                    .card-entity-name Status
+                                                    if claim.status === "PENDING"
+                                                        .claim-status-badge.claim-pending.rounded-pill Pending
+                                                    else if claim.status === "COMPLETE"
+                                                        .claim-status-badge.claim-completed.rounded-pill Completed
+                                                    else
+                                                        .claim-status-badge.claim-unknown.rounded-pill Unknown
+                                            .row.m-2.claim-expense-list-container
+                                                each expense in expenses_short
+                                                    .claim-expense-item
+                                                        .claim-expense-properties
+                                                            .claim-expense-category #{expense.category.name}
+                                                            if expense.description
+                                                                .claim-expense-description #{expense.description}
+                                                        .claim-expense-amount #{formatMoney(expense.amount)}
+                                                if claim.expenses.length > 5
+                                                    .plus-one-more +#{claim.expenses.length - 5} more...
+                                                if claim.claimOffset > 0
+                                                    .claim-expense-item.mt-2
+                                                        .claim-expense-properties
+                                                            .claim-expense-category Claim Offset
+                                                        .claim-expense-amount - #{formatMoney(claim.claimOffset)}
 
 
 
-                                        .row.m-2
-                                            .d-flex.gap-2
-                                                button.btn.btn-outline-primary.action-button(data-action="view", data-claim-id=claim.shareId) View
-                                                button.btn.btn-outline-danger.action-button(data-action="cancel", data-claim-id=claim.id) Cancel
-                                                button.btn.btn-outline-primary.action-button(data-action="share", data-claim-id=claim.id)
-                                                    i.bi-share
+                                            .row.m-2
+                                                .d-flex.gap-2
+                                                    button.btn.btn-outline-primary.rounded-pill.action-button(data-action='edit', data-claim-id=claim.id)
+                                                        i.bi.bi-pencil-fill
+                                                    button.btn.btn-outline-primary.action-button(data-action="view", data-claim-id=claim.shareId) View
+                                                    button.btn.btn-outline-danger.action-button(data-action="cancel", data-claim-id=claim.id) Cancel
+                                                    button.btn.btn-outline-primary.action-button(data-action="share", data-claim-id=claim.id)
+                                                        i.bi-share
     script(src="/assets/javascripts/claims.js")
