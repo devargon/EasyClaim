@@ -130,88 +130,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function openClaimModal(expenseIds) {
-        createClaimModalEntriesSection.innerHTML = "";
-        const foundExpenses = [];
-        if (expenseIds.length < 1) {
-           return pushToast("You need to select at least one expense.", "Error creating claim", "danger");
-        }
-        let expenseClaimSubtotal = currency(0.00);
-        expenseIds.reverse().forEach(expenseId => {
-            const expenseCard = document.getElementById(`expense-${expenseId}`);
-            if (expenseCard) {
-                let expenseAmount, expenseDate, expenseCategoryName, expenseDescription;
-                const expenseAmountDiv = expenseCard.querySelector(".expense-amount");
-                if (expenseAmountDiv) expenseAmount = expenseAmountDiv.getAttribute("data-money");
-                const expenseDateDiv = expenseCard.querySelector(".expense-date");
-                if (expenseDateDiv) expenseDate = expenseDateDiv.getAttribute("data-iso");
-                const expenseCategoryNameDiv = expenseCard.querySelector(".expense-category-name");
-                if (expenseCategoryNameDiv) expenseCategoryName = expenseCategoryNameDiv.innerText;
-                const expenseDescriptionDiv = expenseCard.querySelector(".expense-description");
-                if (expenseDescriptionDiv) expenseDescription = expenseDescriptionDiv.innerText;
-                const expenseInformalObj = {
-                    amount: currency(expenseAmount),
-                    date: new Date(expenseDate),
-                    categoryName: expenseCategoryName,
-                    description: expenseDescription,
-                }
-                if (!expenseInformalObj.amount) {
-                    console.error(`Could not find expense amount information for #${expenseId}`)
-                } else if (!(expenseInformalObj.categoryName || expenseInformalObj.description)) {
-                    console.error(`Could not find expense cat or desc for ${expenseId}`);
-                } else {
-                    let entryNameArr = [];
-                    if (expenseInformalObj.date) {
-                        if (Object.prototype.toString.call(expenseInformalObj.date) === '[object Date]') {
-                            entryNameArr.push(formatISOToLocaleDate(expenseInformalObj.date));
-                        }
-                    }
-                    if (expenseInformalObj.description) entryNameArr.push(expenseInformalObj.description);
-
-
-                    const claimExpenseEntryDiv = document.createElement("div")
-                    claimExpenseEntryDiv.className = "claim-expense-item";
-                    const claimExpenseEntryNameContainerDiv = document.createElement("div");
-                    claimExpenseEntryNameContainerDiv.className = "claim-expense-properties";
-                    const claimExpenseCategoryDiv = document.createElement("div");
-                    claimExpenseCategoryDiv.className = "claim-expense-category";
-                    claimExpenseCategoryDiv.innerText = expenseInformalObj.categoryName;
-                    claimExpenseEntryNameContainerDiv.appendChild(claimExpenseCategoryDiv);
-                    if (entryNameArr.length > 0) {
-                        const claimExpenseDescriptionDiv = document.createElement("div");
-                        claimExpenseDescriptionDiv.innerText = entryNameArr.join(' \267 ');
-                        claimExpenseDescriptionDiv.className = "claim-expense-description";
-                        claimExpenseEntryNameContainerDiv.appendChild(claimExpenseDescriptionDiv);
-                    }
-
-                    const claimExpenseEntryAmtContainer = document.createElement("div");
-                    claimExpenseEntryAmtContainer.className = "claim-expense-amount";
-                    claimExpenseEntryAmtContainer.innerText = expenseInformalObj.amount.format();
-                    claimExpenseEntryDiv.appendChild(claimExpenseEntryNameContainerDiv);
-                    claimExpenseEntryDiv.appendChild(claimExpenseEntryAmtContainer);
-                    createClaimModalEntriesSection.appendChild(claimExpenseEntryDiv);
-                    expenseClaimSubtotal = expenseClaimSubtotal.add(expenseInformalObj.amount);
-
-                    foundExpenses.push(expenseInformalObj);
-                }
-            } else {
-                console.error(`Could not find the Expense Card div for ${expenseId}`);
+        try {
+            createClaimModalEntriesSection.innerHTML = "";
+            const foundExpenses = [];
+            if (expenseIds.length < 1) {
+                return pushToast("You need to select at least one expense.", "Error creating claim", "danger");
             }
-        })
-        if (foundExpenses.length === 0) {
-            console.error("Failed to parse any selected expenses.");
-            return pushToast("Hmm... Something is wrong. I could not find any expenses. Refresh the page and try again.", "Error creating expenses.", "danger");
+            let expenseClaimSubtotal = currency(0.00);
+            expenseIds.reverse().forEach(expenseId => {
+                const expenseCard = document.getElementById(`expense-${expenseId}`);
+                if (expenseCard) {
+                    let expenseAmount, expenseDate, expenseCategoryName, expenseDescription;
+                    const expenseAmountDiv = expenseCard.querySelector(".expense-amount");
+                    if (expenseAmountDiv) expenseAmount = expenseAmountDiv.getAttribute("data-money");
+                    const expenseDateDiv = expenseCard.querySelector(".expense-date");
+                    if (expenseDateDiv) expenseDate = expenseDateDiv.getAttribute("data-iso");
+                    const expenseCategoryNameDiv = expenseCard.querySelector(".expense-category-name");
+                    if (expenseCategoryNameDiv) expenseCategoryName = expenseCategoryNameDiv.innerText;
+                    const expenseDescriptionDiv = expenseCard.querySelector(".expense-description");
+                    if (expenseDescriptionDiv) expenseDescription = expenseDescriptionDiv.innerText;
+                    if (!expenseAmount) {
+                        console.error(`Could not find expense amount information for #${expenseId}`)
+                    } else if (!(expenseCategoryName || expenseDescription)) {
+                        console.error(`Could not find expense cat or desc for ${expenseId}`);
+                    } else {
+                        const expenseInformalObj = {
+                            amount: currency(expenseAmount),
+                            date: new Date(expenseDate),
+                            category: {
+                                name: expenseCategoryName,
+                            },
+                            description: expenseDescription,
+                        }
+                        foundExpenses.push(expenseInformalObj);
+                        expenseClaimSubtotal = expenseClaimSubtotal.add(expenseInformalObj.amount.value);
+                    }
+                } else {
+                    console.error(`Could not find the Expense Card div for ${expenseId}`);
+                }
+            })
+            if (foundExpenses.length === 0) {
+                console.error("Failed to parse any selected expenses.");
+                return pushToast("Hmm... Something is wrong. I could not find any expenses. Refresh the page and try again.", "Error creating expenses.", "danger");
+            }
+            generateExpenseDivForClaimModal(foundExpenses, createClaimModalEntriesSection)
+
+            claimOffsetAmtInput.max = expenseClaimSubtotal.format({separator: '', symbol: ''});
+
+            const offsetAmtDiv = document.querySelector(".offset-amt");
+            offsetAmtDiv.innerText = currency(0.00).format();
+            const totalAmountDiv = document.querySelector(".claim-total");
+            totalAmountDiv.innerText = expenseClaimSubtotal.format();
+            totalAmountDiv.setAttribute("data-subtotal", expenseClaimSubtotal.format({separator: '', symbol: ''}))
+
+            currentSelectedExpensesForClaim = expenseIds;
+            createClaimModal.show();
+        } catch (e) {
+            console.error(e);
+            return pushToast("An error occured while trying to generate the claim details.", "Could not create claim", "danger");
         }
 
-        claimOffsetAmtInput.max = expenseClaimSubtotal.format({separator: '', symbol: ''});
-
-        const offsetAmtDiv = document.querySelector(".offset-amt");
-        offsetAmtDiv.innerText = currency(0.00).format();
-        const totalAmountDiv = document.querySelector(".claim-total");
-        totalAmountDiv.innerText = expenseClaimSubtotal.format();
-        totalAmountDiv.setAttribute("data-subtotal", expenseClaimSubtotal.format({separator: '', symbol: ''}))
-
-        currentSelectedExpensesForClaim = expenseIds;
-        createClaimModal.show();
     }
 
     function pushToast(message, header, type) {

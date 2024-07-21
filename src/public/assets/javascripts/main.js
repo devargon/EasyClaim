@@ -60,3 +60,42 @@ function formToJSObject(form) {
     });
     return object;
 }
+
+function generateExpenseDivForClaimModal(expenses, expensesContainer) {
+    expenses.forEach(expense => {
+
+        let entryNameArr = [];
+        if (expense.date) {
+            const formattedDate = formatISOToLocaleDate(new Date(expense.date))
+            if (formattedDate) {
+                entryNameArr.push(formattedDate);
+            }
+
+        }
+        if (expense.description) entryNameArr.push(expense.description);
+
+        const claimExpenseEntryDiv = document.createElement("div")
+        claimExpenseEntryDiv.className = "claim-expense-item";
+        const claimExpenseEntryNameContainerDiv = document.createElement("div");
+        claimExpenseEntryNameContainerDiv.className = "claim-expense-properties";
+        const claimExpenseCategoryDiv = document.createElement("div");
+        claimExpenseCategoryDiv.className = "claim-expense-category";
+        claimExpenseCategoryDiv.innerText = expense.category.name;
+        claimExpenseEntryNameContainerDiv.appendChild(claimExpenseCategoryDiv);
+        if (entryNameArr.length > 0) {
+            const claimExpenseDescriptionDiv = document.createElement("div");
+            claimExpenseDescriptionDiv.innerText = entryNameArr.join(' \267 ');
+            claimExpenseDescriptionDiv.className = "claim-expense-description";
+            claimExpenseEntryNameContainerDiv.appendChild(claimExpenseDescriptionDiv);
+        }
+
+        const claimExpenseEntryAmtContainer = document.createElement("div");
+        claimExpenseEntryAmtContainer.className = "claim-expense-amount";
+        console.log(typeof(expense.amount));
+        if (typeof expense.amount === "number" || typeof expense.amount === "string") expense.amount = currency(expense.amount);
+        claimExpenseEntryAmtContainer.innerText = expense.amount.format();
+        claimExpenseEntryDiv.appendChild(claimExpenseEntryNameContainerDiv);
+        claimExpenseEntryDiv.appendChild(claimExpenseEntryAmtContainer);
+        expensesContainer.appendChild(claimExpenseEntryDiv);
+    })
+}
