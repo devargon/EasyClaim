@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     claimOffsetAmtInput.addEventListener("input", () => {
         if (handleCurrencyValue(claimOffsetAmtInput.value) !== claimOffsetAmtInput.value) {
             claimOffsetAmtInput.value = handleCurrencyValue(claimOffsetAmtInput.value);
+            vm.offset = Number(claimOffsetAmtInput.value);
         }
 
         let newOffsetNumber = Number(claimOffsetAmtInput.value);
