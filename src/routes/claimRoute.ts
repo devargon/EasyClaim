@@ -33,7 +33,7 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
     res.render('claims', {title: 'Claims', claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
 });
 
-router.get('/shared/:shareId', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/share/:shareId', async (req: Request, res: Response, next: NextFunction) => {
     res.locals.showHeader = false;
     const claim = await findClaimByShareId(req.params.shareId || "");
     if (claim) {

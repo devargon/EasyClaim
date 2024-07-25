@@ -11,6 +11,83 @@ const router = express.Router();
 
 // noinspection JSUnusedLocalSymbols
 
+
+
+router.get('/:claimId/share', redirectAsRequiresLogin, async(req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+
+    const claimId = parseInt(req.params.claimId, 10);
+    if (isNaN(claimId)) {
+        return res.status(404).json({error_message: "Claim not found"});
+    }
+
+    const claim = await findClaimByIdAndUserId(claimId, req.user.id)
+    console.log(claim);
+    if (!claim) {
+        return res.status(404).json({error_message: "Claim not found"});
+    } else {
+
+        const formatted_total_claim_amount = currency(Number(claim.totalAmountAfterOffset))
+        const claim_share_link = `${req.protocol}://${req.get('host')}/claims/share/${claim.shareId}`
+        function generate_share_link(lang: string) {
+            if (claim) {
+                return `${req.protocol}://${req.get('host')}/claims/share/${lang}/${claim.shareId}`
+            } else return "";
+        }
+        let messages: { [key: string]: { message: string, url: string, html: string} } = {};
+        messages.en = {
+            message: `Hi, I'm claiming \$${formatted_total_claim_amount} for some expenses. See the details of it with this link: ${generate_share_link('en')}`,
+            url: generate_share_link('en'),
+            html: `Hi, I'm claiming \$${formatted_total_claim_amount} for some expenses. See the details of it with this link: <a class="text-reset" href="${generate_share_link('en')}">${generate_share_link('en')}</a>`
+        };
+
+        messages.my = {
+            message: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: ${generate_share_link('my')}`,
+            url: generate_share_link('my'),
+            html: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: <a class="text-reset" href="${generate_share_link('my')}">${generate_share_link('my')}</a>`
+        };
+
+        messages.es = {
+            message: `Hola, estoy reclamando \$${formatted_total_claim_amount} por algunos gastos. Vea los detalles en este enlace: ${generate_share_link('es')}`,
+            url: generate_share_link('es'),
+            html: `Hola, estoy reclamando \$${formatted_total_claim_amount} por algunos gastos. Vea los detalles en este enlace: <a class="text-reset" href="${generate_share_link('es')}">${generate_share_link('es')}</a>`
+        };
+
+        messages.ja = {
+            message: `こんにちは、いくつかの費用について\$${formatted_total_claim_amount}を請求しています。詳細はこのリンクをご覧ください: ${generate_share_link('ja')}`,
+            url: generate_share_link('ja'),
+            html: `こんにちは、いくつかの費用について\$${formatted_total_claim_amount}を請求しています。詳細はこのリンクをご覧ください: <a class="text-reset" href="${generate_share_link('ja')}">${generate_share_link('ja')}</a>`
+        };
+
+        messages.de = {
+            message: `Hallo, ich beantrage \$${formatted_total_claim_amount} für einige Ausgaben. Einzelheiten finden Sie unter diesem Link: ${generate_share_link('de')}`,
+            url: generate_share_link('de'),
+            html: `Hallo, ich beantrage \$${formatted_total_claim_amount} für einige Ausgaben. Einzelheiten finden Sie unter diesem Link: <a class="text-reset" href="${generate_share_link('de')}">${generate_share_link('de')}</a>`
+        };
+
+        messages.fr = {
+            message: `Bonjour, je réclame \$${formatted_total_claim_amount} pour certaines dépenses. Voir les détails via ce lien : ${generate_share_link('fr')}`,
+            url: generate_share_link('fr'),
+            html: `Bonjour, je réclame \$${formatted_total_claim_amount} pour certaines dépenses. Voir les détails via ce lien : <a class="text-reset" href="${generate_share_link('fr')}">${generate_share_link('fr')}</a>`,
+        };
+
+        messages['zh-CN'] = {
+            message: `您好，我正在报销一些费用，总金额为 \$${formatted_total_claim_amount}。详细信息请查看此链接：${generate_share_link('zh-CN')}`,
+            url: generate_share_link('zh-CN'),
+            html: `您好，我正在报销一些费用，总金额为 \$${formatted_total_claim_amount}。详细信息请查看此链接：<a class="text-reset" href="${generate_share_link('zh-CN')}">${generate_share_link('zh-CN')}</a>`,
+        };
+        return res.status(200).json({
+            default_url: claim_share_link,
+            default_message: `Hi, I'm claiming \$${formatted_total_claim_amount} for some expenses. See the details of it with this link: ${generate_share_link('en')}`,
+            default_html: `Hi, I'm claiming \$${formatted_total_claim_amount} for some expenses. See the details of it with this link: <a href="${generate_share_link('en')}"><${generate_share_link('en')}`,
+            messages: messages
+        });
+    }
+})
+
+
 router.get('/:claimId', redirectAsRequiresLogin, async(req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();
@@ -29,6 +106,7 @@ router.get('/:claimId', redirectAsRequiresLogin, async(req: Request, res: Respon
         return res.status(200).json(claim);
     }
 })
+
 
 router.post("/:claimId/cancel", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
