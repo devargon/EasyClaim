@@ -281,13 +281,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getStuff() {
         const language = message_strings[selected_message_language];
-        let html = language.html;
-        let url = language.url;
-        let message = language.message;
-        if (!language) {
-            html = default_html;
-            url = default_url;
-            message = default_message;
+        let html = default_html;
+        let url = default_url;
+        let message = default_message;
+        if (language) {
+            html = language.html;
+            url = language.url;
+            message = language.message;
         }
         return { html, url, message }
     }
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selected_message_language = messageLanguageSelect.value;
         if (message_strings[selected_message_language] === undefined) {
             missingLanguageAlert.style.display = "block";
-            missingLanguageDisplay.innerText = messageLanguageSelect.options[missingLanguageSelect.selectedIndex].text;
+            missingLanguageDisplay.innerText = messageLanguageSelect.options[messageLanguageSelect.selectedIndex].text;
         } else {
             missingLanguageDisplay.innerText = "";
             missingLanguageAlert.style.display = "none";
@@ -458,6 +458,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 selected_message_language = "en";
                 messageLanguageSelect.value = selected_message_language;
                 message_strings = jsonResponse.messages;
+                default_url = jsonResponse.default_url;
+                default_message = jsonResponse.default_message;
+                default_html = jsonResponse.default_html;
                 updateExampleMessage();
                 shareClaimModal.show();
             } else {
