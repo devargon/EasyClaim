@@ -12,7 +12,10 @@ block content
     .container.px-3.px-md-4.px-lg-5
         .row
             .col-12.col-md-10.col-lg-8.mx-auto.claim-share
-                p.mt-3.text-center.text-body-secondary John Doe is claiming the following expenses from you.
+                if claim.claimComplete
+                    p.mt-3.text-center.text-body-secondary #{user.name} has claimed this expense.
+                else
+                    p.mt-3.text-center.text-body-secondary #{user.name} is claiming the following expenses from you.
                 h1.total-amount #{formatMoney(claim.totalAmountAfterOffset)}
                 h1.text-center Expenses
                 .container.mt-5.claim-container(style="margin-top: 30px !important")

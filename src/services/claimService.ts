@@ -93,7 +93,8 @@ export async function findClaimByShareId(shareId: string) {
                 include: {
                     category: true,
                 },
-            }
+            },
+            user: true
         }
     });
     // if (claim) {
