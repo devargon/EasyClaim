@@ -38,6 +38,9 @@ export function createClaim(userId: number, affectedExpenseIds: number[], totalE
 
 export async function findAllClaimsByUserId(userId: number) {
     return prisma.claim.findMany({
+        where: {
+            userId: userId
+        },
         include: {
             expenses: {
                 include: {
