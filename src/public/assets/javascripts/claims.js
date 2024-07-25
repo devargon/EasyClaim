@@ -517,6 +517,10 @@ document.addEventListener('DOMContentLoaded', function() {
             pushToast("An error occured, please try again later.", "Could not open share prompt", "danger");
 
         }
-
     }
+
+    if (!(navigator.share && navigator.canShare({text: "abc"}))) {
+        document.getElementById("others-share").remove();
+        document.getElementById("others-button-description").remove()
+    };
 })
