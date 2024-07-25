@@ -445,6 +445,47 @@ document.addEventListener('DOMContentLoaded', function() {
         claimIframe.src = "about:blank";
     })
 
+    document.querySelector(".share-buttons").addEventListener("click", (e) => {
+        const button = e.target.closest('.social-share-btn');
+        console.log(button);
+        if (!button || !button.id) {
+            return;
+        }
+        const language = getStuff();
+        const message_encoded = encodeURIComponent(language.message);
+        switch(button.id) {
+            case "whatsapp-share":
+                console.log("WhatsApp");
+                window.location.href = `whatsapp://send?text=${message_encoded}`;
+                break;
+            case "telegram-share":
+                console.log("Telegram");
+                const message_without_link = language.message.replace(language.url, "");
+                window.location.href = `tg://msg_url?url=${encodeURIComponent(language.url)}&text=${message_without_link}`;
+                break;
+            case "line-share":
+                console.log("Line");
+                window.location.href = `line://msg/text/${message_encoded}`;
+                break;
+            case "others-share":
+                if (navigator.share) {
+                    console.log("navigator.share is defined");
+                    const share_data = {
+                        text: language.message
+                    }
+                    if (navigator.canShare(share_data)) {
+                        navigator.share(share_data)
+                    } else {
+                        console.log("cannot share");
+                    }
+                }
+                console.log("Others");
+                break;
+            default:
+                console.log("Unknown share button clicked");
+        }
+    })
+
     async function renderShareModal(claimId) {
         try {
             const getShareURLResponse = await fetch(`/api/claims/${claimId}/share`, {
