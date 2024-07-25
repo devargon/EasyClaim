@@ -47,7 +47,15 @@ export async function findAllClaimsByUserId(userId: number) {
                     category: true,
                 },
             }
-        }
+        },
+        orderBy: [
+            {
+                status: 'asc'
+            },
+            {
+                submittedAt: 'desc'
+            },
+        ]
     });
     // return claims.map(claim => {
     //     return {
@@ -138,4 +146,28 @@ export async function updateClaim(claimId: number, offsetAmount: number) {
             }
         }
     });
+}
+
+export async function setClaimToComplete(claimId: number) {
+    return prisma.$transaction(async (tx) => {
+
+        await tx.expense.updateMany({
+            data: {
+                claimId: claimId,
+                claimComplete: true,
+            },
+            where: {
+                claimId: claimId
+            }
+        });
+
+        return tx.claim.update({
+            data: {
+                status: "COMPLETED"
+            },
+            where: {
+                id: claimId
+            }
+        });
+    })
 }

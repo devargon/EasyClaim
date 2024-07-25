@@ -140,7 +140,7 @@ block content
                                                     .card-entity-name Status
                                                     if claim.status === "PENDING"
                                                         .claim-status-badge.claim-pending.rounded-pill Pending
-                                                    else if claim.status === "COMPLETE"
+                                                    else if claim.status === "COMPLETED"
                                                         .claim-status-badge.claim-completed.rounded-pill Completed
                                                     else
                                                         .claim-status-badge.claim-unknown.rounded-pill Unknown
@@ -164,12 +164,20 @@ block content
 
                                             .row.m-2
                                                 .d-flex.gap-2
-                                                    button.btn.btn-outline-primary.rounded-pill.action-button(data-action='edit', data-claim-id=claim.id)
-                                                        i.bi.bi-pencil-fill
-                                                    button.btn.btn-outline-primary.rounded-pill.action-button(data-action="view", data-claim-id=claim.shareId)
-                                                        i.bi.bi-eye
-                                                    button.btn.btn-outline-danger.rounded-pill.action-button(data-action="cancel", data-claim-id=claim.id)
-                                                        i.bi.bi-x-circle
-                                                    button.btn.btn-outline-info.rounded-pill.action-button(data-action="share", data-claim-id=claim.id)
-                                                        i.bi-share
+                                                    if claim.status === "COMPLETED"
+                                                        button.btn.btn-outline-primary.rounded-pill.action-button(data-action="view", data-claim-id=claim.shareId)
+                                                            i.bi.bi-eye
+                                                        button.btn.btn-outline-info.rounded-pill.action-button(data-action="share", data-claim-id=claim.id)
+                                                            i.bi-share
+                                                    else
+                                                        button.btn.btn-outline-primary.rounded-pill.action-button(data-action='edit', data-claim-id=claim.id)
+                                                            i.bi.bi-pencil-fill
+                                                        button.btn.btn-outline-primary.rounded-pill.action-button(data-action="view", data-claim-id=claim.shareId)
+                                                            i.bi.bi-eye
+                                                        button.btn.btn-outline-danger.rounded-pill.action-button(data-action="cancel", data-claim-id=claim.id)
+                                                            i.bi.bi-x-circle
+                                                        button.btn.btn-outline-info.rounded-pill.action-button(data-action="share", data-claim-id=claim.id)
+                                                            i.bi-share
+                                                        button.btn.btn-outline-success.rounded-pill.action-button(data-action="complete", data-claim-id=claim.id)
+                                                            i.bi-check2
     script(src="/assets/javascripts/claims.js")

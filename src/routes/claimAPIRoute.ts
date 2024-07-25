@@ -2,7 +2,7 @@ import express, {Request, Response, NextFunction} from 'express';
 import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
 import currency from "currency.js";
 import {findExpenseByIdAndUser} from "../services/expenseService";
-import {createClaim, deleteClaim, findClaimByIdAndUserId, updateClaim} from "../services/claimService";
+import {createClaim, deleteClaim, findClaimByIdAndUserId, updateClaim, setClaimToComplete} from "../services/claimService";
 import prisma from "../config/db";
 
 import { v4 as uuidv4 } from 'uuid';
@@ -133,6 +133,31 @@ router.post("/:claimId/cancel", redirectAsRequiresLogin, async (req: Request, re
     }
 })
 
+router.post("/:claimId/complete", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const claimId = req.params.claimId;
+    const claimIdActual = parseInt(claimId, 10);
+    if (isNaN(claimIdActual)) {
+        return res.status(400).json({error_message: "not a valid claimId"});
+    }
+    const claim = await prisma.claim.findUnique({where: {id: claimIdActual, userId: req.user.id}});
+    if (!claim) {
+        return res.status(404).json({error_message: `Claim #${claimIdActual} not found.`});
+    }
+    if (claim.status === "COMPLETED") {
+        return res.status(400).json({error_message: `Claim #${claimIdActual} is already complete.`});
+    } else {
+        const a = await setClaimToComplete(claim.id);
+        if (a) {
+            return res.status(200).json({success_message: `Expense #${claimIdActual} complete.`});
+        } else {
+            return res.status(404).json({error_message: `Expense #${claimIdActual} not found.`});
+        }
+    }
+})
+
 router.post("/:claimId/edit", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
         return res.status(401).send();
@@ -151,7 +176,7 @@ router.post("/:claimId/edit", redirectAsRequiresLogin, async (req: Request, res:
         return res.status(404).json({error_message: `Claim #${claimId} not found.`});
     }
     if (existingClaim.status === "COMPLETED") {
-        return res.status(400).json({error_message: `Claim #${claimId} is complete and can't be deleted.`});
+        return res.status(400).json({error_message: `Claim #${claimId} is complete and can't be edited.`});
     } else {
         const updatedClaim = await updateClaim(existingClaim.id, offsetAmount);
         if (updatedClaim) {

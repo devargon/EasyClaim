@@ -364,6 +364,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (target) target.setAttribute("disabled", "");
                 renderShareModal(claimId).then(() => {if (target) target.removeAttribute("disabled")});
                 break;
+            case 'complete':
+                if (target) target.setAttribute("disabled", "");
+                renderCompletePrompt(claimId).then(() => {if (target) target.removeAttribute("disabled")});
             default:
                 console.error("Event delegation encountered unknown action: ", action);
         }
@@ -424,6 +427,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         promptOverlayActions.appendChild(cancelBtn);
+        promptOverlayActions.appendChild(cancelActionBtn);
+
+        promptOverlayContent.appendChild(promptOverlayText);
+        promptOverlayContent.appendChild(promptOverlayActions);
+
+        promptOverlay.appendChild(promptOverlayContent);
+
+        card.querySelector(".expense-claim-card-contents").appendChild(promptOverlay);
+    }
+
+    async function renderCompletePrompt(claimId) {
+        const card = document.getElementById(`claim-${claimId}`);
+        const promptOverlay = document.createElement("div")
+        promptOverlay.className = "overlay";
+
+        const promptOverlayContent = document.createElement("div")
+        promptOverlayContent.className = "content";
+
+        const promptOverlayText = document.createElement("p");
+        promptOverlayText.innerText = "Are you sure you want to cancel this claim?";
+
+        const promptOverlayActions = document.createElement("div");
+        promptOverlayActions.className = "action";
+
+        const completeBtn = document.createElement("button");
+        completeBtn.className = "btn btn-success";
+        completeBtn.innerHTML = "<i class='bi bi-check2'></i> Complete"
+
+        const cancelActionBtn = document.createElement("button");
+        cancelActionBtn.className = "btn btn-secondary";
+        cancelActionBtn.innerText = "Cancel";
+
+        completeBtn.addEventListener("click", async function() {
+            try {
+                const completeResult = await fetch(`/api/claims/${claimId}/complete`, {
+                    method: "POST",
+                    headers: {'Accept': 'application/json'},
+                    signal: AbortSignal.timeout(5000),
+                    credentials: 'same-origin'
+                })
+                if (completeResult.ok) {
+                    promptOverlay.remove();
+                    window.location.reload();
+                } else {
+                    let error_message = "An error occured while marking this claim as complete."
+                    try {
+                        const jsonError = await completeResult.json();
+                        if (jsonError.error_message) {
+                            error_message = `This claim can't be marked as complete: ${jsonError.error_message}`;
+                        }
+                    } catch {}
+                    pushToast(error_message, "Error", "danger");
+                }
+            } catch (e) {
+                console.error(e);
+                pushToast("An error occured while marking this claim as complete.", "Error", "danger");
+            }
+
+        })
+
+        cancelActionBtn.addEventListener("click", function() {
+            promptOverlay.remove();
+        });
+
+        promptOverlayActions.appendChild(completeBtn);
         promptOverlayActions.appendChild(cancelActionBtn);
 
         promptOverlayContent.appendChild(promptOverlayText);
