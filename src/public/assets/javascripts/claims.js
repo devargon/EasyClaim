@@ -11,6 +11,37 @@ const app = Vue.createApp({
 const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
+    function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        document.body.removeChild(textArea);
+        return true;
+    }
+    function copyTextToClipboard(text) {
+        if (!navigator.clipboard) {
+            fallbackCopyTextToClipboard(text);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(function() {
+            return true;
+        }, function(err) {
+            throw err;
+        });
+    }
+
+
+    let currentClaimShareURL = "";
 
     const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
     const createClaimModalEntriesSection = document.getElementById("actualClaimExpenseList");
@@ -233,6 +264,89 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    const shareClaimModalElement = document.getElementById("shareClaimModal");
+    const shareClaimModal = new bootstrap.Modal(shareClaimModalElement);
+    const shareClaimUrlInput = document.getElementById("claim-share-link-input");
+    const claimMessageContent = document.getElementById("imessage-msg");
+    const shareClaimCopyUrlBtn = document.getElementById("copy-link-btn");
+    const missingLanguageAlert = document.getElementById("missing-language-alert");
+    const missingLanguageDisplay = document.getElementById("selected-missing-language");
+    let just_copied = false;
+    let selected_message_language = "en";
+    let message_strings = {"en": "Among Us"};
+    let messageLanguageSelect = document.getElementById("message-language");
+    let default_message = "";
+    let default_url = "";
+    let default_html = "";
+
+    function getStuff() {
+        const language = message_strings[selected_message_language];
+        let html = language.html;
+        let url = language.url;
+        let message = language.message;
+        if (!language) {
+            html = default_html;
+            url = default_url;
+            message = default_message;
+        }
+        return { html, url, message }
+    }
+    function updateExampleMessage() {
+        const language = getStuff()
+        claimMessageContent.innerHTML = language.html;
+        shareClaimUrlInput.value = language.url;
+    }
+    messageLanguageSelect.addEventListener("change", function(e) {
+        selected_message_language = messageLanguageSelect.value;
+        if (message_strings[selected_message_language] === undefined) {
+            missingLanguageAlert.style.display = "block";
+            missingLanguageDisplay.innerText = messageLanguageSelect.options[missingLanguageSelect.selectedIndex].text;
+        } else {
+            missingLanguageDisplay.innerText = "";
+            missingLanguageAlert.style.display = "none";
+        }
+        updateExampleMessage();
+
+    })
+    shareClaimModalElement.addEventListener("hidden.bs.modal", () => {
+        shareClaimUrlInput.value = "";
+        currentClaimShareURL = null;
+    });
+    shareClaimUrlInput.addEventListener("focus", () => {
+        shareClaimUrlInput.select();
+    })
+    shareClaimCopyUrlBtn.addEventListener("click", () => {
+        let URLToShare = getStuff().url;
+        if (URLToShare && !just_copied ) {
+            try {
+                copyTextToClipboard(URLToShare);
+                const a = document.createElement("div")
+                b = document.createElement("i")
+                b.className = "bi bi-check2";
+                a.appendChild(b)
+                a.appendChild(document.createTextNode(" Copied to clipboard!"));
+                const oldBtnHTML = shareClaimCopyUrlBtn.innerHTML;
+                shareClaimCopyUrlBtn.classList.remove("btn-outline-secondary");
+                shareClaimCopyUrlBtn.classList.add("btn-outline-success");
+                shareClaimCopyUrlBtn.innerHTML = a.innerHTML;
+                just_copied = true;
+                setTimeout(() => {
+                        shareClaimCopyUrlBtn.innerHTML = oldBtnHTML;
+                        shareClaimCopyUrlBtn.classList.add("btn-outline-secondary");
+                        shareClaimCopyUrlBtn.classList.remove("btn-outline-success");
+                        just_copied = false;
+                    }, 2000
+                );
+            } catch (e) {
+                console.error("Failed to copy to clipboard: ", e);
+                return pushToast("Failed to copy to clipboard, please copy the link manually.", null, "danger");
+            }
+        }
+    })
+
+
+
+
     function handleExpenseAction(action, claimId, target) {
         switch (action) {
             case 'cancel':
@@ -323,14 +437,42 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentExpenseId = 0;
 
     async function renderShowClaim(shareId) {
-        claimIframe.src = `/claims/shared/${shareId}`
+        claimIframe.src = `/claims/share/${shareId}`
         viewClaimModal.show();
     }
 
     viewClaimModalElement.addEventListener("hidden.bs.modal", event => {
         claimIframe.src = "about:blank";
-        console.log("iFrame has nthing now")
     })
 
-    async function renderShareModal(claimId) {}
+    async function renderShareModal(claimId) {
+        try {
+            const getShareURLResponse = await fetch(`/api/claims/${claimId}/share`, {
+                method: "GET",
+                headers: {'Accept': 'application/json'},
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5000),
+            });
+            if (getShareURLResponse.ok) {
+                let jsonResponse = await getShareURLResponse.json();
+                selected_message_language = "en";
+                messageLanguageSelect.value = selected_message_language;
+                message_strings = jsonResponse.messages;
+                updateExampleMessage();
+                shareClaimModal.show();
+            } else {
+                if (getShareURLResponse.status === 404) {
+                    return pushToast("I could not find that claim.", "Could not open share prompt", "danger");
+                } else {
+                    return pushToast(`Unexpected response ${getShareURLResponse.status}`, "Could not open share prompt", "danger");
+                }
+
+            }
+        } catch (e) {
+            console.error(e);
+            pushToast("An error occured, please try again later.", "Could not open share prompt", "danger");
+
+        }
+
+    }
 })
