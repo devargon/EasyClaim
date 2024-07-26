@@ -16,6 +16,10 @@ const requiredEnvVars = {
   'SESSION_SECRET': "Encoding session data for express-session",
   'DATABASE_URL': "Connecting to the database via Prisma",
   'DB_SESSION_URL': "Separate database URL storing express-session data.",
+  'R2_ACCESS_KEY': "Access key for Cloudflare R2 Object Storage.",
+  'CF_ACCOUNT_ID': "Your Cloudflare account ID in which you've created an R2 bucket.",
+  'R2_BUCKET_NAME': "Your R2 bucket's name.",
+  'R2_SECRET' : "Your R2 API access' secret."
 };
 const missingEnvVars = Object.entries(requiredEnvVars).filter(([envVar]) => !process.env[envVar]);
 

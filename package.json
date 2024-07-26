@@ -8,8 +8,11 @@
     "dev": "nodemon --exec ts-node ./src/bin/www.ts -e js,ts,pug,css"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.620.0",
+    "@aws-sdk/s3-request-presigner": "^3.620.0",
     "@prisma/client": "^5.17.0",
     "@sequelize/mariadb": "^7.0.0-alpha.41",
+    "aws4fetch": "^1.0.19",
     "bcrypt": "^5.1.1",
     "connect-session-sequelize": "^7.1.7",
     "cookie-parser": "~1.4.4",
