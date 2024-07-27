@@ -94,17 +94,14 @@ export async function findClaimByShareId(shareId: string) {
                     category: true,
                 },
             },
-            user: true
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                }
+            }
         }
     });
-    // if (claim) {
-    //     return {
-    //         ...claim,
-    //         totalAmountAfterOffset: currency(Number(claim.totalAmount)).subtract(Number(claim.claimOffset)),
-    //     };
-    // } else {
-    //     return null
-    // }
 
 }
 
