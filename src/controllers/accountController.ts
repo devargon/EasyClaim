@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
 import isEmail from 'validator/lib/isEmail';
-import {findUserByEmail, registerUser} from "../services/accountService";
+import {findUserByEmail, findUserByEmailInternalUsage, registerUser} from "../services/accountService";
 import 'express-session';
 import bcrypt from 'bcrypt';
 
@@ -25,7 +25,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
         return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     debug(`Finding user with email ${req.body.email}`);
-    const found_user = await findUserByEmail(req.body.email);
+    const found_user = await findUserByEmailInternalUsage(req.body.email);
     if (!found_user) {
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
@@ -58,7 +58,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
         return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
     debug(`Checking for existing user for ${req.body.email}`);
-    const existingUser = await findUserByEmail(email);
+    const existingUser = await findUserByEmailInternalUsage(email);
     if (existingUser) {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`
         return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
