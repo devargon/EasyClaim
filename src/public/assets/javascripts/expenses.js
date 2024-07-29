@@ -409,8 +409,8 @@ document.addEventListener('DOMContentLoaded', function() {
         card.querySelector(".expense-card-contents").appendChild(promptOverlay);
     }
 
-    const filesInUpload = [];
-    console.log(filesInUpload);
+    let uploadedFiles = [];
+    let pendingFiles = [];
 
     const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
     const createExpenseModalElement = document.getElementById("createExpenseModal");
@@ -433,6 +433,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentExpenseId = 0;
 
     async function openUploadModal(expenseId, expense_data = null) {
+        uploadedFiles = [];
+        pendingFiles = [];
         currentExpenseId = expenseId;
         if (!expense_data) {
             let fetchExpenseResponse;
@@ -474,8 +476,11 @@ document.addEventListener('DOMContentLoaded', function() {
             let currency_disp = formatMoney(expense_data.amount);
             expenseDetails.push(currency_disp);
             document.getElementById("manageExpenseAttachmentsExpenseDetails").innerText = expenseDetails.join(" \u00B7 ");
+            expense_data.attachments.forEach(attachment => {
+                let fileItem = new FileItem({name: attachment.fileName, size: attachment.fileSize}, null, fileDisplay);
+                fileItem.completeSuccess(attachment.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${attachment.id}/delete`);
+            })
             uploadModal.show();
-            await initFileUploader();
         } else {
             console.error("Failed to read expense data: ", e);
             pushToast("Could not fetch details about this expense due to an error.", "Couldn't manage attachments", "danger");
@@ -605,7 +610,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.error("Unable to update Unclaimed amt:", e)
                         }
                         try {
-                            document.querySelector(".no-claims").style.display = "none";
+                            const no_claims_div =document.querySelector(".no-claims");
+                            if (no_claims_div) no_claims_div.style.display = "none";
                             const existingCardElement = document.getElementById(jsonResponse.html.id);
                             if (existingCardElement) {
                                 existingCardElement.outerHTML = jsonResponse.html.render
@@ -614,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
                             }
                         } catch (e) {
-                            console.log("Unable to add new expense card:", e);
+                            console.error("Unable to add new expense card:", e);
                         }
                         resetExpenseForm();
                         createExpenseModal.hide();
@@ -722,6 +728,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         async completeSuccess(fileUrl, deleteUrl) {
+            pendingFiles = pendingFiles.filter(e => e !== this);
+            uploadedFiles.push(this);
             this.isUploadSuccess = true;
             // Hide the progress bar
             // this.progressBarContainer.style.display = 'none';
@@ -730,13 +738,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show the remove button
             this.removeButton.style.display = 'block';
 
-            this.fileLink.href = fileUrl;
+            this.fileName.href = fileUrl;
+            this.fileName.target = "_blank";
 
             // Set up the remove button to handle deletion
             this.removeButton.onclick = async () => {
                 try {
-                    const response = await fetch(deleteUrl, { method: 'GET', signal: AbortSignal.timeout(5000) });
+                    const response = await fetch(deleteUrl, { method: 'POST', signal: AbortSignal.timeout(5000) });
                     if (response.status === 200) {
+                        uploadedFiles = uploadedFiles.filter(e => e !== this);
                         this.fileItem.textContent = 'Attachment deleted.';
                     } else {
                         this.completeError('Failed to delete attachment.', true);
@@ -748,6 +758,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         completeError(message, isFromUpload = false) {
+            pendingFiles = pendingFiles.filter(e => e !== this);
+            console.log(pendingFiles);
             // Hide the progress bar
             // this.progressBarContainer.remove();
             this.progressBarContainer.style.display = 'none';
@@ -765,6 +777,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.remove();
                 };
             }
+
         }
 
         remove() {
@@ -783,53 +796,133 @@ document.addEventListener('DOMContentLoaded', function() {
         })
 
         uploadArea.addEventListener('dragover', (event) => {
-            event.preventDefault(); // To prevent file from benig opened in a new tab I presume
+            console.log("dragover");
+            event.preventDefault(); // Necessary to allow a drop
             uploadArea.classList.add('dragover');
-        })
+        });
 
-        uploadArea.addEventListener('drop', async (event) => {
+        uploadArea.addEventListener('dragleave', (event) => {
+            console.log("dragleave");
             event.preventDefault();
             uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', async (event) => {
+            console.log("drop");
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            console.log(event.dataTransfer);
             await handleFiles(event.dataTransfer.files);
-        })
+        });
 
         fileInput.addEventListener('change', async () => {
             await handleFiles(fileInput.files);
-        })
+        });
     }
 
+    initFileUploader().then();
+
     async function handleFiles(files) {
-        console.log(files.length);
+        files = Array.from(files);
+        fileInput.value = null;
 
-        for (let file of files) {
-            const actualMimeType = await loadMime(file);
-            console.log(actualMimeType);
+        const promises = files.map(async (file) => {
+            try {
+                const actualMimeType = await loadMime(file);
+                console.log(actualMimeType);
+                console.log("Pending Files:");
+                console.log(pendingFiles);
+                console.log("Uploaded Files");
+                console.log(uploadedFiles);
 
-            const fileItem = new FileItem(file, actualMimeType, fileDisplay);
+                const fileItem = new FileItem(file, actualMimeType, fileDisplay);
+                if ((pendingFiles.length + uploadedFiles.length) >= 3) {
+                    return fileItem.completeError("You can only upload a maximum of 3 files. (FE)");
+                }
+                pendingFiles.push(fileItem);
 
-
-            filesInUpload.push(file);
-
-            // Example conditional rendering
-            if (!['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'].includes(actualMimeType)) {
-                return fileItem.completeError('Only JPGs, PNGs and PDFs are supported.');
-            } else if (file.size > 8000000) {
-                return fileItem.completeError('Attachments must be smaller than 8 MB.');
-            } else {
-                console.log(`Here, the file will be uploaded as part of claim ${currentExpenseId}`)
-                let progress = 0;
-                const interval = setInterval(() => {
-                    if (progress < 100) {
-                        progress += 10;
-                        fileItem.updateProgress(progress);
-                    } else {
-                        clearInterval(interval);
-                        fileItem.completeSuccess("https://media.nogra.app/download", "/api/attachments/delete")
+                // Example conditional rendering
+                if (!['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'].includes(actualMimeType)) {
+                    return fileItem.completeError('Only JPGs, PNGs and PDFs are supported.');
+                }
+                let presignResponse;
+                try {
+                    presignResponse = await axios.post(`/api/expenses/${currentExpenseId}/attachments/upload`, {
+                        fileName: file.name,
+                        size: file.size,
+                        contentType: actualMimeType,
+                    });
+                } catch (e) {
+                    if (e.response && e.response.data && e.response.data.error_message) {
+                        return fileItem.completeError(`Failed to upload: ${e.response.data.error_message}`);
                     }
-                }, 500); // Update progress every 500ms
+                    console.error("Failed to upload file (1): ", e);
+                    return fileItem.completeError(`Failed to upload file, try again later.`);
+                }
+                let presignedURL;
+                if (presignResponse && presignResponse.data && presignResponse.data.upload) {
+                    presignedURL = presignResponse.data.upload;
+                } else {
+                    console.error("Presigned URL missing in response");
+                    return fileItem.completeError("Failed to upload file, try again later.")
+                }
+                let uploadResponse;
+                try {
+                    uploadResponse = await axios.put(presignedURL, file, {
+                        headers: { "Content-Type": actualMimeType },
+                        onUploadProgress: (progressEvent) => {
+                            console.log(Math.round(progressEvent.loaded/progressEvent.total * 100))
+                            const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total * 100));
+                            fileItem.updateProgress(percentCompleted);
+                        }
+                    });
+                } catch (e) {
+                    let error_msg = `Failed to upload file, try again later.`;
+                    console.error("Failed to upload file to provider: ", e);
+                    if (e.response && e.response.status) {
+                        if (e.response.data && e.response.data.error_message) {
+                            error_msg = e.response.data.error_message;
+                        } else {
+                            error_msg += ` (${e.response.status})`;
+                        }
+                    }
+                    return fileItem.completeError(error_msg);
+                }
+                if (!(uploadResponse.status >= 200 && uploadResponse.status < 300)) {
+                    console.error("Response from uploading to provider, was not 2XX");
+                    return fileItem.completeError("Failed to upload file, try again later.");
+                }
+                let doneAttachmentResponse;
+                try {
+                    doneAttachmentResponse = await axios.post(`/api/expenses/${currentExpenseId}/attachments`, {fileName: file.name, fileUrl: presignResponse.data.fileUrl, fileSize: file.size, mimeType: actualMimeType});
+                    if (doneAttachmentResponse.status === 201 && doneAttachmentResponse.data && doneAttachmentResponse.data.id) {
+                        return await fileItem.completeSuccess(doneAttachmentResponse.data.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${doneAttachmentResponse.data.id}/delete`);
+                    } else {
+                        console.error("Response was not expected.", doneAttachmentResponse);
+                        return fileItem.completeError("Failed to upload file, try again later.");
+                    }
+                } catch (e) {
+                    let error_msg = `Failed to upload file, try again later.`;
+                    console.error("Failed to upload file to provider: ", e);
+                    if (e.response && e.response.status) {
+                        if (e.response.data && e.response.data.error_message) {
+                            error_msg = e.response.data.error_message;
+                        } else {
+                            error_msg += ` (${e.response.status})`;
+                        }
+                    }
+                    return fileItem.completeError(error_msg);
+                }
+            } catch (e) {
+                console.error(`Error processing file ${file.name}:`, e);
             }
+        });
 
-            console.log(file)
+        try {
+            await Promise.all(promises);
+            console.log("All files processed");
+        } catch (error) {
+            console.error("Failed to handle promises for uploading files");
         }
     }
 })
