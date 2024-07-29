@@ -43,14 +43,6 @@
         padding: 0.6rem 0.5rem;
         background-color: var(--bs-gray-100);
         margin-bottom: 0.3rem;
-
-        a {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-            text-decoration: none;
-
-        }
     }
 
     .file-details {
@@ -58,32 +50,38 @@
         align-items: center;
         gap: 0.5rem;
         flex-grow: 1;
+        min-width: 0; /* Ensure flex-grow works properly */
     }
 
     .file-icon {
-        height: 1.5rem;
-        width: 1.5rem;
+        height: 24px; /* Ensure icon size */
+        width: 24px; /* Ensure icon size */
         color: var(--bs-gray-700); /* text-muted-foreground */
+        flex-shrink: 0;
     }
 
     .file-info {
-        display: flex;
-        flex-direction: column;
+        display: flex; /* Use flex to keep alignment */
+        flex-direction: column; /* Column layout for file name and size */
         flex-grow: 1;
+        min-width: 0; /* Ensures the flex item does not grow beyond its container */
     }
 
     .file-name {
         font-size: 0.875rem;
         font-weight: 500;
         margin: 0;
-        display: inline;
         color: black;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .file-size {
         font-size: 0.75rem;
         color: var(--bs-gray-700); /* text-muted-foreground */
         margin: 0;
+        margin-top: 2px; /* Small margin to separate from file name */
     }
 
     .file-action-message {
@@ -94,6 +92,7 @@
     .btn-close {
         margin-left: 0.5rem;
         margin-right: 0.5rem;
+        flex-shrink: 0;
     }
 
     .progress-bar-container {
@@ -101,7 +100,17 @@
         height: 10px;
         margin-top: 0.5rem;
     }
+
+    a {
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        max-width: 100%; /* Ensures link does not exceed its container */
+    }
 }
+
 
 
 .createClaimModal, .claim-share {

@@ -648,19 +648,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const fileDetails = document.createElement('div');
             fileDetails.className = 'file-details';
 
-            const fileLink = document.createElement('a');
-            fileLink.className = "text-decoration-none";
-            fileLink.href = "javascript:void(0);";
-
             const fileIcon = document.createElement('i');
             fileIcon.className = 'bi bi-file-earmark file-icon';
 
             const fileInfo = document.createElement('div');
             fileInfo.className = 'file-info';
 
-            const fileNameElement = document.createElement('p');
+            const fileNameElement = document.createElement('a');
             fileNameElement.className = 'file-name';
             fileNameElement.textContent = this.file.name;
+            fileNameElement.href="";
 
             const fileSizeElement = document.createElement('p');
             fileSizeElement.className = 'file-size';
@@ -675,8 +672,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fileDetails.appendChild(fileIcon);
             fileDetails.appendChild(fileInfo);
-
-            fileLink.appendChild(fileDetails);
 
             const removeButton = document.createElement('button');
             removeButton.className = 'btn-close';
@@ -706,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
             progressBarContainer.appendChild(progressBar);
 
             // Append file details, progress bar, and remove button to the main file item container
-            fileItem.appendChild(fileLink);
+            fileItem.appendChild(fileDetails);
             fileInfo.appendChild(progressBarContainer);
             fileItem.appendChild(removeButton);
 
@@ -715,8 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.removeButton = removeButton;
             this.progressBarContainer = progressBarContainer;
             this.fileItem = fileItem;
-            this.fileInfo = fileInfo;
-            this.fileLink = fileLink;
+            this.fileName = fileNameElement;
             this.fileActionMessage = fileActionMessage;
 
             return fileItem;
