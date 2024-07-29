@@ -1,4 +1,5 @@
 import prisma from '../config/db';
+import {deleteFile} from "../config/r2";
 
 
 export async function findExpenseById(id: number) {
@@ -10,5 +11,27 @@ export async function findExpenseById(id: number) {
 export async function findExpenseByIdAndUser(id: number, userId: number) {
     return prisma.expense.findUnique({
         where: {id, userId},
+        select: {id: true, userId: true, spentOn: true, submittedAt: true, editedAt: true, amount: true, description: true, category: true, claim: true, claimComplete: true, claimId: true, attachments: true}
     });
+}
+
+export async function findAttachmentsOfExpense(expenseId: number) {
+    return prisma.attachment.findMany({
+        where: {expenseId}
+    })
+}
+
+export async function deleteAttachment(id: number, expenseId: number, userId: number) {
+
+    const deletedAttachment = await prisma.attachment.delete({
+        where: {expenseId, uploaderId: userId, id}
+    });
+    if (deletedAttachment) {
+        try {
+            await deleteFile(deletedAttachment.fileObjectUrl);
+        } catch (e) {
+            console.error(`Failed to delete object ${deletedAttachment.fileObjectUrl} from bucket: `, e);
+        }
+    }
+    return deletedAttachment;
 }

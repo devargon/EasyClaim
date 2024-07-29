@@ -4,6 +4,9 @@ import prisma from "../config/db";
 import currency from "currency.js";
 import pug from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
+import {deleteAttachment, findAttachmentsOfExpense, findExpenseByIdAndUser} from "../services/expenseService";
+import R2_URL, {generatePresignedUrl} from "../config/r2";
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -85,11 +88,13 @@ router.post('/new', redirectAsRequiresLogin, validateExpenseMiddleware, async (r
         },
         include: {
             category: true,
+            attachments: true
         }
     })
     const renderedExpenseCard = pug.renderFile("./src/views/components/expense-card.pug", {
         expense: new_expense,
-        formatMoney
+        formatMoney,
+        showHeader: true
     });
     const return_obj = {
         expense: new_expense,
@@ -170,7 +175,8 @@ router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddlewa
         if (updatedExpense) {
             const renderedExpenseCard = pug.renderFile("./src/views/components/expense-card.pug", {
                 expense: updatedExpense,
-                formatMoney
+                formatMoney,
+                showHeader: true
             });
             const return_obj = {
                 expense: updatedExpense,
@@ -196,14 +202,124 @@ router.get("/:expenseId", redirectAsRequiresLogin, async (req: Request, res: Res
     if (isNaN(expenseIdActual)) {
         return res.status(400).json({error_message: "not a valid expenseId"});
     }
-    const expense = await prisma.expense.findFirst({where: {userId: req.user.id, id: expenseIdActual}, include: {category: true}});
+    const expense = await findExpenseByIdAndUser(expenseIdActual, req.user.id);
     if (!expense) {
         return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
     }
     return res.status(200).json(expense);
 })
 
+router.post('/:expenseId/attachments/upload', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const UPLOAD_LIMIT = 3
+    const FILESIZE_LIMIT = 8000000
 
+    const expenseId = parseInt(req.params.expenseId, 10);
+    if (isNaN(expenseId)) {
+        return res.status(400).json({error_message: "Unable to upload attachment.", dev_error: "not a valid expenseId"});
+    }
+    console.log(req.user.id, expenseId);
+    const expense = await findExpenseByIdAndUser(expenseId, req.user.id);
+    if (!expense) {
+        return res.status(404).send({error_message: `Expense ${expenseId} not found.`});
+    }
+    if (expense.claimId) {
+        return res.status(400).json({error_message: `Expense #${expenseId} can't be edited while it's linked to a claim.`});
+    } else if (expense.claimComplete) {
+        return res.status(400).json({error_message: `Expense #${expenseId} has been claimed and can't be edited for tracking purposes.`});
+    }
+    const expense_attachments = await findAttachmentsOfExpense(expense.id);
+    if (expense_attachments.length >= UPLOAD_LIMIT) {
+        return res.status(403).json({error_message: `You have reached the limit of ${UPLOAD_LIMIT} attachments.`});
+    }
+    const fileName = req.body.fileName;
+    const fileSize = parseInt(req.body.size, 10);
+    console.log(fileSize);
+    if (isNaN(fileSize) || fileSize > FILESIZE_LIMIT) {
+        return res.status(403).json({error_message: "Your attachment's exceeds the maxmimum file size of 8 MB."});
+    }
+    const contentType = req.body.contentType;
+    const metaValue = `Attachment for Expense ${expense.id}`;
+    const path = `${req.user.id}/${expense.id}/attachments/${uuidv4()}/`;
+    const url = await generatePresignedUrl(path, fileName, fileSize, contentType, metaValue);
+    return res.status(200).json(url);
+})
+
+router.post('/:expenseId/attachments', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const UPLOAD_LIMIT = 3;
+    const expenseId = parseInt(req.params.expenseId, 10);
+    if (isNaN(expenseId)) {
+        return res.status(400).json({error_message: "Unable to upload attachment.", dev_error: "Not a valid expenseId"});
+    }
+    const expense = await findExpenseByIdAndUser(expenseId, req.user.id);
+    if (!expense) {
+        return res.status(404).send({error_message: `Expense ${expenseId} not found.`});
+    }
+    if (expense.claimId) {
+        return res.status(400).json({error_message: `Expense #${expenseId} can't be edited while it's linked to a claim.`});
+    } else if (expense.claimComplete) {
+        return res.status(400).json({error_message: `Expense #${expenseId} has been claimed and can't be edited for tracking purposes.`});
+    }
+    const expense_attachments = await findAttachmentsOfExpense(expense.id);
+    if (expense_attachments.length >= UPLOAD_LIMIT) {
+        return res.status(403).json({error_message: `You have reached the limit of ${UPLOAD_LIMIT} attachments.`});
+    }
+    // Maybe handle deletion of file from buckt here
+    const { fileName, fileUrl, fileSize, mimeType} = req.body;
+    if (!fileName || !fileUrl || !fileSize || !mimeType) {
+        return res.status(400).json({error_message: `Unable to upload attachment.`, dev_error: `One or more fields are missing.`});
+    }
+    const attachment = await prisma.attachment.create({
+        data: {
+            uploaderId: req.user.id,
+            expenseId,
+            fileName,
+            fileObjectUrl: fileUrl,
+            fileUrl: `${R2_URL}/${fileUrl}`,
+            fileSize,
+            mimeType
+        },
+    });
+    if (attachment) {
+        return res.status(201).json(attachment);
+    } else {
+        return res.status(500).json({error_message: `Unable to upload attachment.`});
+    }
+})
+
+router.post(`/:expenseId/attachments/:attachmentId/delete`, redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        return res.status(401).send();
+    }
+    const expenseId = parseInt(req.params.expenseId, 10);
+    const attachmentId = parseInt(req.params.attachmentId, 10);
+    if (isNaN(expenseId)) {
+        return res.status(400).json({error_message: "Unable to delete attachment.", dev_error: "Not a valid expenseId"});
+    }
+    if (isNaN(attachmentId)) {
+        return res.status(400).json({error_message: "Unable to delete attachment.", dev_error: "Not a valid attachmentId"});
+    }
+    const expense = await findExpenseByIdAndUser(expenseId, req.user.id);
+    if (!expense) {
+        return res.status(404).send({error_message: `Expense ${expenseId} not found.`});
+    }
+    if (expense.claimId) {
+        return res.status(400).json({error_message: `Expense #${expenseId} can't be edited while it's linked to a claim.`});
+    } else if (expense.claimComplete) {
+        return res.status(400).json({error_message: `Expense #${expenseId} has been claimed and can't be edited for tracking purposes.`});
+    }
+    const deletedAttachment = await deleteAttachment(attachmentId, expenseId, req.user.id);
+    if (deletedAttachment) {
+        return res.status(200).json({success_message: `Attachment deleted.`});
+    } else {
+        return res.status(404).json({error_message: `Attachment ${attachmentId} not found.`});
+    }
+})
 
 
 
