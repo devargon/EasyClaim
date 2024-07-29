@@ -70,7 +70,10 @@ model Attachment {
   expenseId   Int
   expense     Expense? @relation(fields: [expenseId], references: [id])
   fileName    String
-  fileUrl     String
+  fileUrl     String   @db.VarChar(300)
+  fileObjectUrl String @db.VarChar(300)
+  mimeType    String   @db.VarChar(300)
+  fileSize    Int
   createdAt   DateTime @default(now())
 }
 
