@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const fileSizeElement = document.createElement('p');
             fileSizeElement.className = 'file-size';
-            fileSizeElement.textContent = `${(this.file.size / 1024 / 1024).toFixed(2)} MB`;
+            fileSizeElement.textContent = formatFileSize(this.file.size);
 
             const fileActionMessage = document.createElement('div');
             fileActionMessage.className = 'file-action-message';
