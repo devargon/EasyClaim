@@ -65,10 +65,13 @@ model Expense {
 
 model Attachment {
   id          Int      @id @default(autoincrement())
-  uploaderId  Int?
+  uploaderId  Int
   uploader    User?    @relation(fields: [uploaderId], references: [id])
-  expenseId   Int?
+  expenseId   Int
   expense     Expense? @relation(fields: [expenseId], references: [id])
+  fileName    String
+  fileUrl     String
+  createdAt   DateTime @default(now())
 }
 
 enum Status {
