@@ -32,4 +32,4 @@ export const showSharedClaim = async (req: Request, res: Response, next: NextFun
     } else {
         next();
     }
-}
+};
