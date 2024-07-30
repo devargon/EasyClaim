@@ -7,6 +7,7 @@ block head
     script(src="https://unpkg.com/currency.js@~2.0.0/dist/currency.min.js")
     script(src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js")
     script(src="/assets/javascripts/data-iso.js")
+    script(src="/assets/javascripts/expenses.js" defer)
     script(src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js")
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css")
 
@@ -151,7 +152,7 @@ block content
 
                     .d-flex.align-items-center.gap-2.pt-3
                         button.btn.btn-primary.rounded-pill(data-bs-toggle="modal", data-bs-target="#createExpenseModal") New Expense
-                        button.btn.btn-outline-primary.rounded-pill#make-claim(:disabled="selectedExpenses.length > 0 ? undefined: true") Make Claim
+                        button.btn.btn-outline-primary.rounded-pill#make-claim(disabled) Make Claim
                 .mt-3
                     nav.nav.nav-pills(style='display: inline-flex')
                         .nav-link.rounded-pill.px-2.py-1.fs-6.clickable-pill(:class="{ active: !showingCompletedExpenses }", @click="showingCompletedExpenses=false") Unclaimed
@@ -174,7 +175,7 @@ block content
                         each expense in completedExpenses
                             include components/expense-card.pug
 
-    script(src="/assets/javascripts/expenses.js")
+
     script
         | var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         | var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
