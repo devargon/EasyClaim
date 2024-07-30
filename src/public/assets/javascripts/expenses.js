@@ -10,10 +10,47 @@ const app = Vue.createApp({
     }
 });
 
+function iv(element) {
+    return new Viewer(element, {
+        url: 'src',
+        toolbar: {
+            zoomIn: 1,
+            zoomOut: 1,
+            reset: 1,
+            prev: 0,
+            next: 0,
+            rotateLeft: 1,
+            rotateRight: 1
+        },
+        filter: function(image) {
+            return !image.classList.contains('exclude-viewer')
+        }
+    });
+}
+
 // Mount the app to the DOM element with id 'app'
 const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
+    const viewerInstances = {};
+
+    function updateExpenseCardAndImageViewer(element_id, render) {
+        const ele = document.getElementById(element_id);
+        console.log(ele);
+        ele.outerHTML = render;
+        if (viewerInstances[element_id]) {
+            console.log("Attempting to destroy existing viewer for element");
+            viewerInstances[element_id].destroy();
+        }
+        const updatedEle = document.getElementById(element_id);
+        viewerInstances[element_id]  = iv(updatedEle);
+    }
+
+    function getAllExpenseCardElements() {
+        const el = document.querySelectorAll('[id^="expense-"]');
+        const exEl = Array.from(el).filter(ele => /^\bexpense-\d+\b$/.test(ele.id))
+        return exEl;
+    }
 
     let currentSelectedExpensesForClaim = [];
 
@@ -406,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         promptOverlay.appendChild(promptOverlayContent);
 
-        card.querySelector(".expense-card-contents").appendChild(promptOverlay);
+        card.querySelector(".expense-card").appendChild(promptOverlay);
     }
 
     let uploadedFiles = [];
@@ -744,10 +781,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set up the remove button to handle deletion
             this.removeButton.onclick = async () => {
                 try {
-                    const response = await fetch(deleteUrl, { method: 'POST', signal: AbortSignal.timeout(5000) });
+                    const response = await axios.post(deleteUrl, { timeout: 5000 });
                     if (response.status === 200) {
                         uploadedFiles = uploadedFiles.filter(e => e !== this);
                         this.fileItem.textContent = 'Attachment deleted.';
+                        if (response.data.html) {
+                            try {
+                                updateExpenseCardAndImageViewer(response.data.html.id, response.data.html.render);
+                                // document.getElementById(response.data.html.id).outerHTML = response.data.html.render;
+                            } catch (e) {console.error("Failed to update expense HTML:", e)}
+                        }
                     } else {
                         this.completeError('Failed to delete attachment.', true);
                     }
@@ -895,8 +938,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 let doneAttachmentResponse;
                 try {
                     doneAttachmentResponse = await axios.post(`/api/expenses/${currentExpenseId}/attachments`, {fileName: file.name, fileUrl: presignResponse.data.fileUrl, fileSize: file.size, mimeType: actualMimeType});
-                    if (doneAttachmentResponse.status === 201 && doneAttachmentResponse.data && doneAttachmentResponse.data.id) {
-                        return await fileItem.completeSuccess(doneAttachmentResponse.data.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${doneAttachmentResponse.data.id}/delete`);
+                    if (doneAttachmentResponse.status === 201 && doneAttachmentResponse.data && doneAttachmentResponse.data.attachment) {
+                        if (doneAttachmentResponse.data.html) {
+                            try {
+                                updateExpenseCardAndImageViewer(doneAttachmentResponse.data.html.id, doneAttachmentResponse.data.html.render)
+                                // document.getElementById(doneAttachmentResponse.data.html.id).outerHTML = doneAttachmentResponse.data.html.render;
+                            } catch (e) {console.error("Failed to update expense HTML:", e)}
+                        }
+                        return await fileItem.completeSuccess(doneAttachmentResponse.data.attachment.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${doneAttachmentResponse.data.attachment.id}/delete`);
                     } else {
                         console.error("Response was not expected.", doneAttachmentResponse);
                         return fileItem.completeError("Failed to upload file, try again later.");
@@ -925,4 +974,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Failed to handle promises for uploading files");
         }
     }
+    const expense_cards = getAllExpenseCardElements()
+    expense_cards.forEach(expenseCard => {
+        if (expenseCard.querySelectorAll("img").length > 0) {
+            viewerInstances[expenseCard.id] = iv(expenseCard);
+        }
+    })
+
 })

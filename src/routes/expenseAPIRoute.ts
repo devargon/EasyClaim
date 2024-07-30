@@ -2,11 +2,12 @@ import express, {Request, Response, NextFunction} from 'express';
 import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
 import prisma from "../config/db";
 import currency from "currency.js";
-import pug from "pug";
+import pug, {render} from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
 import {deleteAttachment, findAttachmentsOfExpense, findExpenseByIdAndUser} from "../services/expenseService";
 import R2_URL, {generatePresignedUrl} from "../config/r2";
 import { v4 as uuidv4 } from 'uuid';
+import {Expense} from "@prisma/client";
 
 const router = express.Router();
 
@@ -14,6 +15,22 @@ function isValidDate(date: any): date is Date {
     return date instanceof Date && !isNaN(date.getTime());
 }
 
+
+async function renderExpenseCardForFrontend(expenseId?: number, userId?: number, expense?: Expense) {
+    let updatedExpense;
+    if (expense) updatedExpense = expense;
+    else if (expenseId && userId) updatedExpense = await findExpenseByIdAndUser(expenseId, userId);
+    else updatedExpense = null;
+    if (updatedExpense) {
+        const renderedExpenseCard = pug.renderFile("./src/views/components/expense-card.pug", {
+            expense: updatedExpense,
+            formatMoney,
+            showHeader: true
+        });
+        return {id: `expense-${updatedExpense.id}`, render: renderedExpenseCard};
+    }
+    return null;
+}
 function formatMoney(money: string | number, stripped_down: boolean = false) {
     const a = currency(Number(money));
     let format;
@@ -173,17 +190,10 @@ router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddlewa
             }
         })
         if (updatedExpense) {
-            const renderedExpenseCard = pug.renderFile("./src/views/components/expense-card.pug", {
-                expense: updatedExpense,
-                formatMoney,
-                showHeader: true
-            });
+            const expense_html = await renderExpenseCardForFrontend(undefined, undefined, updatedExpense);
             const return_obj = {
                 expense: updatedExpense,
-                html: {
-                    id: `expense-${updatedExpense.id}`,
-                    render: renderedExpenseCard
-                },
+                html: expense_html
             }
             res.status(200).json(return_obj);
         } else {
@@ -269,7 +279,7 @@ router.post('/:expenseId/attachments', redirectAsRequiresLogin, async (req: Requ
     if (expense_attachments.length >= UPLOAD_LIMIT) {
         return res.status(403).json({error_message: `You have reached the limit of ${UPLOAD_LIMIT} attachments.`});
     }
-    // Maybe handle deletion of file from buckt here
+    // Maybe handle deletion of file from bucket here
     const { fileName, fileUrl, fileSize, mimeType} = req.body;
     if (!fileName || !fileUrl || !fileSize || !mimeType) {
         return res.status(400).json({error_message: `Unable to upload attachment.`, dev_error: `One or more fields are missing.`});
@@ -286,7 +296,11 @@ router.post('/:expenseId/attachments', redirectAsRequiresLogin, async (req: Requ
         },
     });
     if (attachment) {
-        return res.status(201).json(attachment);
+        const expense_html = await renderExpenseCardForFrontend(expenseId, req.user.id);
+        if (expense_html) {
+            return res.status(201).json({attachment, html: expense_html});
+        }
+        return res.status(201).json({attachment});
     } else {
         return res.status(500).json({error_message: `Unable to upload attachment.`});
     }
@@ -315,13 +329,15 @@ router.post(`/:expenseId/attachments/:attachmentId/delete`, redirectAsRequiresLo
     }
     const deletedAttachment = await deleteAttachment(attachmentId, expenseId, req.user.id);
     if (deletedAttachment) {
-        return res.status(200).json({success_message: `Attachment deleted.`});
+        const expense_html = await renderExpenseCardForFrontend(expenseId, req.user.id);
+        if (expense_html) {
+            return res.status(200).json({success_message: "Attachment deleted.", html: expense_html});
+        }
+        return res.status(200).json({success_message: "Attachment deleted."});
     } else {
         return res.status(404).json({error_message: `Attachment ${attachmentId} not found.`});
     }
 })
-
-
 
 export default router;
 
