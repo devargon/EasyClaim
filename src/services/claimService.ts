@@ -2,7 +2,7 @@ import prisma from '../config/db';
 import currency from "currency.js";
 
 export function createClaim(userId: number, affectedExpenseIds: number[], totalExpenseAmount: number, offsetAmount: number, uuid: string) {
-    let totalAmountAfterOffset = 0;
+    let totalAmountAfterOffset = totalExpenseAmount;
     if (offsetAmount) totalAmountAfterOffset = currency(totalExpenseAmount).subtract(offsetAmount).value;
     return prisma.$transaction(async (tx) => {
         const claim = await tx.claim.create({
@@ -92,6 +92,7 @@ export async function findClaimByShareId(shareId: string) {
             expenses: {
                 include: {
                     category: true,
+                    attachments: true,
                 },
             },
             user: {
