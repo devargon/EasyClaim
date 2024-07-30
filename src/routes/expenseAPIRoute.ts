@@ -187,6 +187,7 @@ router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddlewa
             },
             include: {
                 category: true,
+                attachments: true
             }
         })
         if (updatedExpense) {
