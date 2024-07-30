@@ -33,13 +33,43 @@ const vm = app.mount('#app');
 
 document.addEventListener('DOMContentLoaded', function() {
     const viewerInstances = {};
+    const selectedExpenses = [];
+
+    function handleCheckbox() {
+        const checkbox = event.target;
+        const expenseId = checkbox.value;
+
+        if (checkbox.checked) {
+            if (!selectedExpenses.includes(expenseId)) {
+                selectedExpenses.push(expenseId);
+            }
+        } else {
+            const index = selectedExpenses.indexOf(expenseId);
+            if (index > -1) {
+                selectedExpenses.splice(index, 1);
+            }
+        }
+
+        console.log('Selected Expenses:', selectedExpenses);
+        if (selectedExpenses.length > 0) {
+            createClaimButton.removeAttribute("disabled");
+        } else {
+            createClaimButton.setAttribute("disabled", "");
+        }
+    }
 
     function updateExpenseCardAndImageViewer(element_id, render) {
         const ele = document.getElementById(element_id);
-        console.log(ele);
-        ele.outerHTML = render;
+        if (ele) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(render, 'text/html');
+            ele.querySelector('.expense-card-selectable-contents').innerHTML = doc.querySelector('.expense-card-selectable-contents').innerHTML
+        } else {
+            const expensesSection = document.getElementById("expenses-section");
+            expensesSection.insertAdjacentHTML('afterbegin', render);
+            document.getElementById(element_id).querySelector('input[name="select-expense"]').addEventListener('change', handleCheckbox);
+        }
         if (viewerInstances[element_id]) {
-            console.log("Attempting to destroy existing viewer for element");
             viewerInstances[element_id].destroy();
         }
         const updatedEle = document.getElementById(element_id);
@@ -82,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const createClaimModalEntriesSection = document.getElementById("actualClaimExpenseList");
     const createClaimButton = document.getElementById("make-claim");
     createClaimButton.addEventListener("click", function() {
-        if (vm.selectedExpenses.length > 0) {
-            openClaimModal(vm.selectedExpenses);
+        if (selectedExpenses.length > 0) {
+            openClaimModal(selectedExpenses);
         } else {
             pushToast("You need to select at least one expense to make a claim.", "", "warning");
         }
@@ -590,13 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return completeError("Hmm... Something isn't right. Reload this page and check if the expense is edited.")
                 }
                 if (editExpenseResponse.ok) {
-                    const existingCardElement = document.getElementById(jsonResponse.html.id);
-                    if (existingCardElement) {
-                        existingCardElement.outerHTML = jsonResponse.html.render
-                    } else {
-                        const expensesSection = document.getElementById("expenses-section");
-                        expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
-                    }
+                    updateExpenseCardAndImageViewer(jsonResponse.html.id, jsonResponse.html.render);
                 } else {
                     completeError(jsonResponse?.error_message || "An unknown error occured.");
                     return createExpenseAlert.style.display = "block";
@@ -649,13 +673,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         try {
                             const no_claims_div =document.querySelector(".no-claims");
                             if (no_claims_div) no_claims_div.style.display = "none";
-                            const existingCardElement = document.getElementById(jsonResponse.html.id);
-                            if (existingCardElement) {
-                                existingCardElement.outerHTML = jsonResponse.html.render
-                            } else {
-                                const expensesSection = document.getElementById("expenses-section");
-                                expensesSection.insertAdjacentHTML('afterbegin', jsonResponse.html.render);
-                            }
+                            updateExpenseCardAndImageViewer(jsonResponse.html.id, jsonResponse.html.render);
                         } catch (e) {
                             console.error("Unable to add new expense card:", e);
                         }
@@ -788,7 +806,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (response.data.html) {
                             try {
                                 updateExpenseCardAndImageViewer(response.data.html.id, response.data.html.render);
-                                // document.getElementById(response.data.html.id).outerHTML = response.data.html.render;
                             } catch (e) {console.error("Failed to update expense HTML:", e)}
                         }
                     } else {
@@ -942,7 +959,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (doneAttachmentResponse.data.html) {
                             try {
                                 updateExpenseCardAndImageViewer(doneAttachmentResponse.data.html.id, doneAttachmentResponse.data.html.render)
-                                // document.getElementById(doneAttachmentResponse.data.html.id).outerHTML = doneAttachmentResponse.data.html.render;
                             } catch (e) {console.error("Failed to update expense HTML:", e)}
                         }
                         return await fileItem.completeSuccess(doneAttachmentResponse.data.attachment.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${doneAttachmentResponse.data.attachment.id}/delete`);
@@ -979,6 +995,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (expenseCard.querySelectorAll("img").length > 0) {
             viewerInstances[expenseCard.id] = iv(expenseCard);
         }
+        let checkbox = expenseCard.querySelector('input[name="select-expense"]')
+        if (checkbox) {
+            checkbox.addEventListener('change', handleCheckbox)
+        }
+
     })
 
 })
