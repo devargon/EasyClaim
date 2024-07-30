@@ -4,6 +4,7 @@ import prisma from "../config/db";
 import currency from "currency.js";
 import pug from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
+import {findExpensesByUserId} from "../services/expenseService";
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
         return res.status(401).send();
     }
     const categories = await prisma.category.findMany();
-    let expenses = await prisma.expense.findMany({where: {userId: req.user.id}, include: {category: true}, orderBy: {submittedAt: 'desc'}});
+    let expenses = await findExpensesByUserId(req.user.id);
 
     const completedExpenses = expenses.filter(expense => expense.claimId !== null && expense.claimComplete);
     const incompleteExpenses = expenses.filter(expense => !expense.claimComplete)

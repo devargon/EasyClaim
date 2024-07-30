@@ -8,6 +8,19 @@ export async function findExpenseById(id: number) {
     });
 }
 
+export async function findExpensesByUserId(userId: number) {
+    return prisma.expense.findMany({
+        where: {userId},
+        include: {
+            attachments: true,
+            category: true,
+        },
+        orderBy: {
+            submittedAt: "desc"
+        }
+    })
+}
+
 export async function findExpenseByIdAndUser(id: number, userId: number) {
     return prisma.expense.findUnique({
         where: {id, userId},
