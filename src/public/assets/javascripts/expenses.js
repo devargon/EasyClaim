@@ -6,8 +6,7 @@ const app = Vue.createApp({
             showingCompletedExpenses: false
         }
     },
-    methods: {
-    }
+    methods: {}
 });
 
 function iv(element) {
@@ -22,7 +21,7 @@ function iv(element) {
             rotateLeft: 1,
             rotateRight: 1
         },
-        filter: function(image) {
+        filter: function (image) {
             return !image.classList.contains('exclude-viewer')
         }
     });
@@ -31,7 +30,7 @@ function iv(element) {
 // Mount the app to the DOM element with id 'app'
 const vm = app.mount('#app');
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const viewerInstances = {};
     const selectedExpenses = [];
 
@@ -73,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             viewerInstances[element_id].destroy();
         }
         const updatedEle = document.getElementById(element_id);
-        viewerInstances[element_id]  = iv(updatedEle);
+        viewerInstances[element_id] = iv(updatedEle);
     }
 
     function getAllExpenseCardElements() {
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const claimOffsetAmtInput = document.getElementById("claim_offset_amt");
     const createClaimModalEntriesSection = document.getElementById("actualClaimExpenseList");
     const createClaimButton = document.getElementById("make-claim");
-    createClaimButton.addEventListener("click", function() {
+    createClaimButton.addEventListener("click", function () {
         if (selectedExpenses.length > 0) {
             openClaimModal(selectedExpenses);
         } else {
@@ -132,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let newOffsetNumber = Number(claimOffsetAmtInput.value);
         if (isNaN(newOffsetNumber)) {
-           newOffsetNumber = Number(0);
+            newOffsetNumber = Number(0);
         }
         const claimSubtotalDiv = document.querySelector(".claim-total")
         let subtotal = Number(claimSubtotalDiv.dataset.subtotal)
@@ -156,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
             createClaimAlert.innerHTML = error_message;
             createClaimAlert.style.display = "block";
         }
+
         event.preventDefault();
 
         let offsetAmount = Number(claimOffsetAmtInput.value);
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         document.querySelector('.toast-container').appendChild(toastElement);
 
-        const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 4000});
+        const toast = new bootstrap.Toast(toastElement, {autohide: true, delay: 4000});
         toast.show();
 
         toastElement.addEventListener('hidden.bs.toast', () => {
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function formatMoney (money) {
+    function formatMoney(money) {
         let currency_disp
         try {
             currency_disp = currency(money).format();
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return currency_disp;
     }
 
-    document.getElementById("incompleteExpenses").addEventListener("click", function(event) {
+    document.getElementById("incompleteExpenses").addEventListener("click", function (event) {
         let target = event.target;
         if (!target) return;
         // console.log(target);
@@ -353,15 +353,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleExpenseAction(action, expenseId, target) {
         switch (action) {
             case 'delete':
-                renderDeletePrompt(expenseId).then(() => {})
+                renderDeletePrompt(expenseId).then(() => {
+                })
                 break;
             case 'edit':
                 if (target) target.setAttribute("disabled", "");
-                renderEditPrompt(expenseId).then(() => {if (target) target.removeAttribute("disabled")})
+                renderEditPrompt(expenseId).then(() => {
+                    if (target) target.removeAttribute("disabled")
+                })
                 break;
             case 'attachments':
                 if (target) target.setAttribute("disabled", "");
-                openUploadModal(expenseId, null).then(() => {if (target) target.removeAttribute("disabled")});
+                openUploadModal(expenseId, null).then(() => {
+                    if (target) target.removeAttribute("disabled")
+                });
                 break;
             default:
                 console.error("Event delegation encountered unknown action: ", action);
@@ -398,7 +403,10 @@ document.addEventListener('DOMContentLoaded', function() {
             expenseForm.setAttribute("data-expenseid", expense_data.id);
             expenseForm.setAttribute("data-purpose", "edit");
 
-            document.getElementById("expense_amt").value = currency(expense_data.amount).format({ separator: '', symbol: '' });
+            document.getElementById("expense_amt").value = currency(expense_data.amount).format({
+                separator: '',
+                symbol: ''
+            });
             document.getElementById("category").value = expense_data.category.id;
             const now_dt = new Date();
             document.getElementById("spent_dt").value = new Date(new Date(expense_data.spentOn) - (now_dt.getTimezoneOffset() * 60 * 1000)).toISOString().slice(0, 16);
@@ -432,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelBtn.className = "btn btn-secondary";
         cancelBtn.innerText = "Cancel";
 
-        deleteBtn.addEventListener("click", async function() {
+        deleteBtn.addEventListener("click", async function () {
             try {
                 const deleteResult = await fetch(`/api/expenses/${expenseId}/delete`, {
                     method: "POST",
@@ -451,7 +459,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (jsonError.error_message) {
                             error_message = `This expense can't be deleted: ${jsonError.error_message}`;
                         }
-                    } catch {}
+                    } catch {
+                    }
                     pushToast(error_message, "Error", "danger");
                 }
             } catch (e) {
@@ -461,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })
 
-        cancelBtn.addEventListener("click", function() {
+        cancelBtn.addEventListener("click", function () {
             promptOverlay.remove();
         });
 
@@ -555,7 +564,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const expenseForm = document.getElementById("expense-form");
-
 
 
     function resetExpenseForm() {
@@ -671,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.error("Unable to update Unclaimed amt:", e)
                         }
                         try {
-                            const no_claims_div =document.querySelector(".no-claims");
+                            const no_claims_div = document.querySelector(".no-claims");
                             if (no_claims_div) no_claims_div.style.display = "none";
                             updateExpenseCardAndImageViewer(jsonResponse.html.id, jsonResponse.html.render);
                         } catch (e) {
@@ -691,6 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     })
+
     class FileItem {
         constructor(file, actualMimeType, container) {
             this.file = file;
@@ -718,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const fileNameElement = document.createElement('a');
             fileNameElement.className = 'file-name';
             fileNameElement.textContent = this.file.name;
-            fileNameElement.href="";
+            fileNameElement.href = "";
 
             const fileSizeElement = document.createElement('p');
             fileSizeElement.className = 'file-size';
@@ -799,14 +808,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set up the remove button to handle deletion
             this.removeButton.onclick = async () => {
                 try {
-                    const response = await axios.post(deleteUrl, { timeout: 5000 });
+                    const response = await axios.post(deleteUrl, {timeout: 5000});
                     if (response.status === 200) {
                         uploadedFiles = uploadedFiles.filter(e => e !== this);
                         this.fileItem.textContent = 'Attachment deleted.';
                         if (response.data.html) {
                             try {
                                 updateExpenseCardAndImageViewer(response.data.html.id, response.data.html.render);
-                            } catch (e) {console.error("Failed to update expense HTML:", e)}
+                            } catch (e) {
+                                console.error("Failed to update expense HTML:", e)
+                            }
                         }
                     } else {
                         this.completeError('Failed to delete attachment.', true);
@@ -929,9 +940,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 let uploadResponse;
                 try {
                     uploadResponse = await axios.put(presignedURL, file, {
-                        headers: { "Content-Type": actualMimeType },
+                        headers: {"Content-Type": actualMimeType},
                         onUploadProgress: (progressEvent) => {
-                            console.log(Math.round(progressEvent.loaded/progressEvent.total * 100))
+                            console.log(Math.round(progressEvent.loaded / progressEvent.total * 100))
                             const percentCompleted = Math.round((progressEvent.loaded / progressEvent.total * 100));
                             fileItem.updateProgress(percentCompleted);
                         }
@@ -954,12 +965,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 let doneAttachmentResponse;
                 try {
-                    doneAttachmentResponse = await axios.post(`/api/expenses/${currentExpenseId}/attachments`, {fileName: file.name, fileUrl: presignResponse.data.fileUrl, fileSize: file.size, mimeType: actualMimeType});
+                    doneAttachmentResponse = await axios.post(`/api/expenses/${currentExpenseId}/attachments`, {
+                        fileName: file.name,
+                        fileUrl: presignResponse.data.fileUrl,
+                        fileSize: file.size,
+                        mimeType: actualMimeType
+                    });
                     if (doneAttachmentResponse.status === 201 && doneAttachmentResponse.data && doneAttachmentResponse.data.attachment) {
                         if (doneAttachmentResponse.data.html) {
                             try {
                                 updateExpenseCardAndImageViewer(doneAttachmentResponse.data.html.id, doneAttachmentResponse.data.html.render)
-                            } catch (e) {console.error("Failed to update expense HTML:", e)}
+                            } catch (e) {
+                                console.error("Failed to update expense HTML:", e)
+                            }
                         }
                         return await fileItem.completeSuccess(doneAttachmentResponse.data.attachment.fileUrl, `/api/expenses/${currentExpenseId}/attachments/${doneAttachmentResponse.data.attachment.id}/delete`);
                     } else {
@@ -990,6 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Failed to handle promises for uploading files");
         }
     }
+
     const expense_cards = getAllExpenseCardElements()
     expense_cards.forEach(expenseCard => {
         if (expenseCard.querySelectorAll("img").length > 0) {
