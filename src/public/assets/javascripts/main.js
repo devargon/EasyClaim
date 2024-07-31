@@ -130,3 +130,87 @@ function getAllExpenseCardElements() {
     const exEl = Array.from(el).filter(ele => /^\bexpense-\d+\b$/.test(ele.id))
     return exEl;
 }
+
+function pdfModal(filename, fileURL, modalContainerSelector) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'dynamicModal';
+    modal.tabIndex = -1;
+    modal.setAttribute('aria-labelledby', 'dynamicModalLabel');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const modalDialog = document.createElement('div');
+    modalDialog.className = 'modal-dialog modal-lg';
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+
+    const modalHeader = document.createElement('div');
+    modalHeader.className = 'modal-header';
+
+    const modalTitle = document.createElement('h5');
+    modalTitle.className = 'modal-title';
+    modalTitle.id = 'dynamicModalLabel';
+    modalTitle.textContent = filename;
+
+    const downloadButton = document.createElement('a');
+    downloadButton.href = fileURL;
+    downloadButton.download = filename;
+    downloadButton.className = 'btn-download';
+    downloadButton.target = "_blank";
+    downloadButton.setAttribute('aria-label', 'Download');
+    downloadButton.innerHTML = '<i class="bi bi-cloud-arrow-down" style="font-size: 1.25rem"></i>';
+
+    const modalCloseButton = document.createElement('button');
+    modalCloseButton.type = 'button';
+    modalCloseButton.className = 'btn-close';
+    modalCloseButton.setAttribute('data-bs-dismiss', 'modal');
+    modalCloseButton.setAttribute('aria-label', 'Close');
+
+    const modalBody = document.createElement('div');
+    modalBody.className = 'modal-body';
+
+    const pdfViewer = document.createElement('iframe');
+    pdfViewer.src = fileURL;
+    pdfViewer.className = "iframeInModal";
+
+    const modalFooter = document.createElement('div');
+    modalFooter.className = 'modal-footer';
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn btn-secondary';
+    closeButton.setAttribute('data-bs-dismiss', 'modal');
+    closeButton.textContent = 'Close';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'btn btn-primary';
+    saveButton.textContent = 'Save changes';
+
+    // Append elements
+    modalBody.appendChild(pdfViewer);
+    modalFooter.appendChild(closeButton);
+    modalFooter.appendChild(saveButton);
+    modalHeader.appendChild(modalTitle);
+    modalHeader.appendChild(downloadButton);
+    modalHeader.appendChild(modalCloseButton);
+    modalContent.appendChild(modalHeader);
+    modalContent.appendChild(modalBody);
+    modalContent.appendChild(modalFooter);
+    modalDialog.appendChild(modalContent);
+    modal.appendChild(modalDialog);
+    document.querySelector(modalContainerSelector).appendChild(modal);
+
+    // Initialize and show the modal
+    const myModal = new bootstrap.Modal(modal, {
+        keyboard: false
+    });
+
+    myModal.show();
+
+    // Add event listener to destroy modal on close
+    modal.addEventListener('hidden.bs.modal', function () {
+        modal.remove();
+    });
+}

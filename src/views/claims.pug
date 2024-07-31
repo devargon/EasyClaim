@@ -15,7 +15,7 @@ block content
                         h5.modal-title View Claim
                         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
                     .modal-body
-                        iframe#viewClaimIframe(src="", loading="lazy", referrerpolicy="no-referrer", sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox", allow="geolocation 'none'; microphone 'none'; camera 'none';")
+                        iframe.iframeInModal#viewClaimIframe(src="", loading="lazy", referrerpolicy="no-referrer", sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox", allow="geolocation 'none'; microphone 'none'; camera 'none';")
         .modal.fade.modal-lg#shareClaimModal(tabindex='-1')
             .modal-dialog
                 .modal-content

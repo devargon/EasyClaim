@@ -21,6 +21,29 @@ document.addEventListener('DOMContentLoaded', function () {
     let pendingFiles = [];
     let currentExpenseId = 0;
 
+    const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
+
+    function initializeExpenseCardAttachments(expenseCard) {
+        if (viewerInstances[expenseCard.id]) {
+            viewerInstances[expenseCard.id].destroy();
+        }
+        if (expenseCard.querySelectorAll("img").length > 0) {
+            expenseCard.querySelectorAll(".ex-image-dl").forEach(image_download => {
+                image_download.outerHTML = image_download.innerHTML;
+                // if javascript is enabled replace link with image viewer
+            })
+            viewerInstances[expenseCard.id] = iv(expenseCard);
+        }
+        expenseCard.querySelectorAll(".ex-pdf_dl").forEach((pdfAttachment) => {
+
+            pdfAttachment.firstChild.addEventListener("click", function (event) {
+                event.preventDefault();
+                pdfModal(pdfAttachment.dataset.filename, pdfAttachment.href, ".expense-modal-container");
+            })
+            // pdfAttachment.href = "";
+        })
+    }
+
     // Helper Functions
     function handleCheckbox(event) {
         const checkbox = event.target;
@@ -56,11 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
             expensesSection.insertAdjacentHTML('afterbegin', render);
             document.getElementById(element_id).querySelector('input[name="select-expense"]').addEventListener('change', handleCheckbox);
         }
-        if (viewerInstances[element_id]) {
-            viewerInstances[element_id].destroy();
-        }
         const updatedEle = document.getElementById(element_id);
-        viewerInstances[element_id] = iv(updatedEle);
+        initializeExpenseCardAttachments(updatedEle);
     }
 
     function getAllExpenseCardElements() {
@@ -349,6 +369,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return pushToast("An error occurred while trying to generate the claim details.", "Could not create claim", "danger");
         }
     }
+
+    const fileDisplay = document.getElementById("expense-attachments-display");
 
     async function openUploadModal(expenseId, expense_data = null) {
         uploadedFiles = [];
@@ -966,14 +988,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const expense_cards = getAllExpenseCardElements();
+
     expense_cards.forEach(expenseCard => {
-        if (expenseCard.querySelectorAll("img").length > 0) {
-            expenseCard.querySelectorAll(".ex-image-dl").forEach(image_download => {
-                image_download.outerHTML = image_download.innerHTML;
-                // if javascript is enabled replace link with image viewer
-            })
-            viewerInstances[expenseCard.id] = iv(expenseCard);
-        }
+        initializeExpenseCardAttachments(expenseCard);
         let checkbox = expenseCard.querySelector('input[name="select-expense"]');
         if (checkbox) {
             checkbox.addEventListener('change', handleCheckbox);
