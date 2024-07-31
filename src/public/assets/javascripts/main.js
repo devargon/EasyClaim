@@ -1,3 +1,21 @@
+function iv(element) {
+    return new Viewer(element, {
+        url: 'src',
+        toolbar: {
+            zoomIn: 1,
+            zoomOut: 1,
+            reset: 1,
+            prev: 0,
+            next: 0,
+            rotateLeft: 1,
+            rotateRight: 1
+        },
+        filter: function (image) {
+            return !image.classList.contains('exclude-viewer')
+        }
+    });
+}
+
 function makeButtonLoad (button) {
     button.setAttribute("disabled", "");
     const spinner = getSpinnerInButton(button);
@@ -105,4 +123,10 @@ function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+}
+
+function getAllExpenseCardElements() {
+    const el = document.querySelectorAll('[id^="expense-"]');
+    const exEl = Array.from(el).filter(ele => /^\bexpense-\d+\b$/.test(ele.id))
+    return exEl;
 }

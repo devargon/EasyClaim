@@ -9,23 +9,7 @@ const app = Vue.createApp({
     methods: {}
 });
 
-function iv(element) {
-    return new Viewer(element, {
-        url: 'src',
-        toolbar: {
-            zoomIn: 1,
-            zoomOut: 1,
-            reset: 1,
-            prev: 0,
-            next: 0,
-            rotateLeft: 1,
-            rotateRight: 1
-        },
-        filter: function (image) {
-            return !image.classList.contains('exclude-viewer')
-        }
-    });
-}
+
 
 const vm = app.mount('#app');
 
@@ -984,6 +968,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const expense_cards = getAllExpenseCardElements();
     expense_cards.forEach(expenseCard => {
         if (expenseCard.querySelectorAll("img").length > 0) {
+            expenseCard.querySelectorAll(".ex-image-dl").forEach(image_download => {
+                image_download.outerHTML = image_download.innerHTML;
+                // if javascript is enabled replace link with image viewer
+            })
             viewerInstances[expenseCard.id] = iv(expenseCard);
         }
         let checkbox = expenseCard.querySelector('input[name="select-expense"]');
