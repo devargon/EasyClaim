@@ -1,5 +1,5 @@
 function iv(element) {
-    return new Viewer(element, {
+    const viewer = new Viewer(element, {
         url: 'src',
         toolbar: {
             zoomIn: 1,
@@ -8,7 +8,17 @@ function iv(element) {
             prev: 0,
             next: 0,
             rotateLeft: 1,
-            rotateRight: 1
+            rotateRight: 1,
+            download: function() {
+                const a = document.createElement('a');
+                a.href = viewer.image.src;
+                a.download = viewer.image.alt;
+                a.target = "_blank";
+                console.log(a.outerHTML);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         },
         filter: function (image) {
             return !image.classList.contains('exclude-viewer')

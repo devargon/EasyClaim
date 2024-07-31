@@ -281,3 +281,15 @@ body {
         height: 70vh;
     }
 }
+
+.viewer-download {
+    color: #fff;
+    font-family: 'bootstrap-icons', serif;
+    font-size: 0.75rem;
+    line-height: 1.5rem;
+    text-align: center;
+}
+
+.viewer-download::before {
+    content: "\F294";
+}
