@@ -38,6 +38,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     req.session.userId = found_user.id;
+    req.session.save();
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
@@ -67,5 +68,6 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     const user = await registerUser(name, email, password);
     debug(`Registration completed for ${req.body.email}`);
     req.session.userId = user.id;
+    req.session.save();
     return res.status(201).redirect("/accounts/signup/success");
 }
