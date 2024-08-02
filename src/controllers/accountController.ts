@@ -20,25 +20,32 @@ function validatePassword(password: string) {
 
 // noinspection JSUnusedLocalSymbols
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
+    console.log(`Session: ${req.session}`);
+    console.log("Login request received");
 
     if (!req.body.email || !req.body.password) {
         return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     debug(`Finding user with email ${req.body.email}`);
+    console.log(`Email: ${req.body.email}, Password: ${req.body.password ? "Present" : "Not present"}`)
     const found_user = await findUserByEmailInternalUsage(req.body.email);
     if (!found_user) {
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
+    console.log(`Found user ${found_user}`);
 
     debug(`Account for ${req.body.email} found. Comparing hashes`);
 
     const isValidPassword = await bcrypt.compare(req.body.password, found_user.password);
     debug(`Password match result for ${req.body.email}:  ${isValidPassword}`);
+    console.log("Compared password hashes")
     if (!isValidPassword) {
+        console.log("Password is invalid");
         return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     req.session.userId = found_user.id;
     req.session.save();
+    console.log(`Session: ${req.session}`);
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
