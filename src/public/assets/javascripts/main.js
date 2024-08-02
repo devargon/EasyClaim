@@ -24,6 +24,7 @@ function iv(element) {
             return !image.classList.contains('exclude-viewer')
         }
     });
+    return viewer;
 }
 
 function makeButtonLoad (button) {
