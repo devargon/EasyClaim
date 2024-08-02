@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean&& tsc && npm run copy-assets",
-    "copy-assets": "copyfiles -u 1 src/views/**/* src/public/**/* dist",
+    "copy-assets": "copyfiles -u 1 \"src/views/**/*\" \"src/public/**/*\" dist",
     "start": "ts-node ./src/bin/www.ts",
     "dev": "nodemon --exec ts-node ./src/bin/www.ts -e js,ts,pug,css"
   },
