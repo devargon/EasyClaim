@@ -43,10 +43,10 @@ router.get('/:claimId/share', redirectAsRequiresLogin, async(req: Request, res: 
             html: `Hi, I'm claiming \$${formatted_total_claim_amount} for some expenses. See the details of it with this link: <a class="text-reset" href="${generate_share_link('en')}">${generate_share_link('en')}</a>`
         };
 
-        messages.my = {
-            message: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: ${generate_share_link('my')}`,
+        messages.ms = {
+            message: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: ${generate_share_link('ms')}`,
             url: generate_share_link('my'),
-            html: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: <a class="text-reset" href="${generate_share_link('my')}">${generate_share_link('my')}</a>`
+            html: `Hai, saya ingin membuat tuntutan sebanyak \$${formatted_total_claim_amount} untuk beberapa perbelanjaan. Lihat butirannya di pautan ini: <a class="text-reset" href="${generate_share_link('ms')}">${generate_share_link('ms')}</a>`
         };
 
         messages.es = {
