@@ -19,7 +19,7 @@ import connectSessionSequelize from "connect-session-sequelize";
 import {findUserById} from "./services/accountService";
 
 // Sequelize connection as URL:
-const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: true});
+const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: console.log});
 
 const SequelizeStore = connectSessionSequelize(session.Store);
 
