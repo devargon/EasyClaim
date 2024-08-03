@@ -23,6 +23,8 @@ model User {
   hasSeenWelcomePage Boolean @default(false)
   expenses Expense[]
   claims Claim[]
+
+  @@map("user")
 }
 
 model Claim {
@@ -36,6 +38,8 @@ model Claim {
   claimOffset Decimal @db.Decimal(10, 2) @default(0.00)
   totalAmountAfterOffset Decimal @db.Decimal(10,2) @default(0.00)
   shareId String @default("00000000-0000-0000-0000-000000000000") @unique
+
+  @@map("claim")
 }
 
 model Category {
@@ -43,8 +47,9 @@ model Category {
   name     String    @db.VarChar(50)
   icon     String    @db.VarChar(30)
   expenses Expense[]
-}
 
+  @@map("category")
+}
 
 model Expense {
   id           Int         @id @default(autoincrement())
@@ -61,6 +66,8 @@ model Expense {
   attachments  Attachment[]
   claim Claim? @relation(fields: [claimId], references: [id])
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expense")
 }
 
 model Attachment {
@@ -75,6 +82,8 @@ model Attachment {
   mimeType    String   @db.VarChar(300)
   fileSize    Int
   createdAt   DateTime @default(now())
+
+  @@map("attachment")
 }
 
 enum Status {

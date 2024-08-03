@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `User` (
+CREATE TABLE `user` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
@@ -7,12 +7,12 @@ CREATE TABLE `User` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `hasSeenWelcomePage` BOOLEAN NOT NULL DEFAULT false,
 
-    UNIQUE INDEX `User_email_key`(`email`),
+    UNIQUE INDEX `user_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Claim` (
+CREATE TABLE `claim` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `submittedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -22,12 +22,12 @@ CREATE TABLE `Claim` (
     `totalAmountAfterOffset` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `shareId` VARCHAR(191) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 
-    UNIQUE INDEX `Claim_shareId_key`(`shareId`),
+    UNIQUE INDEX `claim_shareId_key`(`shareId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Category` (
+CREATE TABLE `category` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
     `icon` VARCHAR(30) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `Category` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Expense` (
+CREATE TABLE `expense` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `spentOn` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -44,7 +44,7 @@ CREATE TABLE `Expense` (
     `editedAt` DATETIME(3) NULL,
     `amount` DECIMAL(10, 2) NOT NULL,
     `description` VARCHAR(191) NULL,
-    `categoryId` INTEGER NOT NULL,
+    `categoryId` INTEGER NULL,
     `claimId` INTEGER NULL,
     `claimComplete` BOOLEAN NOT NULL DEFAULT false,
 
@@ -52,7 +52,7 @@ CREATE TABLE `Expense` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Attachment` (
+CREATE TABLE `attachment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uploaderId` INTEGER NOT NULL,
     `expenseId` INTEGER NOT NULL,
@@ -67,19 +67,19 @@ CREATE TABLE `Attachment` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Claim` ADD CONSTRAINT `Claim_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `claim` ADD CONSTRAINT `claim_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Expense` ADD CONSTRAINT `Expense_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `Category`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `expense` ADD CONSTRAINT `expense_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `category`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Expense` ADD CONSTRAINT `Expense_claimId_fkey` FOREIGN KEY (`claimId`) REFERENCES `Claim`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `expense` ADD CONSTRAINT `expense_claimId_fkey` FOREIGN KEY (`claimId`) REFERENCES `claim`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Expense` ADD CONSTRAINT `Expense_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `expense` ADD CONSTRAINT `expense_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Attachment` ADD CONSTRAINT `Attachment_uploaderId_fkey` FOREIGN KEY (`uploaderId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `attachment` ADD CONSTRAINT `attachment_uploaderId_fkey` FOREIGN KEY (`uploaderId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Attachment` ADD CONSTRAINT `Attachment_expenseId_fkey` FOREIGN KEY (`expenseId`) REFERENCES `Expense`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `attachment` ADD CONSTRAINT `attachment_expenseId_fkey` FOREIGN KEY (`expenseId`) REFERENCES `expense`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
