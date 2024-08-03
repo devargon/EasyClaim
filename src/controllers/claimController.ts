@@ -21,13 +21,18 @@ export const showClaims = async (req: Request, res: Response, next: NextFunction
             completedClaimAmt = completedClaimAmt.add(amount);
         }
     });
-    res.render('claims', {title: 'Claims', claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
+    res.locals.head.pageTitle = "My Claims";
+    res.render('claims', {claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
 }
 
 export const showSharedClaim = async (req: Request, res: Response, next: NextFunction) => {
     res.locals.showHeader = false;
+    res.locals.head.pageTitle = "View Claim";
     const claim = await findClaimByShareId(req.params.shareId || "");
     if (claim) {
+        const money_display = formatMoney(Number(claim.totalAmountAfterOffset))
+        res.locals.head.pageTitle = `View Claim (${money_display})`
+        res.locals.head.description=`${claim.user.name} is claiming ${money_display}. Tap here to see what they spent.`
         res.render('public_claim', {formatMoney, claim}, );
     } else {
         next();

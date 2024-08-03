@@ -56,6 +56,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(fetchUser);
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.showHeader = true;
+
+  res.locals.head = {};
+  res.locals.head.siteName = "EasyClaim";
+  res.locals.head.pageTitle = "EasyClaim";
+  res.locals.head.description = "Effortlessly track your expenses and generate claims that are easy to share with EasyClaim. Simplify your financial management today."
+  res.locals.head.keywords = "expense tracking, claim generation, shareable claims, expense management, financial management, expense reporting, budget tracking, personal finance, expense submission, claim submission, expense monitoring, claim details, expense categories, expense analysis, expense documentation, claim processing, expense conversion, expense claims, finance management, expense overview, expense records, shareable expense reports, digital expense tracking, online finance tools, expense management software, claim management, personal budgeting, expense auditing, expense management system";
+  res.locals.head.author = "Nogra";
+  res.locals.head.url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  res.locals.head.image = "";
   next();
 });
 

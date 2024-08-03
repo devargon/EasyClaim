@@ -17,11 +17,7 @@ function formatMoney(money: string | number, stripped_down: boolean = false) {
 
 /* GET home page. */
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.render('index', { title: 'Express' });
-});
-
-router.get('/api/attachments/delete', (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).send();
+  res.render('index');
 });
 
 export default router;

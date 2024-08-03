@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/', redirectAsRequiresLogin, showClaims);
 
 router.get('/share/:lang/:shareId', async (req, res,next) => {
-    const shareId = req.params.lang || "";
+    const shareId = req.params.shareId || "";
     return res.redirect(`/claims/share/${shareId}`);
 });
 

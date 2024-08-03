@@ -7,19 +7,21 @@ import type {User} from "@prisma/client";
 
 const router = express.Router();
 /* GET home page. */
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
-    res.render('index', { title: 'Express' });
-});
+// router.get('/', (req: Request, res: Response, next: NextFunction) => {
+//     res.render('index', { title: 'Express' });
+// });
 
 router.get('/login', redirectIfLoggedIn, (req: Request, res: Response, next: NextFunction) => {
     req.body.redirect = req.query.redirect || "/";
-    res.render('login', { title: 'Login to EasyClaim', register_error: null, values: req.body });
+    res.locals.head.pageTitle = "Login";
+    res.render('login', { register_error: null, values: req.body });
 });
 
 router.post('/login', redirectIfLoggedIn, LoginUser)
 
 router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: NextFunction) => {
-    res.render('signup', { title: 'Sign up for EasyClaim', register_error: null, values: req.body});
+    res.locals.head.pageTitle = "Sign up";
+    res.render('signup', { register_error: null, values: req.body});
 });
 
 router.get('/signup/success', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
@@ -29,7 +31,8 @@ router.get('/signup/success', redirectAsRequiresLogin, async (req: Request, res:
                 where: {id: req.user.id},
                 data: {hasSeenWelcomePage: true}
             });
-            return res.render('signupsuccessful', {title: "Signup Successful"})
+            res.locals.head.pageTitle = "Sign up successful";
+            return res.render('signupsuccessful');
         }
     }
     return res.redirect("/");

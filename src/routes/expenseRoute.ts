@@ -46,9 +46,8 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
             completedExpenseAmt = completedExpenseAmt.add(amount);
         }
     });
-
+    res.locals.head.pageTitle = "My Expenses";
     res.render('expenses', {
-        title: 'Expenses',
         completedExpenses,
         incompleteExpenses,
         categories: categories,
