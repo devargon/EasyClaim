@@ -33,7 +33,7 @@ model Claim {
   submittedAt DateTime @default(now())
   status Status @default(PENDING)
   expenses Expense[]
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   totalAmount Decimal @db.Decimal(10, 2) @default(0.00)
   claimOffset Decimal @db.Decimal(10, 2) @default(0.00)
   totalAmountAfterOffset Decimal @db.Decimal(10,2) @default(0.00)
