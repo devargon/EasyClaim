@@ -31,7 +31,7 @@ model Claim {
   submittedAt DateTime @default(now())
   status Status @default(PENDING)
   expenses Expense[]
-  user User? @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   totalAmount Decimal @db.Decimal(10, 2) @default(0.00)
   claimOffset Decimal @db.Decimal(10, 2) @default(0.00)
   totalAmountAfterOffset Decimal @db.Decimal(10,2) @default(0.00)
@@ -54,21 +54,21 @@ model Expense {
   editedAt     DateTime?   @updatedAt
   amount       Decimal    @db.Decimal(10, 2)
   description  String?
-  categoryId   Int
-  category     Category   @relation(fields: [categoryId], references: [id])
+  categoryId   Int?
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   claimId Int?
   claimComplete Boolean @default(false)
   attachments  Attachment[]
   claim Claim? @relation(fields: [claimId], references: [id])
-  user User? @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Attachment {
   id          Int      @id @default(autoincrement())
   uploaderId  Int
-  uploader    User?    @relation(fields: [uploaderId], references: [id])
+  uploader    User?    @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   expenseId   Int
-  expense     Expense? @relation(fields: [expenseId], references: [id])
+  expense     Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   fileName    String
   fileUrl     String   @db.VarChar(300)
   fileObjectUrl String @db.VarChar(300)
