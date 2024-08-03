@@ -16,7 +16,7 @@ export async function findExpensesByUserId(userId: number) {
             category: true,
         },
         orderBy: {
-            submittedAt: "desc"
+            spentOn: "desc"
         }
     })
 }

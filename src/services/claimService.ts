@@ -77,6 +77,9 @@ export async function findClaimByIdAndUserId(claimId: number, userId: number) {
                 include: {
                     category: true,
                 },
+                orderBy: {
+                    spentOn: "desc"
+                }
             }
         }
     });
@@ -94,6 +97,9 @@ export async function findClaimByShareId(shareId: string) {
                     category: true,
                     attachments: true,
                 },
+                orderBy: {
+                    spentOn: "desc"
+                }
             },
             user: {
                 select: {
