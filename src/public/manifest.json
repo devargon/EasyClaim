@@ -1,5 +1,10 @@
 {
- "name": "App",
+ "name": "EasyClaim",
+ "short_name": "EasyClaim",
+ "start_url": "/expenses",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme-color": "#000000",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",
