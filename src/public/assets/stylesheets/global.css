@@ -10,7 +10,9 @@
 h1 {
     font-weight: 500;
 }
-
+nav#mainNav {
+    background-color: white;
+}
 .btn-toggle {
     border-radius: 20px;
     border: 2px solid #ccc;
