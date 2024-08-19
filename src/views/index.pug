@@ -1,5 +1,87 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .container-fluid.d-flex.flex-column.min-vh-100
+    main.flex-grow-1
+      // Hero Section
+      section.py-5.py-md-7.py-lg-8.py-xl-12
+        .container.px-4.px-md-6
+          .row.g-6.g-lg-12
+            .col-lg-6.d-flex.flex-column.justify-content-center.mb-4.mb-lg-0
+              h1.display-4.fw-bold Keep Track of Your Expenses, Hassle-Free
+              p.fs-5.text-muted
+                | Whether you’re tracking your spending or splitting costs with friends, EasyClaim keeps it simple. Stay organized and in control.
+              .d-flex.flex-column.flex-md-row.gap-2.mt-3
+                if user
+                  a.btn.btn-primary(href="/expenses") Get Started
+                else
+                  a.btn.btn-primary(href="/accounts/signup") Sign Up
+                  a.btn.btn-outline-primary(href="/accounts/login") Log in
+
+            .col-lg-6
+              img.img-fluid.rounded(src="/assets/static/index/hero.png" alt="EasyClaim app displayed on a laptop and smartphone screen, showing the Expenses page where users can manage unclaimed and pending expenses with options to add new expenses or submit claims.")
+      // Features Section
+      section.bg-light.py-5.py-md-7.py-lg-8
+        .container.px-4.px-md-6
+          .text-center.mb-5
+            span.badge.bg-secondary.text-uppercase.mb-2 Key Features
+            h2.display-5.fw-bold Effortless Expense Tracking
+            //p.fs-5.text-muted
+            //  | Our expense tracker helps you and your team stay on top of expenses with easy claim submission, automated approval workflows, and detailed reporting.
+          .row.g-6.g-lg-12.align-items-center
+            .col-lg-6
+              ul.list-unstyled
+                li.mb-4
+                  h3.h5.fw-bold Quick Expense Entries
+                  p.text-muted
+                    | Add expenses with just a few taps. Keep your grocery bills or shared dinners organized and easy to find.
+                li.mb-4
+                  h3.h5.fw-bold Share Expenses Easily
+                  p.text-muted
+                    | Need to settle up with a friend or family member? Share multiple expenses to them as claims to keep it clear.
+                li.mb-4
+                  h3.h5.fw-bold Clear and Simple Summaries
+                  p.text-muted
+                    | See where your money goes with easy-to-understand summaries. Perfect for budgeting or just keeping an eye on your spending habits.
+            .col-lg-6
+              .carousel.slide#featuresCarousel(data-bs-ride="carousel")
+                .carousel-indicators
+                  button(type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1")
+                  button(type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="1" aria-label="Slide 2")
+                  button(type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="2" aria-label="Slide 3")
+                  button(type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="4" aria-label="Slide 4")
+                .carousel-inner
+                  .carousel-item.active
+                    img.d-block.w-100.rounded(src="/assets/static/index/f1.png" alt="Expenses page listing unclaimed expenses totaling $55.29, with options to submit a claim, add a new expense, or manage existing entries like food and transportation.")
+                  .carousel-item
+                    img.d-block.w-100.rounded(src="/assets/static/index/f2.png" alt="Expense summary showing a total of $55.29 claimed by John Doe, including expenses for food and transportation.")
+                  .carousel-item
+                    img.d-block.w-100.rounded(src="/assets/static/index/f3.png" alt="Share claim interface displaying a message to share the claim of $55.29 with a link and sharing options including WhatsApp, Telegram, Line, and others.")
+                  .carousel-item
+                    img.d-block.w-100.rounded(src="/assets/static/index/f4.png" alt="Claims page with a detailed breakdown of a pending claim for $55.29, showing items like groceries and transportation with their respective costs.")
+                button.carousel-control-prev(type="button" data-bs-target="#featuresCarousel" data-bs-slide="prev")
+                  span.carousel-control-prev-icon(aria-hidden="true")
+                  span.visually-hidden Previous
+                button.carousel-control-next(type="button" data-bs-target="#featuresCarousel" data-bs-slide="next")
+                  span.carousel-control-next-icon(aria-hidden="true")
+                  span.visually-hidden Next
+
+    // Footer Section
+    footer.bg-light.py-4
+      .container
+        .row
+          .col-sm-6.col-md-4.col-lg-2.mb-3
+            h5.fw-bold EasyClaim
+            ul.list-unstyled
+              li: a.text-muted.text-decoration-none(href="/expenses") Expenses
+              li: a.text-muted.text-decoration-none(href="/claims") Claims
+          .col-sm-6.col-md-4.col-lg-2.mb-3
+            h5.fw-bold Support
+            ul.list-unstyled
+              li: a.text-muted.text-decoration-none(href="#") Contact Us (unavailable)
+          .col-sm-6.col-md-4.col-lg-2.mb-3
+            h5.fw-bold Legal
+            ul.list-unstyled
+              li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/privacy/") Privacy Policy
+              li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/terms/") Terms of Service
+
