@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!signupForm.checkValidity()) {
             event.preventDefault();
             event.stopPropagation();
+            makeFormSubmitButtonUnload(event.target);
         }
         signupForm.classList.add('was-validated');
     }
