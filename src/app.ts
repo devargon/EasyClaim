@@ -36,12 +36,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.set('trust proxy', 1);
+console.log("NODE_ENV: " + process.env.NODE_ENV)
 app.use(session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET || 'unknown',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === "production"}
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: "lax",
+  }
 }))
 
 sessionStore.sync();
