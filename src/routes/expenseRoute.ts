@@ -47,7 +47,7 @@ router.get('/', redirectAsRequiresLogin, async (req: Request, res: Response, nex
         }
     });
     res.locals.head.pageTitle = "My Expenses";
-    res.render('expenses', {
+    res.render('pages/expenses', {
         completedExpenses,
         incompleteExpenses,
         categories: categories,

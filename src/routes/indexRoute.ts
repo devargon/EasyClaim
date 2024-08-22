@@ -17,7 +17,7 @@ function formatMoney(money: string | number, stripped_down: boolean = false) {
 
 /* GET home page. */
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.render('index');
+  res.render('pages/index');
 });
 
 export default router;

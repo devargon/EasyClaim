@@ -82,11 +82,11 @@ app.use('/api/expenses', expenseAPIRouter);
 app.use('/api/claims', claimAPIRouter);
 
 app.get('/500', function(req: Request, res: Response, next: NextFunction) {
-  return res.render('500')
+  return res.render('pages/errors/500')
 })
 
 app.get('/404', function(req: Request, res: Response, next: NextFunction) {
-  return res.render('404')
+  return res.render('pages/errors/404')
 })
 
 
@@ -99,7 +99,7 @@ app.use("*", function (req, res, next) {
     //     createError(404, `Unknown Resource ${req.method} ${req.originalUrl}`)
     // );
   }
-  return res.status(404).render("404", {
+  return res.status(404).render("pages/errors/404", {
     notfound_resource: `Unknown Resource ${req.method} ${req.originalUrl}`,
   });
 });
@@ -115,7 +115,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (req.app.get('env') === 'development' || process.env.NODE_ENV === 'development') {
     if (req.accepts('html')) {
       res.status(err.status || 500);
-      res.render('error');
+      res.render('pages/errors/error');
     } else {
       res.status(err.status || 500).json({
         message: err.message,
@@ -124,7 +124,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     }
   } else {
     if (req.accepts('html')) {
-      res.render('500');
+      res.render('pages/errors/500');
     } else {
       res.status(err.status || 500).json({
         error: "Internal server error"

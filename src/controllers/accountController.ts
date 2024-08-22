@@ -24,13 +24,13 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     console.log("Login request received");
 
     if (!req.body.email || !req.body.password) {
-        return res.status(400).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
+        return res.status(400).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     debug(`Finding user with email ${req.body.email}`);
     console.log(`Email: ${req.body.email}, Password: ${req.body.password ? "Present" : "Not present"}`)
     const found_user = await findUserByEmailInternalUsage(req.body.email);
     if (!found_user) {
-        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
+        return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     console.log(`Found user ${found_user}`);
 
@@ -41,7 +41,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     console.log("Compared password hashes")
     if (!isValidPassword) {
         console.log("Password is invalid");
-        return res.status(401).render('login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
+        return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     req.session.userId = found_user.id;
     req.session.save();
@@ -63,7 +63,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     if (!passwordIsValid) {register_error = "Your password did not meet the security requirements. Please make a stronger password.";}
 
     if (register_error) {
-        return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
+        return res.status(400).render('pages/accounts/signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
     debug(`Checking for existing user for ${req.body.email}`);
     const existingUser = await findUserByEmailInternalUsage(email);

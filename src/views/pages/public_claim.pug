@@ -23,7 +23,7 @@ block content
                 .container.mt-5.claim-container(style="margin-top: 30px !important")
                     .row
                         for expense in claim.expenses
-                            include components/expense-card
+                            include ../components/expense-card
                 hr
                 .d-flex.flex-column.claim-expense-list-container
                     for expense in claim.expenses

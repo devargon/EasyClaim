@@ -14,14 +14,14 @@ const router = express.Router();
 router.get('/login', redirectIfLoggedIn, (req: Request, res: Response, next: NextFunction) => {
     req.body.redirect = req.query.redirect || "/";
     res.locals.head.pageTitle = "Login";
-    res.render('login', { register_error: null, values: req.body });
+    res.render('pages/accounts/login', { register_error: null, values: req.body });
 });
 
 router.post('/login', redirectIfLoggedIn, LoginUser)
 
 router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: NextFunction) => {
     res.locals.head.pageTitle = "Sign up";
-    res.render('signup', { register_error: null, values: req.body});
+    res.render('pages/accounts/signup', { register_error: null, values: req.body});
 });
 
 router.get('/signup/success', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
@@ -32,7 +32,7 @@ router.get('/signup/success', redirectAsRequiresLogin, async (req: Request, res:
                 data: {hasSeenWelcomePage: true}
             });
             res.locals.head.pageTitle = "Sign up successful";
-            return res.render('signupsuccessful');
+            return res.render('pages/accounts/signupsuccessful');
         }
     }
     return res.redirect("/");
