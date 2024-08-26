@@ -6,15 +6,13 @@ block content
             .row.mb-4.mb-lg-5
                 .col-md-8.col-sl-6.text-center.mx-auto
                     p.fw-bold.text-success.mb-2 Signup for EasyClaim
-                    h2.fw-bold Start tracking your expenses, for easy claiming
+                    h2.fw-bold Start tracking your expenses
             .row.d-flex.justify-content-center
                 .col-md-7.col-xl-5.col-xxl-4
                     .card.p-4
                         .card-body.text-center.d-flex.flex-column.align-items-center
-                            .d-flex.justify-content-center.p-4.bg-primary.shadow.bs-icon.mb-4.text-white.fs-1(style="width: 80px; height: 80px;border-radius: 50px")
-                                svg.bi.bi-person-add(xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' viewbox='0 0 16 16')
-                                    path(d='M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4')
-                                    path(d='M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z')
+                            .circle-background.translucent-blue.mx-auto.mb-3
+                                i.bi.bi-person-plus
 
                             if register_error
                                 .alert.alert-danger
