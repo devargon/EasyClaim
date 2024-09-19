@@ -19,7 +19,9 @@ const requiredEnvVars = {
   'R2_ACCESS_KEY': "Access key for Cloudflare R2 Object Storage.",
   'CF_ACCOUNT_ID': "Your Cloudflare account ID in which you've created an R2 bucket.",
   'R2_BUCKET_NAME': "Your R2 bucket's name.",
-  'R2_SECRET' : "Your R2 API access' secret."
+  'R2_SECRET' : "Your R2 API access' secret.",
+  'SMTP_USER' : "For email sending",
+  'SMTP_PASSWORD': "For email sending"
 };
 const missingEnvVars = Object.entries(requiredEnvVars).filter(([envVar]) => !process.env[envVar]);
 
