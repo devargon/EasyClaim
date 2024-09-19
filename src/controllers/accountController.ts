@@ -3,20 +3,10 @@ import isEmail from 'validator/lib/isEmail';
 import {findUserByEmail, findUserByEmailInternalUsage, registerUser} from "../services/accountService";
 import 'express-session';
 import bcrypt from 'bcrypt';
+import {validatePassword} from "../utils/validatePassword";
 
 const debug = require('debug')('easyclaim:accounts');
 
-function validatePassword(password: string) {
-    const validations = {
-        length: password.length >= 6 && password.length <= 20,
-        uppercase: /[A-Z]/.test(password),
-        lowercase: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
-    };
-
-    const isValid = Object.values(validations).every(Boolean);
-    return isValid;
-}
 
 // noinspection JSUnusedLocalSymbols
 export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -69,7 +59,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     const existingUser = await findUserByEmailInternalUsage(email);
     if (existingUser) {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`
-        return res.status(400).render('signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
+        return res.status(400).render('pages/accounts/signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
     debug(`Registering user ${req.body.email}...`);
     const user = await registerUser(name, email, password);
