@@ -1,0 +1,132 @@
+extends ../layout
+
+block head
+    link(rel="stylesheet" href="/assets/stylesheets/settings.css")
+    script(src="/assets/javascripts/passwordValidation.js")
+
+block content
+    .container-fluid.d-flex.flex-column.min-vh-100
+        main.flex-grow-1
+            // Hero Section
+            section.py-5.py-md-7.py-lg-8.py-xl-12
+                .container.px-4.px-md-6
+                    .row
+                        .col-md-4.mb-3
+                            .d-flex.align-items-center(style="max-width: 300px").mb-2
+                                .avatar-wrapper.me-3
+                                    img(src="https://via.placeholder.com/50" alt="Profile Picture" class="avatar rounded-circle")
+                                .text-container
+                                    .fw-bold.fs-4.text-break.has-user-name=user.name
+                                    .text-muted.text-break Joined #{user.createdAt.toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}
+                            nav.nav.flex-column.nav-pills.nav-gap-y-1
+                                a.nav-item.nav-link.has-icon.nav-link-faded(class=(section==='profile' ? 'active': ''), href='/settings/profile' data-toggle='tab')
+                                    i.bi.bi-label.bi-person.h5
+                                    | Profile
+                                a.nav-item.nav-link.has-icon.nav-link-faded(class=(section==='account' ? 'active': ''), href='/settings/account' data-toggle='tab')
+                                    i.bi.bi-label.bi-person-gear.h5
+                                    | Account Settings
+                        .col-md-8
+                            .card
+                                .card-body
+                                    case section
+                                        when "profile"
+                                            #profile.tab-pane.active
+                                                h5 Update Your Profile
+                                                hr
+                                                .alert-container
+                                                    if error
+                                                        .alert.alert-danger= error
+                                                    if success
+                                                        .alert.alert-success= success
+                                                form.profile-form(method="POST" action="/settings/profile")
+                                                    .mb-3
+                                                        label.form-label(for='name') Name
+                                                        input.form-control(id="name" name="name" type='text' aria-describedby='nameInputHelp' placeholder=user.name value=user.name required="", maxlength=50)
+                                                        small#nameInputHelp.form-text.text-muted
+                                                            | People who receive your claim will see this name.
+                                                    .d-flex.flex-column.flex-md-row.gap-2
+                                                        button.btn.btn-primary(type='submit')
+                                                            span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                                            | Update
+                                        when "account"
+                                            #account.tab-pane
+                                                h5 Manage your account
+                                                hr
+                                                .alert-container
+                                                    if error
+                                                        .alert.alert-danger= error
+                                                    if success
+                                                        .alert.alert-success= success
+                                                div.mb-3
+                                                    h6 Change your email
+                                                    form.email-form(method="POST", action="/settings/account/email")
+                                                        .mb-3
+                                                            input.form-control(type="email", name="email", id="email", placeholder="Email", required='', maxlength=255, value=user.email || '').rounded-3
+                                                            .invalid-feedback Please enter a valid email.
+                                                            #emailHelpBlock.form-text You will use this to sign in.
+                                                        .d-flex.flex-column.flex-md-row.gap-2
+                                                            button.btn.btn-primary(type='submit')
+                                                                span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                                                | Update email
+                                                div.mb-3
+                                                    h6 Change your password
+                                                    form.password-form(method="POST", action="/settings/account/password")
+                                                        div.mb-3
+                                                            label.form-label(for="old_password") Old password
+                                                            input.mb-3.form-control(type="password", name="old_password", id="old_password", placeholder="Old password", required='')
+                                                        .row
+                                                            .col-12.col-lg-6.mb-3
+                                                                label.form-label(for="password") New password
+                                                                input.form-control(type="password", name="password", id="password", placeholder="New Password", required='', minlength=6, maxlength=20)
+                                                                .invalid-feedback Password is required.
+                                                                .password-requirements.text-lg-start(id="password-requirements-display", style='display: none;')
+                                                                    .requirement.d-flex.align-items-center(id="length").text-danger
+                                                                        i.bi.bi-x.me-2
+                                                                        span At least 6 characters
+                                                                    .requirement.d-flex.align-items-center(id="uppercase").text-danger
+                                                                        i.bi.bi-x.me-2
+                                                                        span At least one uppercase letter
+                                                                    .requirement.d-flex.align-items-center(id="lowercase").text-danger
+                                                                        i.bi.bi-x.me-2
+                                                                        span At least one lowercase letter
+                                                                    .requirement.d-flex.align-items-center(id="number").text-danger
+                                                                        i.bi.bi-x.me-2
+                                                                        span At least one number
+                                                            .col-12.col-lg-6.mb-3
+                                                                label.form-label(for="confirmpassword") Confirm new password
+                                                                input.form-control(type="password", name="confirmpassword", id="confirmpassword", placeholder="Confirm New Password", required='', minlength=6, maxlength=20)
+                                                                .invalid-feedback Passwords should match.
+                                                                .password-requirements.text-lg-start(id="confirmpassword-requirements-display", style="display: none")
+                                                                    .requirement.d-flex.align-items-center(id="passwordMatches", style='display: none').text-danger
+                                                                        i.bi.bi-x.me-2
+                                                                        span Passwords must match!
+                                                        .d-flex.flex-column.flex-md-row.gap-2
+                                                            button.btn.btn-primary(type='submit')
+                                                                span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")
+                                                                | Change password
+                                                div
+                                                    h6.text-danger Delete Account
+                                                    p.text-muted.font-size-sm
+                                                        i.bi.bi-exclamation-triangle
+                                                        | This action is permanent.
+                                                    a.btn.btn-danger(type='button' href="/settings/account/delete") Delete Account
+
+        // Footer Section
+        footer.bg-light.py-4
+            .container
+                .row
+                    .col-sm-6.col-md-4.col-lg-2.mb-3
+                        h5.fw-bold EasyClaim
+                        ul.list-unstyled
+                            li: a.text-muted.text-decoration-none(href="/expenses") Expenses
+                            li: a.text-muted.text-decoration-none(href="/claims") Claims
+                    .col-sm-6.col-md-4.col-lg-2.mb-3
+                        h5.fw-bold Support
+                        ul.list-unstyled
+                            li: a.text-muted.text-decoration-none(href="#") Contact Us (unavailable)
+                    .col-sm-6.col-md-4.col-lg-2.mb-3
+                        h5.fw-bold Legal
+                        ul.list-unstyled
+                            li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/privacy/") Privacy Policy
+                            li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/terms/") Terms of Service
+    script(src="/assets/javascripts/settings.js")

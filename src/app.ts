@@ -12,6 +12,8 @@ import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
 import expenseAPIRouter from './routes/expenseAPIRoute';
 import claimAPIRouter from './routes/claimAPIRoute';
+import settingsRouter from './routes/settingsRoute';
+import settingsAPIRouter from './routes/settingsAPIRoute';
 import claimRoute from './routes/claimRoute';
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
@@ -78,8 +80,10 @@ app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
 app.use('/claims', claimRoute);
+app.use('/settings', settingsRouter);
 app.use('/api/expenses', expenseAPIRouter);
 app.use('/api/claims', claimAPIRouter);
+app.use('/api/settings', settingsAPIRouter);
 
 app.get('/500', function(req: Request, res: Response, next: NextFunction) {
   return res.render('pages/errors/500')

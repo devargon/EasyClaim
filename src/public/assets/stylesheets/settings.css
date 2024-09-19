@@ -1,0 +1,19 @@
+.avatar-wrapper {
+    flex-shrink: 0; /* Prevent the avatar from shrinking */
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover; /* Ensure the image fits within the circle */
+}
+
+.text-container {
+    min-width: 0; /* Ensures the text container can shrink appropriately */
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
