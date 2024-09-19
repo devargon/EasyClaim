@@ -1,0 +1,20 @@
+extends ../layout
+
+block head
+    link(rel="stylesheet" href="/assets/stylesheets/confirm-deletion.css")
+
+block content
+    .container.mx-auto.text-center(style="max-width: 768px; margin: 0 auto;")
+        main.flex-grow-1
+            section.py-5.py-md-7.py-lg-8.py-xl-12
+                .circle-background.translucent-green.mx-auto
+                    i.bi.bi-check
+                h1.display-6.fw-bold.mb-4 Account deleted
+                if error
+                    .alert.alert-danger.mb-3
+                        div !{error}
+                p.mb-3.fw-bold We are sorry to see you go.
+                p.mb-3 Your account has been permanently deleted. All of your information will be removed within the next 24 hours.
+                br
+                p.mb-3 Feel free to create an account again when you would like to use EasyClaim.
+                a.btn.btn-primary(href="/") Back to Home

@@ -1,0 +1,29 @@
+extends ../layout
+
+block head
+    link(rel="stylesheet" href="/assets/stylesheets/confirm-deletion.css")
+
+block content
+    .container.mx-auto.text-center(style="max-width: 768px; margin: 0 auto;")
+        main.flex-grow-1
+            section.py-5.py-md-7.py-lg-8.py-xl-12
+                .circle-background.translucent-red.mx-auto
+                    i.bi.bi-exclamation-triangle
+                h1.display-6.fw-bold.mb-4 Permanently Delete Your Account
+                if error
+                    .alert.alert-danger.mb-3
+                        div !{error}
+                p.mb-3.fw-bold You are about to perform a dangerous action on your account.
+                p.mb-3 If you proceed:
+                ul.text-start.d-inline-block.mb-4
+                    li Your user account, including your preferences and personal information, will be deleted immediately.
+                    li Your expenses and claims will be deleted immediately.
+                    li Any links you shared for your claims will be non-functional.
+                    li Any attachments you uploaded for your expenses will be deleted within 12 hours.
+                    li Any other data associated with your account will be deleted.
+                p This action is permanent and irreversible. You will not be able to recover any information belonging to you on your EasyClaim account once it is deleted.
+                form(method="POST", action="/settings/account/delete")
+                    .mb-3
+                        label.form-label.fw-semibold(for="password") To confirm, enter your account's password below.
+                        input.mb-3.form-control(id="password" name="password", type="password", placeholder="Enter your account's password", required="")
+                    button.btn.btn-danger.d-block.w-100#submit(type="submit") Delete Account
