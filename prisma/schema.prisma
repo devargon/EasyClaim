@@ -27,6 +27,20 @@ model User {
   @@map("user")
 }
 
+model UserOTP {
+  id          Int         @id @default(autoincrement())
+  email       String      @db.VarChar(50)
+  createdAt   DateTime    @default(now())
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestType String      @db.VarChar(100)
+  isUsed      Boolean     @default(false)
+  isOverwritten Boolean   @default(false)
+  secret      String      @db.VarChar(255) @default("0")
+  otp         String      @db.VarChar(6)
+  @@map("userotp")
+}
+
 model Claim {
   id Int @id @default(autoincrement())
   userId Int
