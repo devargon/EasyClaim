@@ -40,7 +40,7 @@ html
     link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
 
     block head
-  body
+  body.knnb
     .toast-container.position-fixed.top-0.end-0.p-3(style="z-index: 1021;")
     .container.mx-auto(style="max-width: 768px; margin: 0 auto;")
       if showHeader
@@ -50,4 +50,6 @@ html
               img.me-2(src='/assets/icons/icon-512.png', width=40, height=40)
               span EasyClaim
     block content
+    include mixins/footer
+    +footer('simplified')
     script(src="/assets/javascripts/main.js")

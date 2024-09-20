@@ -1,0 +1,48 @@
+mixin footer(type)
+    -
+        var allLinks = {
+            "EasyClaim": [
+                { text: "Expenses", href: "/expenses" },
+                { text: "Claims", href: "/claims" }
+            ],
+            "Support": [
+                { text: "Contact Us (unavailable)", href: "#" }
+            ],
+            "Legal": [
+                { text: "Privacy Policy", href: "https://nogra.app/legal/privacy/" },
+                { text: "Terms of Service", href: "https://nogra.app/legal/terms/" }
+            ]
+        };
+        var allSections = ["EasyClaim", "Support", "Legal"];
+        var simplifiedSections = ["Support", "Legal"];
+
+    footer.bg-light.py-4.footer.mt-auto
+        .container
+            if type === "simplified"
+                nav.footer-nav.d-flex.flex-wrap.mb-3.text-muted
+                    - var isFirstLink = true;
+                    each sectionName in simplifiedSections
+                        - var links = allLinks[sectionName];
+                        if links
+                            each link in links
+                                if !isFirstLink
+                                    span.separator.mx-2 &nbsp;|&nbsp;
+                                a.text-muted.text-decoration-none.me-2(href=link.href)= link.text
+                                - isFirstLink = false;
+            else
+                .row
+                    each sectionName in allSections
+                        - var sectionLinks = allLinks[sectionName];
+                        if allLinks
+                            .col-sm-6.col-md-4.col-lg-2.mb-3
+                                h5.fw-bold #{sectionName}
+                                ul.list-unstyled
+                                    each link in sectionLinks
+                                        li
+                                            a.text-muted.text-decoration-none(href=link.href)= link.text
+            p.text-secondary.text-decoration-none(style="font-size: 0.9rem")
+                | Easyclaim is protected by hCaptcha, its#{' '}
+                a.text-decoration-none(href="https://www.hcaptcha.com/privacy") Privacy Policy
+                | #{' '}and#{' '}
+                a.text-decoration-none(href="https://www.hcaptcha.com/terms") Terms of Service
+                | #{' '}apply.
