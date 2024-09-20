@@ -183,7 +183,7 @@ router.get('/forgotpassword/reset', async (req: Request, res: Response, next: Ne
         delete req.session.pwResetSession;
         return res.redirect('/accounts/forgotpassword?err=EXPIRED_SESSION')
     }
-    return res.render('pages/accounts/forgotpassword', {step: 'reset_password', error: error_message});
+    return res.render('pages/accounts/forgotpassword', {step: 'reset_password', error: error_message, requested_email: req.session.pwResetSession.email});
 })
 
 router.post('/forgotpassword/reset', async (req: Request, res: Response, next: NextFunction) => {
