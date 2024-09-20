@@ -1,5 +1,8 @@
 extends ../layout
 
+block head
+    script(src="https://js.hcaptcha.com/1/api.js", async, defer)
+
 block content
     section.py-5
         .container.py-5
@@ -49,7 +52,8 @@ block content
                                         .requirement.d-flex.align-items-center(id="passwordMatches", style='display: none').text-danger
                                             i.bi.bi-x.me-2
                                             span Passwords must match!
-                                div reCaptcha goes here
+                                div.mb-3
+                                    .h-captcha(data-sitekey=hcaptcha_sitekey)
                                 div.mb-3
                                     button.rounded-pill.btn.btn-primary.shadow.d-block.w-100#submit(type="submit")
                                         span.spinner-border.spinner-border-sm.me-1(aria-hidden='', style="display: none")

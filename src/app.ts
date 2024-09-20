@@ -72,6 +72,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.head.author = "Nogra";
   res.locals.head.url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   res.locals.head.image = "";
+
+  res.locals.hcaptcha_sitekey = process.env.HCAPTCHA_SITEKEY
   next();
 });
 

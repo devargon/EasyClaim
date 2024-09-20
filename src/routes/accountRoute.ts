@@ -15,6 +15,7 @@ import {PwResetSession} from "../../typing-stubs/express-session";
 import {generateResetToken} from "../utils/generateToken";
 import config from "../config/configLoader";
 import {sendOTPEmail} from "../utils/email/email";
+import {validateHCaptcha} from "../utils/validatehCaptcha";
 
 const router = express.Router();
 /* GET home page. */
@@ -83,6 +84,12 @@ router.get('/forgotpassword', (req: Request, res: Response, next: NextFunction) 
 
 router.post('/forgotpassword', async (req: Request, res: Response, next: NextFunction) => {
     const req_email = req.body.email
+    const h_captcha_response = req.body['h-captcha-response'];
+
+    const hCaptchaResult = await validateHCaptcha(h_captcha_response);
+    if (!hCaptchaResult) {
+        return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "You must complete the captcha."});
+    }
     if (!req_email) {
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "Please enter a valid email."});
     }
