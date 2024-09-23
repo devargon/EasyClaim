@@ -14,7 +14,7 @@ import {verifyOTP} from "../utils/generateOTP";
 import {PwResetSession} from "../../typing-stubs/express-session";
 import {generateResetToken} from "../utils/generateToken";
 import config from "../config/configLoader";
-import {sendOTPEmail} from "../utils/email/email";
+import {sendOTPEmail, sendPasswordChangedEmail} from "../utils/email/email";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
 import {pathExtractor} from "../utils/RequestPathExtractor";
 
@@ -213,7 +213,9 @@ router.post('/forgotpassword/reset', async (req: Request, res: Response, next: N
     if (error) {
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'reset_password', error: error})
     }
-    delete req.session.pwResetSession;
+    req.session.destroy(function(err) {})
+    sendPasswordChangedEmail(user);
+
     return res.status(200).render('pages/accounts/forgotpassword', {step: 'complete'});
 })
 
