@@ -8,6 +8,9 @@ import { htmlToText } from "html-to-text";
 const debug = require('debug')('easyclaim:email');
 import dotenv from "dotenv";
 import config from "../../config/configLoader";
+import {User} from "@prisma/client";
+import {PlatformData} from "../RequestPlatformExtractor";
+
 
 dotenv.config();
 
@@ -17,6 +20,12 @@ interface EmailOptions {
   html: string;
   text?: string;
 }
+
+let app_host = config.app.constants.host;
+if (app_host.endsWith("/")) {
+  app_host = app_host.substring(2);
+}
+
 
 const transporter = nodemailer.createTransport({
   host: config.smtp.host,
@@ -105,7 +114,7 @@ const sendTemplateEmail = async (
   const templatePath = join(__dirname, './templates', `${templateName}.ejs`);
 
   try {
-    const htmlContent = await ejs.renderFile(templatePath, { ...templateData, app_host: config.app.constants.host, app_name: config.app.constants.name });
+    const htmlContent = await ejs.renderFile(templatePath, { ...templateData, app_host: app_host, app_name: config.app.constants.name });
     const emailOptions: EmailOptions = {
       email: userEmail,
       subject: subject,
@@ -123,8 +132,12 @@ const sendOTPEmail = async (userEmail: string, otp: string): Promise<boolean> =>
   return sendTemplateEmail('easyclaim_otp', { otp }, userEmail, `Here is your One-Time Pin for EasyClaim`);
 };
 
-const sendNewLoginEmail = async (userEmail: string, requestId: string, status: string): Promise<boolean> => {
-  return sendTemplateEmail('easyclaim_newlogin', { requestId, status }, userEmail, `New login to EasyClaim`);
+const sendNewLoginEmail = async (user: User, platform: PlatformData): Promise<boolean> => {
+  return sendTemplateEmail('easyclaim_newlogin', { user, platform }, user.email, `New login to EasyClaim`);
+};
+
+const sendPasswordChangedEmail = async (user: User): Promise<boolean> => {
+  return sendTemplateEmail('easyclaim_passwordreset', { user }, user.email, `Your EasyClaim password has been reset`);
 };
 
 const getEmailDomain = (email: string): string | null => {
@@ -132,4 +145,4 @@ const getEmailDomain = (email: string): string | null => {
   return atIndex !== -1 ? email.slice(atIndex + 1) : null;
 };
 
-export { sendEmail, sendBulkEmail, sendOTPEmail, sendNewLoginEmail, getEmailDomain };
+export { sendEmail, sendBulkEmail, sendOTPEmail, sendNewLoginEmail, sendPasswordChangedEmail, getEmailDomain };

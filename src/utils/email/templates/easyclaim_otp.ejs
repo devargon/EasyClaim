@@ -24,11 +24,6 @@
   <![endif]-->
   <title>Here is your One-Time Pin for <%= app_name %></title>
   <style>
-    .space-x-4 > :not([hidden]) ~ :not([hidden]) {
-      --tw-space-x-reverse: 0;
-      margin-right: calc(16px * var(--tw-space-x-reverse));
-      margin-left: calc(16px * calc(1 - var(--tw-space-x-reverse)));
-    }
     .hover-important-text-decoration-underline:hover {
       text-decoration: underline !important;
     }
@@ -83,8 +78,17 @@
       <tr>
         <td style="width: 552px; max-width: 100%">
           <div class="sm-my-8" style="margin-top: 48px; margin-bottom: 48px">
-            <a href="<%= app_host %>" class="space-x-4" style="display: flex; align-items: center; text-decoration-line: none">
-              <img src="https://staticx.gh.nogra.app/<%= app_name %>/email/logo_notext.png" width="70" style="max-width: 100%; vertical-align: middle; line-height: 1; border-radius: 9999px" alt="">
+            <a href="<%= app_host %>" style="text-decoration-line: none">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto">
+                <tr>
+                  <td align="center" valign="middle" style="padding-right: 10px">
+                    <img src="https://staticx.gh.nogra.app/easyclaim/email/logo_notext.png" width="60" alt="<%= app_name %> Logo" style="max-width: 100%; vertical-align: middle; line-height: 1; border-radius: 50%">
+                  </td>
+                  <td align="center" valign="middle">
+                    <span class="dark-text-slate-50" style="font-size: 24px; font-weight: 600; color: #334155"><%= app_name %></span>
+                  </td>
+                </tr>
+              </table>
             </a>
           </div>
           <table style="width: 100%" cellpadding="0" cellspacing="0" role="none">
@@ -101,7 +105,7 @@
                   <br>
                 </p>
                 <div role="separator" style="line-height: 24px">&zwj;</div>
-                <div class="dark-bg-gray-700" style="background-color: #f3f4f6; padding-top: 12px; padding-bottom: 12px; text-align: center; font-size: 30px; font-weight: 700"><%= otp%></div>
+                <div class="dark-bg-gray-700" style="background-color: #f3f4f6; padding-top: 12px; padding-bottom: 12px; text-align: center; font-size: 30px; font-weight: 700"><%= otp %></div>
                 <div role="separator" style="line-height: 24px">&zwj;</div>
                 <p>It will expire after a short duration.</p>
                 <div role="separator" style="background-color: #e2e8f0; height: 1px; line-height: 1px; margin: 32px 0">&zwj;</div>
@@ -121,7 +125,7 @@
               <td class="dark-text-slate-400" style="padding-left: 24px; padding-right: 24px; text-align: center; font-size: 12px; color: #475569">
                 <p style="margin: 0 0 16px">You received this email because you requested a password reset for your account on <%= app_name %>.</p>
                 <p style="cursor: default">
-                  <a href="<%= app_host %>" class="dark-text-indigo-400 hover-important-text-decoration-underline" style="color: #4338ca; text-decoration: none">Visit EasyClaim</a>
+                  <a href="<%= app_host %>" class="dark-text-indigo-400 hover-important-text-decoration-underline" style="color: #4338ca; text-decoration: none">Visit <%= app_name %></a>
                 </p>
               </td>
             </tr>
