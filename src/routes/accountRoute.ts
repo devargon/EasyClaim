@@ -87,7 +87,6 @@ router.post('/forgotpassword', async (req: Request, res: Response, next: NextFun
     const path = pathExtractor(req);
     const req_email = req.body.email
     const h_captcha_response = req.body['h-captcha-response'];
-    let step_to_render = 'request_otp';
 
     const hCaptchaResult = await validateHCaptcha(h_captcha_response);
     if (!hCaptchaResult) {

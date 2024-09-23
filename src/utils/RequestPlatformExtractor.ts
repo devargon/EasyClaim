@@ -30,7 +30,3 @@ export function platformExtractor(req: Request): PlatformData {
         ipAddress: ip,
     };
 }
-
-function processPlatformData(data: PlatformData) {
-    console.log(data.device, data.location, data.ipAddress);
-}
