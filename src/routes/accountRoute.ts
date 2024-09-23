@@ -16,6 +16,7 @@ import {generateResetToken} from "../utils/generateToken";
 import config from "../config/configLoader";
 import {sendOTPEmail} from "../utils/email/email";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
+import {pathExtractor} from "../utils/RequestPathExtractor";
 
 const router = express.Router();
 /* GET home page. */
@@ -83,12 +84,18 @@ router.get('/forgotpassword', (req: Request, res: Response, next: NextFunction) 
 })
 
 router.post('/forgotpassword', async (req: Request, res: Response, next: NextFunction) => {
+    const path = pathExtractor(req);
     const req_email = req.body.email
     const h_captcha_response = req.body['h-captcha-response'];
+    let step_to_render = 'request_otp';
 
     const hCaptchaResult = await validateHCaptcha(h_captcha_response);
     if (!hCaptchaResult) {
-        return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "You must complete the captcha."});
+        if (path === "/accounts/forgotpassword/verify") {
+            return res.redirect('/accounts/forgotpassword/verify?err=COMPLETE_CAPTCHA');
+        } else {
+            return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "You must complete the captcha."});
+        }
     }
     if (!req_email) {
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "Please enter a valid email."});
@@ -131,7 +138,8 @@ router.get('/forgotpassword/verify', async (req: Request, res: Response, next: N
     }
     const errorCodes: {[key: string]: string} = {
         'OTP_REQ_COOLDOWN': 'You have already requested for an OTP in the past minute. Please enter it below.',
-        'OTP_NOT_VERIFIED': 'You have not verified that your account belongs to you. Please enter the OTP below.'
+        'OTP_NOT_VERIFIED': 'You have not verified that your account belongs to you. Please enter the OTP below.',
+        'COMPLETE_CAPTCHA': 'You must complete the captcha to request for a new OTP.'
 
     }
     const error_message = req.query.err ? errorCodes[req.query.err as string] || "An unknown error occured" : null;
