@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import session from 'express-session';
 import indexRouter from './routes/indexRoute';
-import usersRouter from './routes/users';
 import accountsRouter from './routes/accountRoute';
 import expenseRouter from './routes/expenseRoute';
 import {fetchUser} from "./middlewares/fetchUser";
@@ -79,7 +78,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/expenses', expenseRouter);
 app.use('/claims', claimRoute);
