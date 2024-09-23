@@ -5,6 +5,7 @@ import 'express-session';
 import bcrypt from 'bcrypt';
 import {validatePassword} from "../utils/validatePassword";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
+import {platformExtractor} from "../utils/RequestPlatformExtractor";
 
 const debug = require('debug')('easyclaim:accounts');
 
@@ -37,6 +38,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     req.session.userId = found_user.id;
     req.session.save();
     console.log(`Session: ${req.session}`);
+    const platform = platformExtractor(req);
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
