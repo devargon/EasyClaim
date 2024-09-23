@@ -10,9 +10,7 @@ export interface PlatformData {
 
 export function platformExtractor(req: Request): PlatformData {
     const userAgent = req.get('User-Agent') || null;
-    const ip = Array.isArray(req.headers['x-forwarded-for'])
-        ? req.headers['x-forwarded-for'][0]
-        : req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
+    const ip = req.get('x-forwarded-for') || req.socket.remoteAddress || req.ip || null;
 
     let derivedLocation: string | null = null;
 
