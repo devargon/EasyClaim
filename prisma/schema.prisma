@@ -23,6 +23,7 @@ model User {
   hasSeenWelcomePage Boolean @default(false)
   expenses Expense[]
   claims Claim[]
+  otpRequests UserOTP[]
 
   @@map("user")
 }
