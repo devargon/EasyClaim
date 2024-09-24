@@ -6,6 +6,12 @@ import {createClaim, deleteClaim, findClaimByIdAndUserId, updateClaim, setClaimT
 import prisma from "../config/db";
 
 import { v4 as uuidv4 } from 'uuid';
+import {
+    insertClaimDeleted,
+    insertClaimStatusChanged,
+    insertClaimSubmitted,
+    insertClaimUpdated
+} from "../services/auditLogService";
 
 const router = express.Router();
 
@@ -125,6 +131,7 @@ router.post("/:claimId/cancel", redirectAsRequiresLogin, async (req: Request, re
         return res.status(400).json({error_message: `Claim #${claimIdActual} is complete and can't be deleted.`});
     } else {
         const a = await deleteClaim(claim.id);
+        await insertClaimDeleted(req.user.id, claim.id, req);
         if (a) {
             return res.status(200).json({success_message: `Expense #${claimIdActual} deleted.`});
         } else {
@@ -151,6 +158,7 @@ router.post("/:claimId/complete", redirectAsRequiresLogin, async (req: Request, 
     } else {
         const a = await setClaimToComplete(claim.id);
         if (a) {
+            await insertClaimStatusChanged(req.user.id, claim.id, claim.status, "COMPLETED", req);
             return res.status(200).json({success_message: `Expense #${claimIdActual} complete.`});
         } else {
             return res.status(404).json({error_message: `Expense #${claimIdActual} not found.`});
@@ -180,6 +188,10 @@ router.post("/:claimId/edit", redirectAsRequiresLogin, async (req: Request, res:
     } else {
         const updatedClaim = await updateClaim(existingClaim.id, offsetAmount);
         if (updatedClaim) {
+            await insertClaimUpdated(req.user.id, existingClaim.id, {
+                offsetAmount: { old: existingClaim.claimOffset, new: updatedClaim.claimOffset},
+                totalAmountAfterOffset: {old: existingClaim.totalAmountAfterOffset, new: updatedClaim.totalAmountAfterOffset},
+            }, req);
             return res.status(200).json(updatedClaim);
         } else {
             return res.status(404).json({error_message: `Expense #${claimId} not found.`});
@@ -227,6 +239,7 @@ router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response,
 
     const claim = await createClaim(req.user.id, foundExpensesIds, expenseTotal.value, offsetAmount, uuidv4());
     if (claim) {
+        await insertClaimSubmitted(req.user.id, claim.id, Number(claim.claimOffset), Number(claim.totalAmount), Number(claim.totalAmountAfterOffset), req);
         return res.status(200).json(claim);
     } else {
         return res.status(500).json({error_message: "Claim might not have been created properly."});

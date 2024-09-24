@@ -8,6 +8,13 @@ import {deleteAttachment, findAttachmentsOfExpense, findExpenseByIdAndUser} from
 import R2_URL, {generatePresignedUrl} from "../config/r2";
 import { v4 as uuidv4 } from 'uuid';
 import {Expense} from "@prisma/client";
+import {
+    insertAttachmentDeleted,
+    insertAttachmentPresignedUrlRequested, insertAttachmentUploaded,
+    insertExpenseCreated,
+    insertExpenseDeleted,
+    insertExpenseUpdated
+} from "../services/auditLogService";
 
 const router = express.Router();
 
@@ -120,6 +127,7 @@ router.post('/new', redirectAsRequiresLogin, validateExpenseMiddleware, async (r
             render: renderedExpenseCard
         },
     }
+    await insertExpenseCreated(req.user.id, new_expense.id, new_expense.amount.toString(), new_expense.categoryId, req);
     res.status(201).json(return_obj);
 })
 
@@ -143,6 +151,7 @@ router.post("/:expenseId/delete", redirectAsRequiresLogin, async (req: Request, 
     } else {
         const a = await prisma.expense.delete({where: {userId: req.user.id, id: expense.id}});
         if (a) {
+            await insertExpenseDeleted(req.user.id, expense.id, req.user.id === expense.userId ? "user" : "admin", null, req);
             return res.status(200).json({success_message: `Expense #${expenseIdActual} deleted.`});
         } else {
             return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
@@ -155,23 +164,37 @@ router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddlewa
     if (!req.user) {
         return res.status(401).send();
     }
+
     const expenseId = req.params.expenseId;
     const expenseIdActual = parseInt(expenseId, 10);
 
-    const { amount, category, spent_on, description } = res.locals.expense;
-
     if (isNaN(expenseIdActual)) {
-        return res.status(400).json({error_message: "not a valid expenseId"});
+        return res.status(400).json({ error_message: "Not a valid expenseId" });
     }
-    const expense = await prisma.expense.findFirst({where: {userId: req.user.id, id: expenseIdActual}, include: {category: true}});
+
+    const expense = await prisma.expense.findFirst({
+        where: { userId: req.user.id, id: expenseIdActual },
+        include: { category: true }
+    });
+
     if (!expense) {
-        return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+        return res.status(404).json({ error_message: `Expense #${expenseIdActual} not found.` });
     }
+
     if (expense.claimId) {
-        return res.status(400).json({error_message: `Expense #${expenseIdActual} can't be edited while it's linked to a claim.`});
+        return res.status(400).json({ error_message: `Expense #${expenseIdActual} can't be edited while it's linked to a claim.` });
     } else if (expense.claimComplete) {
-        return res.status(400).json({error_message: `Expense #${expenseIdActual} has been claimed and can't be edited for tracking purposes.`});
+        return res.status(400).json({ error_message: `Expense #${expenseIdActual} has been claimed and can't be edited for tracking purposes.` });
     } else {
+        const { amount, category, spent_on, description } = res.locals.expense;
+
+        const changedFields: Record<string, { old: any; new: any }> = {};
+
+        if (expense.amount !== amount) { changedFields.amount = { old: expense.amount, new: amount }; }
+        if (expense.description !== description) { changedFields.description = { old: expense.description, new: description }; }
+        if (expense.categoryId !== category) { changedFields.categoryId = { old: expense.categoryId, new: category }; }
+        if (expense.spentOn.getTime() !== spent_on.getTime()) { changedFields.spentOn = { old: expense.spentOn, new: spent_on }; }
+
         const updatedExpense = await prisma.expense.update({
             where: {
                 id: expenseIdActual,
@@ -189,20 +212,24 @@ router.post("/:expenseId/edit", redirectAsRequiresLogin, validateExpenseMiddlewa
                 category: true,
                 attachments: true
             }
-        })
+        });
+
         if (updatedExpense) {
+            if (Object.keys(changedFields).length > 0) {
+                await insertExpenseUpdated(req.user.id, expenseIdActual, changedFields, req);
+            }
+
             const expense_html = await renderExpenseCardForFrontend(undefined, undefined, updatedExpense);
             const return_obj = {
                 expense: updatedExpense,
                 html: expense_html
-            }
+            };
             res.status(200).json(return_obj);
         } else {
-            return res.status(404).json({error_message: `Expense #${expenseIdActual} not found.`});
+            return res.status(404).json({ error_message: `Expense #${expenseIdActual} not found.` });
         }
-
     }
-})
+});
 
 router.get("/:expenseId", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -255,6 +282,7 @@ router.post('/:expenseId/attachments/upload', redirectAsRequiresLogin, async (re
     const metaValue = `Attachment for Expense ${expense.id}`;
     const path = `${req.user.id}/${expense.id}/attachments/${uuidv4()}/`;
     const url = await generatePresignedUrl(path, fileName, fileSize, contentType, metaValue);
+    await insertAttachmentPresignedUrlRequested(req.user.id, "expense_attachment", req);
     return res.status(200).json(url);
 })
 
@@ -297,6 +325,7 @@ router.post('/:expenseId/attachments', redirectAsRequiresLogin, async (req: Requ
         },
     });
     if (attachment) {
+        await insertAttachmentUploaded(req.user.id, attachment.id, expenseId, fileName, fileSize, mimeType, req);
         const expense_html = await renderExpenseCardForFrontend(expenseId, req.user.id);
         if (expense_html) {
             return res.status(201).json({attachment, html: expense_html});
@@ -330,6 +359,7 @@ router.post(`/:expenseId/attachments/:attachmentId/delete`, redirectAsRequiresLo
     }
     const deletedAttachment = await deleteAttachment(attachmentId, expenseId, req.user.id);
     if (deletedAttachment) {
+        await insertAttachmentDeleted(req.user.id, deletedAttachment.id, "user", null, req);
         const expense_html = await renderExpenseCardForFrontend(expenseId, req.user.id);
         if (expense_html) {
             return res.status(200).json({success_message: "Attachment deleted.", html: expense_html});

@@ -17,6 +17,7 @@ import config from "../config/configLoader";
 import {sendOTPEmail, sendPasswordChangedEmail} from "../utils/email/email";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
 import {pathExtractor} from "../utils/RequestPathExtractor";
+import {insertPasswordResetCompleted, insertPasswordResetRequested} from "../services/auditLogService";
 
 const router = express.Router();
 /* GET home page. */
@@ -123,6 +124,7 @@ router.post('/forgotpassword', async (req: Request, res: Response, next: NextFun
             resetTokenExpiresAt: undefined,
         }
         req.session.pwResetSession = pwResetSession;
+        await insertPasswordResetRequested(user_from_email.id, "email", req);
         return res.redirect('/accounts/forgotpassword/verify');
     } catch (e) {
         console.error(`Error generating OTP for ${user_from_email.id}:${user_from_email.email}: `, e);
@@ -212,6 +214,7 @@ router.post('/forgotpassword/reset', async (req: Request, res: Response, next: N
     if (error) {
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'reset_password', error: error})
     }
+    await insertPasswordResetCompleted(user.id, "otp", req);
     req.session.destroy(function(err) {})
     sendPasswordChangedEmail(user);
 

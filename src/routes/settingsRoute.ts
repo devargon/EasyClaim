@@ -6,6 +6,7 @@ import pug from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
 import {processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import bcrypt from "bcrypt";
+import {insertAccountDeleted, insertProfileUpdated} from "../services/auditLogService";
 
 const router = express.Router();
 
@@ -40,6 +41,8 @@ router.post('/profile', redirectAsRequiresLogin, async (req: Request, res: Respo
 router.post('/account/email', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) { return res.status(401).send();}
     const { error, success } = await processEmailUpdate(req.user.id, req.body.email);
+    const changedFields: Record<string, { old: any; new: any }> = {};
+    if (req.user.email !== req.body.email) { changedFields.email = { old: req.user.email, new: req.body.email }; }
 
     if (error) {
         return res.status(400).render('pages/settings/settings', {section: 'account', error: error})
@@ -47,6 +50,7 @@ router.post('/account/email', redirectAsRequiresLogin, async (req: Request, res:
     if (success) {
         req.user = success;
         res.locals.user = success;
+        await insertProfileUpdated(req.user.id, changedFields, req);
         return res.render('pages/settings/settings', {section: 'account', success: "Your email has been updated."});
     }
     return res.status(500).render('pages/errors/500');
@@ -74,6 +78,7 @@ router.post('/account/delete', redirectAsRequiresLogin, async (req: Request, res
             }
         })
         if (result) {
+            await insertAccountDeleted(req.user.id, "user", "user_initiated", req);
             return res.status(200).render('pages/settings/accountdeleted');
         } else {
             return res.status(500).render('pages/settings/accountdeleted', {error: "An error occured while trying to delete your account. Please try again later."});

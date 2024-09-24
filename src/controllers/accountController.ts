@@ -7,6 +7,7 @@ import {validatePassword} from "../utils/validatePassword";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
 import {platformExtractor} from "../utils/RequestPlatformExtractor";
 import {sendNewLoginEmail} from "../utils/email/email";
+import {insertAccountCreated, insertUserLoginFailure, insertUserLoginSuccess} from "../services/auditLogService";
 
 const debug = require('debug')('easyclaim:accounts');
 
@@ -17,12 +18,14 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     console.log("Login request received");
 
     if (!req.body.email || !req.body.password) {
+        await insertUserLoginFailure(req.body.email, "emptyfield", "password", req);
         return res.status(400).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     debug(`Finding user with email ${req.body.email}`);
     console.log(`Email: ${req.body.email}, Password: ${req.body.password ? "Present" : "Not present"}`)
     const found_user = await findUserByEmailInternalUsage(req.body.email);
     if (!found_user) {
+        await insertUserLoginFailure(req.body.email, "accountnotfound", "password", req);
         return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     console.log(`Found user ${found_user}`);
@@ -33,14 +36,14 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     debug(`Password match result for ${req.body.email}:  ${isValidPassword}`);
     console.log("Compared password hashes")
     if (!isValidPassword) {
-        console.log("Password is invalid");
+        await insertUserLoginFailure(req.body.email, "wrongpassword", "password", req);
         return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
     req.session.userId = found_user.id;
     req.session.save();
-    console.log(`Session: ${req.session}`);
     const platform = platformExtractor(req);
     sendNewLoginEmail(found_user, platform);
+    await insertUserLoginSuccess(found_user.id, req.body.email, "password", req);
     return res.status(201).redirect(req.body.redirect || "/");
 }
 
@@ -74,6 +77,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     debug(`Registering user ${req.body.email}...`);
     const user = await registerUser(name, email, password);
     debug(`Registration completed for ${req.body.email}`);
+    await insertAccountCreated(user.id, null, name, email, req);
     req.session.userId = user.id;
     req.session.save();
     return res.status(201).redirect("/accounts/signup/success");
