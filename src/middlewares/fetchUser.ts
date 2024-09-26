@@ -12,7 +12,7 @@ export async function fetchUser(req: Request, res: Response, next: NextFunction)
     if (req.session.userId) {
         try {
             const user = await findUserByIdInternalUsage(req.session.userId);
-            if (user) {
+            if (user && user.active !== "DELETED") {
                 req.user = user;
                 res.locals.user = user;
             }

@@ -101,7 +101,7 @@ router.post('/forgotpassword', async (req: Request, res: Response, next: NextFun
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'request_otp', error: "Please enter a valid email."});
     }
     const user_from_email = await findUserByEmailInternalUsage(req_email);
-    if (!user_from_email) {
+    if (!user_from_email || user_from_email.active === "DELETED") {
         return res.status(200).send();
     }
     const OTPRequest = await getLatestOtpRequest(user_from_email.id, "PASSWORD_RESET");
@@ -207,7 +207,7 @@ router.post('/forgotpassword/reset', async (req: Request, res: Response, next: N
         return res.redirect('/accounts/forgotpassword?err=EXPIRED_SESSION')
     }
     const user = await findUserByEmailInternalUsage(req.session.pwResetSession.email);
-    if (!user) {
+    if (!user || user.active === "DELETED") {
         return res.status(200).redirect('/accounts/forgotpassword?err=MISSING_USER');
     }
     const { error, success } = await processPasswordUpdate(user.id, null, req.body.password, req.body.confirmpassword, true);

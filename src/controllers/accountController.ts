@@ -24,7 +24,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     debug(`Finding user with email ${req.body.email}`);
     console.log(`Email: ${req.body.email}, Password: ${req.body.password ? "Present" : "Not present"}`)
     const found_user = await findUserByEmailInternalUsage(req.body.email);
-    if (!found_user) {
+    if (!found_user || found_user.active === "DELETED") {
         await insertUserLoginFailure(req.body.email, "accountnotfound", "password", req);
         return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
@@ -70,7 +70,7 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
     }
     debug(`Checking for existing user for ${req.body.email}`);
     const existingUser = await findUserByEmailInternalUsage(email);
-    if (existingUser) {
+    if (existingUser && existingUser.active !== "DELETED") {
         register_error = `An account with this email already exists. Try <a href="/accounts/login">logging in</a> instead.`
         return res.status(400).render('pages/accounts/signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }

@@ -38,7 +38,7 @@ export async function findUserByEmailInternalUsage(email: string) {
 export async function findUserByEmail(email: string, showSensitiveInformation: boolean = false) {
     return prisma.user.findUnique({
         where: {email},
-        select: { id: true, name: true, createdAt: true },
+        select: { id: true, name: true, createdAt: true, active: true },
     });
 }
 
@@ -135,7 +135,7 @@ export async function processEmailUpdate(userId: number, email: string) {
         return { error: "Please enter a valid email address." };
     }
     const userWithSameEmail = await findUserByEmail(email);
-    if (userWithSameEmail) {
+    if (userWithSameEmail && userWithSameEmail.active !== "DELETED") {
         return { error: `"${email}" has already been registered to an account.`}
     }
 
@@ -157,7 +157,7 @@ export async function processPasswordUpdate(userId: number, old_password: null |
         return { error: "Your new password does not meet the minimum requirements. You need 6-20 characters in your passwords, of which includes at least 1 uppercase letter, 1 lowercase letter and 1 number." };
     }
     const currentUser = await findUserByIdInternalUsage(userId);
-    if (!currentUser) {
+    if (!currentUser || currentUser.active === "DELETED") {
         console.error(`Unable to find user with id ${userId}`);
         return {} // trigger 500
     }
