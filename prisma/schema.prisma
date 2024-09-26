@@ -19,27 +19,22 @@ model User {
   email       String      @db.VarChar(255) @unique
   password    String      @db.VarChar(255)
   createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
   attachments Attachment[]
   hasSeenWelcomePage Boolean @default(false)
   expenses Expense[]
   claims Claim[]
+  locked Boolean @default(false)
+  active UserStatus @default(ACTIVE)
   otpRequests UserOTP[]
-
+  auditLogEntries AuditLog[]
   @@map("user")
 }
 
-model UserOTP {
-  id          Int         @id @default(autoincrement())
-  email       String      @db.VarChar(50)
-  createdAt   DateTime    @default(now())
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  requestType String      @db.VarChar(100)
-  isUsed      Boolean     @default(false)
-  isOverwritten Boolean   @default(false)
-  secret      String      @db.VarChar(255) @default("0")
-  otp         String      @db.VarChar(6)
-  @@map("userotp")
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
 }
 
 model Claim {
@@ -104,4 +99,59 @@ model Attachment {
 enum Status {
   PENDING
   COMPLETED
+}
+
+model AuditLog {
+  id          Int         @id @default(autoincrement())
+  userId      Int?
+  user        User?       @relation(fields: [userId], references: [id])
+  action      AuditAction
+  timestamp   DateTime    @default(now())
+  details     Json?
+  ipAddress   String?     @db.VarChar(45)
+  userAgent   String?     @db.VarChar(255)
+
+  @@map("audit_log")
+}
+
+enum AuditAction {
+  USER_LOGIN_SUCCESS
+  USER_LOGIN_FAILURE
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  PROFILE_UPDATED
+  ACCOUNT_CREATED
+  ACCOUNT_DELETED
+  ROLE_CHANGED
+  PERMISSION_CHANGED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  TWO_FACTOR_ENABLED
+  TWO_FACTOR_DISABLED
+  SESSION_TERMINATED
+  CLAIM_SUBMITTED
+  CLAIM_UPDATED
+  CLAIM_STATUS_CHANGED
+  CLAIM_DELETED
+  EXPENSE_CREATED
+  EXPENSE_UPDATED
+  EXPENSE_DELETED
+  ATTACHMENT_PRESIGNED_URL_REQUESTED
+  ATTACHMENT_UPLOADED
+  ATTACHMENT_DELETED
+}
+
+model UserOTP {
+  id          Int         @id @default(autoincrement())
+  email       String      @db.VarChar(50)
+  createdAt   DateTime    @default(now())
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  requestType String      @db.VarChar(100)
+  isUsed      Boolean     @default(false)
+  isOverwritten Boolean   @default(false)
+  secret      String      @db.VarChar(255) @default("0")
+  otp         String      @db.VarChar(6)
+  @@map("userotp")
 }
