@@ -185,3 +185,35 @@ export async function updateUser(id: number, data: Partial<UserUpdateData>) {
         data: data
     })
 }
+
+export async function deleteUser(id: number) {
+    return prisma.$transaction(async (tx) => {
+        await tx.attachment.deleteMany({
+            where: {
+                uploaderId: id
+            }
+        })
+        await tx.claim.deleteMany({
+            where: {
+                userId: id
+            }
+        })
+        await tx.expense.deleteMany({
+            where: {
+                userId: id
+            }
+        })
+
+        const uniqueName = `DeletedUser${id}`;
+        const uniqueEmail = `easyclaim_deleteduser_${id}@deleted.nogra.app`;
+        return prisma.user.update({
+            where: {id},
+            data: {
+                name: uniqueName,
+                email: uniqueEmail,
+                active: "DELETED",
+                deletedAt: new Date(),
+            }
+        })
+    })
+}

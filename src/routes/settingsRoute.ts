@@ -4,7 +4,7 @@ import prisma from "../config/db";
 import currency from "currency.js";
 import pug from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
-import {processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
+import {deleteUser, processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import bcrypt from "bcrypt";
 import {insertAccountDeleted, insertProfileUpdated} from "../services/auditLogService";
 
@@ -72,11 +72,7 @@ router.post('/account/delete', redirectAsRequiresLogin, async (req: Request, res
         return res.status(401).render('pages/settings/confirmaccountdeletion', {error: "Your password is incorrect."});
     }
     try {
-        const result = await prisma.user.delete({
-            where: {
-                id: req.user.id
-            }
-        })
+        const result = await deleteUser(req.user.id);
         if (result) {
             await insertAccountDeleted(req.user.id, "user", "user_initiated", req);
             return res.status(200).render('pages/settings/accountdeleted');
