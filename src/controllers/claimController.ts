@@ -22,7 +22,15 @@ export const showClaims = async (req: Request, res: Response, next: NextFunction
         }
     });
     res.locals.head.pageTitle = "My Claims";
-    res.render('pages/claims', {claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value});
+    const flashMessages = req.flash("claim_message")
+    let alerts = [];
+
+    for (const flashMsg of flashMessages) {
+        const splitMsg = flashMsg.split(":");
+        const flashAlert = { tpe: splitMsg[0], content: splitMsg.slice(1).join(":") };
+        alerts.push(flashAlert);
+    }
+    res.render('pages/claims', {claims, formatMoney, pendingClaimAmt: pendingClaimAmt.value, completedClaimAmt: completedClaimAmt.value, alerts: alerts});
 }
 
 export const showSharedClaim = async (req: Request, res: Response, next: NextFunction) => {

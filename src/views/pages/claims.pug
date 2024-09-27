@@ -104,6 +104,8 @@ block content
                                     | Submit
         section.py-3
             .container.py-5
+                each alert in alerts
+                    div.alert.text-center.mb-1.w-100(class="alert-" + alert.tpe) #{alert.content}
                 .d-flex.flex-column.flex-md-row.justify-content-between.mb-4
                     div
                         h1.fw-medium Claims

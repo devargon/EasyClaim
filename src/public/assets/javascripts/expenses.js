@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (newClaimResponse.ok) {
-            return completeError("OK");
+            return window.location.href = "/claims";
         } else {
             try {
                 const json_content = await newClaimResponse.json();

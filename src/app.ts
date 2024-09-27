@@ -1,5 +1,6 @@
 import 'express-async-errors';
 import express, {Request, Response, Application, NextFunction} from "express";
+import flash from "express-flash";
 import createError from 'http-errors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
@@ -76,6 +77,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.hcaptcha_sitekey = process.env.HCAPTCHA_SITEKEY
   next();
 });
+app.use(flash());
 
 app.use('/', indexRouter);
 app.use('/accounts', accountsRouter);

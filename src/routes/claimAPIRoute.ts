@@ -240,6 +240,7 @@ router.post('/new', redirectAsRequiresLogin, async (req: Request, res: Response,
     const claim = await createClaim(req.user.id, foundExpensesIds, expenseTotal.value, offsetAmount, uuidv4());
     if (claim) {
         await insertClaimSubmitted(req.user.id, claim.id, Number(claim.claimOffset), Number(claim.totalAmount), Number(claim.totalAmountAfterOffset), req);
+        req.flash("claim_message", "success:Your claim has been created. Remember to share it!")
         return res.status(200).json(claim);
     } else {
         return res.status(500).json({error_message: "Claim might not have been created properly."});
