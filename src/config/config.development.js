@@ -13,6 +13,10 @@ module.exports = {
                     password: 900
                 }
             }
+        },
+        attachments: {
+            maxFileNo: 3,
+            maxFileSizeInBytes: 8000000
         }
     },
     smtp: {

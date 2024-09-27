@@ -8,6 +8,7 @@ import {deleteAttachment, findAttachmentsOfExpense, findExpenseByIdAndUser} from
 import R2_URL, {generatePresignedUrl} from "../config/r2";
 import { v4 as uuidv4 } from 'uuid';
 import {Expense} from "@prisma/client";
+import config from "../config/configLoader";
 import {
     insertAttachmentDeleted,
     insertAttachmentPresignedUrlRequested, insertAttachmentUploaded,
@@ -251,8 +252,9 @@ router.post('/:expenseId/attachments/upload', redirectAsRequiresLogin, async (re
     if (!req.user) {
         return res.status(401).send();
     }
-    const UPLOAD_LIMIT = 3
-    const FILESIZE_LIMIT = 8000000
+    //TODO move this to config
+    const UPLOAD_LIMIT = config.app.attachments.maxFileNo;
+    const FILESIZE_LIMIT = config.app.attachments.maxFileSizeInBytes;
 
     const expenseId = parseInt(req.params.expenseId, 10);
     if (isNaN(expenseId)) {

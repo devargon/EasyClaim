@@ -98,14 +98,18 @@ block content
                                         div.text-body-secondary Invoices, receipts, etc
                                     div.text-muted(id="manageExpenseAttachmentsExpenseDetails", style="font-size: 0.8rem") Transport &middot; Grab for mummy &middot; $19.23
                             .modal-body
-                                p.text-body-secondary.text-center Drag and drop files or click to select. You can remove any files before uploading.
+                                p.text-body-secondary.text-center
+                                    | You can upload up to#{' '}
+                                    span.file-no-limit-display
+                                    |  files (max#{' '}
+                                    span.file-size-limit-display
+                                    | #{' '} each).
                                 .upload-prompt#expense-attachment-upload(style="height: 10rem")
                                     h1.text-muted-foreground
                                         i.bi.bi-upload
                                     div.fw-medium.text-muted-foreground Drag and drop files here
                                     div.text-muted-foreground or click to select files
                                 input#expense-attachment-file-input(type="file" style="display: none" accept=".jpg,.jpeg,.png,.pdf", multiple='')
-                                // File items UI will go here
                                 .file-display#expense-attachments-display(style="gap: 2px;")
                                     .file-item
                                         .file-details

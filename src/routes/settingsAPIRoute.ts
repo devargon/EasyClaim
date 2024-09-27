@@ -4,6 +4,7 @@ import prisma from "../config/db";
 import currency from "currency.js";
 import pug from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
+import config from "../config/configLoader";
 import {processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import {insertExpenseUpdated, insertPasswordChanged, insertProfileUpdated} from "../services/auditLogService";
 
@@ -64,6 +65,13 @@ router.post('/account/password', redirectAsRequiresLogin, async (req: Request, r
         return res.status(200).json({});
     }
     return res.status(500).send();
+})
+
+router.get("/limits/upload", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) { return res.status(401).send();}
+    const UPLOAD_LIMIT = config.app.attachments.maxFileNo;
+    const FILESIZE_LIMIT = config.app.attachments.maxFileSizeInBytes;
+    return res.json({fileLimit: UPLOAD_LIMIT, fileSize: FILESIZE_LIMIT})
 })
 
 export default router;
