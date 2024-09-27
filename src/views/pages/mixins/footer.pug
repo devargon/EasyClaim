@@ -40,9 +40,13 @@ mixin footer(type)
                                     each link in sectionLinks
                                         li
                                             a.text-muted.text-decoration-none(href=link.href)= link.text
-            p.text-secondary.text-decoration-none(style="font-size: 0.9rem")
-                | Easyclaim is protected by hCaptcha, its#{' '}
+            p.text-secondary.text-decoration-none.mb-0(style="font-size: 0.9rem")
+                | Easyclaim is protected by hCaptcha and its
+                |
                 a.text-decoration-none(href="https://www.hcaptcha.com/privacy") Privacy Policy
-                | #{' '}and#{' '}
+                |  and
+                |
                 a.text-decoration-none(href="https://www.hcaptcha.com/terms") Terms of Service
-                | #{' '}apply.
+                |  apply.
+            p.text-secondary.text-decoration-none(style="font-size: 0.9rem") © Nogra 2024
+
