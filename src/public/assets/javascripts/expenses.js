@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let pendingFiles = [];
     let currentExpenseId = 0;
 
-    const uploadModal = new bootstrap.Modal(document.getElementById("manageExpenseAttachmentsModal"));
+    const uploadModalElement = document.getElementById("manageExpenseAttachmentsModal")
+    const uploadModal = new bootstrap.Modal(uploadModalElement);
 
     function initializeExpenseCardAttachments(expenseCard) {
         if (viewerInstances[expenseCard.id]) {
@@ -445,6 +446,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function makeUploadModalUnescapable(truefalse) {
+        const doneButton = document.querySelector('button.btn.btn-primary[data-bs-dismiss="modal"]');
+        if (truefalse) {
+            uploadModal._config.keyboard = false;
+            uploadModal._config.backdrop = 'static';
+            uploadModal.handleUpdate();
+            doneButton.setAttribute("disabled", "");
+            doneButton.classList.add("disabled");
+        } else {
+            uploadModal._config.keyboard = true;
+            uploadModal._config.backdrop = true;
+            doneButton.removeAttribute("disabled");
+            doneButton.classList.remove("disabled");
+        }
+        uploadModal.handleUpdate();
+    }
+
     function resetExpenseForm() {
         expenseForm.reset();
         expenseForm.removeAttribute("data-expenseid");
@@ -469,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return fileItem.completeError("You can only upload a maximum of 3 files. (FE)");
                 }
                 pendingFiles.push(fileItem);
-
+                makeUploadModalUnescapable(pendingFiles.length > 0);
                 if (!['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'].includes(actualMimeType)) {
                     return fileItem.completeError('Only JPGs, PNGs and PDFs are supported.');
                 }
@@ -957,6 +975,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.completeError('Failed to delete attachment.', true);
                 }
             };
+            makeUploadModalUnescapable(pendingFiles.length > 0);
         }
 
         completeError(message, isFromUpload = false) {
@@ -971,6 +990,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.remove();
                 };
             }
+
+            makeUploadModalUnescapable(pendingFiles.length > 0);
         }
 
         remove() {
