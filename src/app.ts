@@ -74,6 +74,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.head.url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   res.locals.head.image = "";
 
+  res.locals.app = {};
+  res.locals.app.host = config.app.constants.host;
+  res.locals.app.name = config.app.constants.name;
+
   res.locals.hcaptcha_sitekey = process.env.HCAPTCHA_SITEKEY
   next();
 });

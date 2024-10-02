@@ -5,7 +5,7 @@ block content
         .container.py-5
             .row.mb-4.mb-lg-5
                 .col-md-8.col-sl-6.text-center.mx-auto
-                    p.fw-bold.text-success.mb-2 Login to EasyClaim
+                    p.fw-bold.text-success.mb-2 Login to #{app.name}
                     h2.fw-bold Welcome Back
             .row.d-flex.justify-content-center
                 .col-12.col-sm-10.col-md-7.col-xl-5.col-xxl-4
@@ -28,7 +28,7 @@ block content
                                         | Log in
                             p.mb-2.text-body-secondary Forgot your password?
                                 a.ms-2.text-body-secondary(href='/accounts/forgotpassword') Reset it
-                            p.text-body-secondary New to EasyClaim?
+                            p.text-body-secondary New to #{app.name}?
                                 - var signupUrl = '/accounts/signup'
                                 if values.redirect
                                     - signupUrl += '?redirect=' + encodeURIComponent(values.redirect)

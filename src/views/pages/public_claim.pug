@@ -50,7 +50,7 @@ block content
                         .claim-expense-category.me-1 #{claim.claimOffset > 0 ? "Grand Total" : "Total"}
                     .claim-expense-amount(style='white-space: nowrap; margin-left: 10px;') #{formatMoney(claim.totalAmountAfterOffset)}
                 .text-body-secondary.mt-3.text-center
-                    p These expenses were tracked with EasyClaim.
+                    p These expenses were tracked with #{app.name}.
                     p Start tracking your own expenses, and make easy-to-share claims by#{' '}
                         a(href="/accounts/signup" target="_blank") signing up here.
                     p For free.
