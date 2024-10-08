@@ -3,7 +3,18 @@
 /**
  * Module dependencies.
  */
-
+console.log("███████╗ █████╗ ███████╗██╗   ██╗ ██████╗██╗      █████╗ ██╗███╗   ███╗")
+console.log("██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝██╔════╝██║     ██╔══██╗██║████╗ ████║")
+console.log("█████╗  ███████║███████╗ ╚████╔╝ ██║     ██║     ███████║██║██╔████╔██║")
+console.log("██╔══╝  ██╔══██║╚════██║  ╚██╔╝  ██║     ██║     ██╔══██║██║██║╚██╔╝██║")
+console.log("███████╗██║  ██║███████║   ██║   ╚██████╗███████╗██║  ██║██║██║ ╚═╝ ██║")
+console.log("╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝ By Nogra")
+console.log(" ")
+console.log("NOTICE: Unauthorized reproduction, distribution, or transmission of this code, or any portion thereof, is strictly prohibited. ")
+console.log("Any infringement will be pursued under applicable intellectual property laws. Violators will be subject to legal action ")
+console.log("and may be liable for damages. By accessing or using this material, you agree to comply with all relevant terms and conditions.")
+console.log("© Nogra 2024")
+console.log(" ")
 var app = require('../app');
 var debug = require('debug')('easyclaim:server');
 var http = require('http');
@@ -11,7 +22,6 @@ var http = require('http');
 import dotenv from 'dotenv';
 dotenv.config();
 
-console.log("Verifying required environment variables are present");
 const requiredEnvVars = {
   'SESSION_SECRET': "Encoding session data for express-session",
   'DATABASE_URL': "Connecting to the database via Prisma",
@@ -21,7 +31,9 @@ const requiredEnvVars = {
   'R2_BUCKET_NAME': "Your R2 bucket's name.",
   'R2_SECRET' : "Your R2 API access' secret.",
   'SMTP_USER' : "For email sending",
-  'SMTP_PASSWORD': "For email sending"
+  'SMTP_PASSWORD': "For email sending",
+  'R2_BUCKET_CUSTOM_DOMAIN': "For linking users to attachments stored in this bucket.",
+  'HCAPTCHA_SITEKEY': "for hCaptcha widget."
 };
 const missingEnvVars = Object.entries(requiredEnvVars).filter(([envVar]) => !process.env[envVar]);
 
