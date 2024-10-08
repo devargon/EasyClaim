@@ -20,4 +20,12 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.render('pages/index');
 });
 
+router.get('/auth/existingaccount', (req: Request, res: Response, next: NextFunction) => {
+
+  return res.status(200).render('pages/accounts/auth/base2')
+})
+router.get('/flash', (req: Request, res: Response, next: NextFunction) => {
+  return res.json(req.flash("a1b2c3"))
+})
+
 export default router;

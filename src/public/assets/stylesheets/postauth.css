@@ -1,0 +1,33 @@
+.auth-icons-container {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media(min-width: 1200px) {
+    .auth-form-container {
+        padding-left: 5rem;
+        padding-right: 5rem;
+    }
+}
+
+.auth-icons {
+    width: 100px;  /* Default for larger screens (desktop) */
+    height: 100px;
+}
+
+/* Medium and larger screens (Tablet/Desktop) */
+@media (min-width: 768px) {
+    .auth-icons {
+        width: 120px; /* Smaller on desktop */
+        height: 120px;
+    }
+}
+
+/* Extra-small screens (Mobile) */
+@media (max-width: 576px) {
+    .auth-icons {
+        width: 100px; /* Larger on mobile */
+        height: 100px;
+    }
+}
