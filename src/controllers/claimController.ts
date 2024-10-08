@@ -22,7 +22,7 @@ export const showClaims = async (req: Request, res: Response, next: NextFunction
         }
     });
     res.locals.head.pageTitle = "My Claims";
-    const flashMessages = req.flash("claim_message")
+    const flashMessages = req.flash("claim_message") as unknown as string[];
     let alerts = [];
 
     for (const flashMsg of flashMessages) {
