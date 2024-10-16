@@ -49,11 +49,12 @@ router.get('/signup', redirectIfLoggedIn, (req: Request, res: Response, next: Ne
 
 router.get('/signup/success', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     if (req.user) {
-        if (!req.user.hasSeenWelcomePage) {
-            await prisma.user.update({
-                where: {id: req.user.id},
-                data: {hasSeenWelcomePage: true}
-            });
+        if (!req.user.flags?.HAS_SEEN_WELCOME_PAGE) {
+            await prisma.userFlags.upsert({
+                where: {userId: req.user.id},
+                update: {HAS_SEEN_WELCOME_PAGE: true},
+                create: {userId: req.user.id, HAS_SEEN_WELCOME_PAGE: true}
+            })
             res.locals.head.pageTitle = "Sign up successful";
             return res.render('pages/accounts/signupsuccessful');
         }

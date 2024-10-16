@@ -20,15 +20,25 @@ model User {
   password    String      @db.VarChar(255)
   createdAt   DateTime    @default(now())
   deletedAt   DateTime?
-  attachments Attachment[]
-  hasSeenWelcomePage Boolean @default(false)
-  expenses Expense[]
-  claims Claim[]
   locked Boolean @default(false)
   active UserStatus @default(ACTIVE)
+
+  attachments Attachment[]
+  expenses Expense[]
+  claims Claim[]
   otpRequests UserOTP[]
   auditLogEntries AuditLog[]
+  flags               UserFlags?
   @@map("user")
+}
+
+model UserFlags {
+  id      Int   @id @default(autoincrement())
+  HAS_SEEN_WELCOME_PAGE Boolean @default(false)
+  WARN_OAUTH_EMAIL_DIFFERENT Boolean @default(false)
+  user    User @relation(fields: [userId], references: [id])
+  userId  Int @unique
+
 }
 
 enum UserStatus {

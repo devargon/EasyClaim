@@ -1,10 +1,13 @@
 import {findUserByIdInternalUsage} from "../services/accountService";
 import {Request, Response, NextFunction} from "express";
-import type { User } from "@prisma/client";
+import type {User, UserFlags} from "@prisma/client";
 
 declare module "express-serve-static-core" {
+    interface UserWithFlags extends User {
+        flags?: UserFlags | null;
+    }
     interface Request {
-        user?: User;
+        user?: UserWithFlags;
     }
 }
 

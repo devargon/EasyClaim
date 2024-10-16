@@ -19,19 +19,33 @@ interface UpdateOTPRequestOptions {
 
 export async function registerUser(name: string, email: string, password: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-        data: {
-            name: name,
-            email: email,
-            password: hashedPassword,
-        }
-    });
-    return user;
+    return prisma.$transaction(async (tx) => {
+        const user = await prisma.user.create({
+            data: {
+                name: name,
+                email: email,
+                password: hashedPassword,
+            },
+            include: {
+                flags: true
+            }
+        });
+        const userFlags = await prisma.userFlags.create({
+            data: {
+                userId: user.id
+            }
+        })
+        user.flags = userFlags;
+        return user;
+    })
 }
 
 export async function findUserByEmailInternalUsage(email: string) {
     return prisma.user.findUnique({
-        where: {email}
+        where: {email},
+        include: {
+            flags: true
+        }
     });
 }
 
@@ -45,6 +59,9 @@ export async function findUserByEmail(email: string, showSensitiveInformation: b
 export async function findUserByIdInternalUsage(id: number) {
     return prisma.user.findUnique({
         where: {id},
+        include: {
+            flags: true
+        }
     });
 }
 
