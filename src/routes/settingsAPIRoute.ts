@@ -7,8 +7,15 @@ import {Decimal} from "@prisma/client/runtime/library";
 import config from "../config/configLoader";
 import {processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import {insertExpenseUpdated, insertPasswordChanged, insertProfileUpdated} from "../services/auditLogService";
+import multer from "multer";
+import {loadMime} from "../utils/checkMime";
+import {uploadProfilePicture} from "../services/settingsService";
+import {v4 as uuidv4} from "uuid";
 
 const router = express.Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.post('/profile', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.body);
@@ -72,6 +79,42 @@ router.get("/limits/upload", redirectAsRequiresLogin, async (req: Request, res: 
     const UPLOAD_LIMIT = config.app.attachments.maxFileNo;
     const FILESIZE_LIMIT = config.app.attachments.maxFileSizeInBytes;
     return res.json({fileLimit: UPLOAD_LIMIT, fileSize: FILESIZE_LIMIT})
+})
+
+router.post("/avatar", upload.single('avatar'), redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) { return res.status(401).send();}
+    if (!req.file) {
+        return res.status(400).json({error_message: "No file uploaded"});
+    }
+
+    const fileBuffer = req.file.buffer;
+    let fileName = req.file.originalname;
+
+    const mimeType = await loadMime(fileBuffer);
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
+        return res.status(400).json({error_message: "Wrong file format: Only JPEG/PNG images are accepted for a profile picture."})
+    }
+    let mimeTypeExtension = mimeType.substring(mimeType.lastIndexOf('/')+1);
+    // let fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+    fileName = `${uuidv4()}.${mimeTypeExtension}`;
+
+
+    const newProfilePicture = await uploadProfilePicture(req.user.id, fileName, mimeType, fileBuffer);
+    return res.status(200).json({avatarUrl: newProfilePicture.fileUrl})
+})
+
+router.post("/avatar/delete", redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) { return res.status(401).send();}
+    const a = await prisma.userProfilePicture.delete({
+        where: {
+            userId: req.user.id
+        }
+    })
+    if (a) {
+        return res.status(200).json({success_message: "Profile picture successfully deleted"});
+    } else {
+        return res.status(404).json({error_message: "No avatar picture"});
+    }
 })
 
 export default router;

@@ -17,6 +17,147 @@ document.addEventListener("DOMContentLoaded", () => {
         return alertElement;
     }
 
+    const avatarSection = document.querySelector(".profile-picture-section");
+
+    if (avatarSection) {
+        const avatarInput = document.getElementById("avatar-edit-img-input");
+        const profileAvatarMenu = document.getElementById("avatarMenu");
+        let avatarImg = null;
+        if (profileAvatarMenu) {avatarImg = profileAvatarMenu.querySelector(".avatar")}
+        if (avatarImg) {
+            const vueApp = Vue.createApp({
+                data() {
+                    return {
+                        avatarSrc: avatarImg.dataset.initialAvatar
+                    };
+                },
+                computed: {
+                    isPlaceholderAvatar() {
+                        return this.avatarSrc === "/avatar/default";
+                    }
+                },
+                methods: {
+                    changeAvatar(newUrl) {
+                        this.avatarSrc = newUrl;
+                        document.querySelectorAll("img.avatar").forEach(avImg => {
+                            avImg.src = this.avatarSrc;
+                        })
+                    }
+                },
+                mounted() {
+                    let self = this;
+                    document.getElementById("post-avatar-btn").addEventListener("click", e => {
+                        avatarInput.click();
+                    });
+                    document.getElementById("remove-avatar-btn").addEventListener("click", async e => {
+                        const response = await fetch("/api/settings/avatar/delete", {method: 'POST',
+                            headers: {'Accept': 'application/json'}
+                        });
+                        if (response.ok) {
+                            self.changeAvatar("/avatar/default");
+                            clearAlert(".alert-container");
+                            pushAlert("Your profile picture was successfully removed.", "success", ".alert-container");
+                        } else {
+                            console.error(`Failed to delete profile picture: `, response.statusMessage);
+                            clearAlert(".alert-container");
+                            pushAlert("Could not delete your profile picture, please try again later.", "danger", ".alert-container");
+                        }
+                    })
+
+                    let currentCropper;
+                    let currentImageFilename;
+                    const editAvatarModal = document.getElementById("edit-avatar-modal");
+                    const editAvatarBsModal = new bootstrap.Modal(editAvatarModal);
+                    const editAvatarImg = document.getElementById("edit-avatar-img");
+                    const submitEditedAvatarBtn = document.getElementById("upload-avatar-btn");
+
+                    avatarInput.addEventListener("change", async e => {
+                        const file = e.target.files[0];
+                        const actualMimeType = await loadMime(file);
+                        if (!['image/png', 'image/jpeg', 'image/jpg'].includes(actualMimeType)) {
+                            clearAlert(".alert-container");
+                            pushAlert("Wrong file format: Only JPEG/PNG images are accepted for a profile picture.", "danger", ".alert-container");
+                            return;
+                        }
+
+                        currentImageFilename = file.name;
+                        const imageBlobUrl = URL.createObjectURL(file);
+                        editAvatarImg.src = imageBlobUrl;
+
+                        // Ensure the image is loaded before showing the modal
+                        editAvatarImg.onload = () => {
+                            editAvatarBsModal.show();
+                        };
+
+                        editAvatarModal.addEventListener("shown.bs.modal", event => {
+                            if (!currentCropper) {
+                                currentCropper = new Cropper(editAvatarImg, {
+                                    aspectRatio: 1,
+                                    viewMode: 1,
+                                    responsive: true,
+                                    autoCropArea: 1,
+                                });
+                            }
+                        });
+                    });
+
+                    editAvatarModal.addEventListener("hidden.bs.modal", event => {
+                        if (currentCropper) {
+                            currentCropper.destroy();
+                            currentCropper = undefined;
+                        }
+                        avatarInput.value = '';
+                        editAvatarImg.src = ''; // Reset the image source
+                    });
+
+                    submitEditedAvatarBtn.addEventListener("click", async e => {
+                        try {
+                            if (currentCropper) {
+                                const croppedCanvas = currentCropper.getCroppedCanvas({
+                                    maxWidth: 4096,
+                                    maxHeight: 4096,
+                                    imageSmoothingEnabled: true,
+                                    imageSmoothingQuality: 'high',
+                                });
+
+                                croppedCanvas.toBlob(async function (blobby) {
+                                    if (blobby) {
+                                        const formData = new FormData();
+                                        formData.append('avatar', blobby, currentImageFilename);
+                                        editAvatarBsModal.hide();
+                                        const response = await fetch("/api/settings/avatar", {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {'Accept': 'application/json'}
+                                        });
+                                        if (response.ok) {
+                                            const json = await response.json();
+                                            const newAvatarUrl = json.avatarUrl;
+                                            clearAlert(".alert-container");
+                                            pushAlert("Your profile picture is updated!", "success", ".alert-container");
+                                            self.changeAvatar(newAvatarUrl);
+                                        }
+                                    } else {
+                                        clearAlert(".modal-alert-container");
+                                        pushAlert("Could not retrieve cropped image, please reload the page and try again", "danger", ".modal-alert-container");
+                                    }
+                                });
+                            } else {
+                                clearAlert(".modal-alert-container");
+                                pushAlert("Image cropper wasn't initialized, please reload the page and try again.", "danger", ".modal-alert-container");
+                            }
+                        } catch (e) {
+                            console.error(`Error while submitting cropped image`, e);
+                            clearAlert(".modal-alert-container");
+                            pushAlert("An error occurred, please refresh the page and try again.", "danger", ".modal-alert-container");
+                        }
+                    });
+                }
+            })
+            vueApp.mount("#app");
+        }
+    }
+
     const profileForm = document.querySelector(".profile-form");
 
     if (profileForm) {

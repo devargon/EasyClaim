@@ -2,19 +2,38 @@ extends ../layout
 
 block head
     link(rel="stylesheet" href="/assets/stylesheets/settings.css")
+    script(src="https://unpkg.com/vue@3/dist/vue.global.js")
     script(src="/assets/javascripts/passwordValidation.js")
+    script(src="/assets/javascripts/checkMime.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css")
+
 
 block content
-    .container-fluid.d-flex.flex-column.min-vh-100
+    .modal.fade#edit-avatar-modal(tabindex="-1" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+            .modal-content
+                .modal-header
+                    h1.modal-title.fs-5 Crop your profile picture
+                    button.btn-close(data-bs-dismiss="modal" aria-label="Close")
+                .modal-body
+                    .modal-alert-container
+                    .cropper-container
+                        img#edit-avatar-img
+                .modal-footer
+                    button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
+                    button.btn.btn-primary#upload-avatar-btn(type="button") Save
+
+    .container-fluid.d-flex.flex-column.min-vh-100#app
         main.flex-grow-1
             // Hero Section
             section.py-5.py-md-7.py-lg-8.py-xl-12
                 .container.px-4.px-md-6
                     .row
-                        .col-md-4.mb-3
+                        .col-md-4.mb-3.settings-sidebar
                             .d-flex.align-items-center(style="max-width: 300px").mb-2
                                 .avatar-wrapper.me-3
-                                    img(src="https://via.placeholder.com/50" alt="Profile Picture" class="avatar rounded-circle")
+                                    img.avatar.object-fit-cover.rounded-circle(src=userStrings.avatarUrl alt="Profile Picture")
                                 .text-container
                                     .fw-bold.fs-4.text-break.has-user-name=user.name
                                     .text-muted.text-break Joined #{user.createdAt.toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}
@@ -38,6 +57,27 @@ block content
                                                         .alert.alert-danger= error
                                                     if success
                                                         .alert.alert-success= success
+                                                .profile-picture-section
+                                                    p Change your profile picture
+                                                    form()
+                                                        input(type="file", id="avatar-edit-img-input" accept="image/png, image/jpeg" hidden)
+                                                    .dropdown.position-relative.d-inline-block.mb-3
+                                                        a#avatarMenu(href="#", data-bs-toggle="dropdown", aria-expanded="false")
+                                                            img.avatar.object-fit-cover.rounded-circle(:src="avatarSrc", alt="User Avatar", style="max-width: 150px; max-height: 150px" data-initial-avatar=userStrings.avatarUrl)
+                                                        button#avatar-edit-menu-btn(data-bs-toggle="dropdown", type="button" aria-expanded="false", style="position: absolute; bottom: 10px; left: 10px; background-color: white; border: 1px solid #ccc; width: 30px; height: 30px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;")
+                                                            i.bi.bi-pencil-fill(style="font-size: 14px; color: #333;")
+                                                        ul#avatar-dropdown.dropdown-menu(aria-labelledby="avatarMenu")
+                                                            li
+                                                                button.dropdown-item#post-avatar-btn(type="button")
+                                                                    i.bi.bi-pencil.me-1
+                                                                    | {{ isPlaceholderAvatar ? 'Add image': 'Change image'}}
+                                                            li(v-show="!isPlaceholderAvatar")
+                                                                button.dropdown-item#remove-avatar-btn(type="button")
+                                                                    i.bi.bi-trash.me-1
+                                                                    | Remove image
+
+
+
                                                 form.profile-form(method="POST" action="/settings/profile")
                                                     .mb-3
                                                         label.form-label(for='name') Name
@@ -112,21 +152,21 @@ block content
                                                     a.btn.btn-danger(type='button' href="/settings/account/delete") Delete Account
 
         // Footer Section
-        footer.bg-light.py-4
-            .container
-                .row
-                    .col-sm-6.col-md-4.col-lg-2.mb-3
-                        h5.fw-bold #{app.name}
-                        ul.list-unstyled
-                            li: a.text-muted.text-decoration-none(href="/expenses") Expenses
-                            li: a.text-muted.text-decoration-none(href="/claims") Claims
-                    .col-sm-6.col-md-4.col-lg-2.mb-3
-                        h5.fw-bold Support
-                        ul.list-unstyled
-                            li: a.text-muted.text-decoration-none(href="#") Contact Us (unavailable)
-                    .col-sm-6.col-md-4.col-lg-2.mb-3
-                        h5.fw-bold Legal
-                        ul.list-unstyled
-                            li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/privacy/") Privacy Policy
-                            li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/terms/") Terms of Service
+        //footer.bg-light.py-4
+        //    .container
+        //        .row
+        //            .col-sm-6.col-md-4.col-lg-2.mb-3
+        //                h5.fw-bold #{app.name}
+        //                ul.list-unstyled
+        //                    li: a.text-muted.text-decoration-none(href="/expenses") Expenses
+        //                    li: a.text-muted.text-decoration-none(href="/claims") Claims
+        //            .col-sm-6.col-md-4.col-lg-2.mb-3
+        //                h5.fw-bold Support
+        //                ul.list-unstyled
+        //                    li: a.text-muted.text-decoration-none(href="#") Contact Us (unavailable)
+        //            .col-sm-6.col-md-4.col-lg-2.mb-3
+        //                h5.fw-bold Legal
+        //                ul.list-unstyled
+        //                    li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/privacy/") Privacy Policy
+        //                    li: a.text-muted.text-decoration-none(href="https://nogra.app/legal/terms/") Terms of Service
     script(src="/assets/javascripts/settings.js")

@@ -30,12 +30,16 @@
     "express-mysql-session": "^3.0.2",
     "express-session": "^1.18.0",
     "geoip-lite": "^1.4.10",
+    "google-auth-library": "^9.14.1",
     "hcaptcha": "^0.2.0",
     "html-to-text": "^9.0.5",
     "http-errors": "~1.6.3",
     "i18n": "^0.15.1",
+    "jimp": "^1.6.0",
+    "jsonwebtoken": "^9.0.2",
     "mariadb": "^3.3.1",
     "morgan": "~1.9.1",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
     "otplib": "^12.0.1",
     "platform": "^1.3.6",
@@ -59,6 +63,7 @@
     "@types/i18n": "^0.13.12",
     "@types/jest": "^29.5.12",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^20.14.10",
     "@types/nodemailer": "^6.4.15",
     "@types/platform": "^1.3.6",
@@ -70,5 +75,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.3"
+  },
+  "overrides": {
+    "whatwg-url": "^14.0.0"
   }
 }

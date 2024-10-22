@@ -2,7 +2,7 @@
     flex-shrink: 0; /* Prevent the avatar from shrinking */
 }
 
-.avatar {
+.avatar-wrapper .avatar {
     width: 50px;
     height: 50px;
     object-fit: cover; /* Ensure the image fits within the circle */
@@ -16,4 +16,21 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
 }
