@@ -1,23 +1,9 @@
-import path from 'path';
-
 const env: string = process.env.NODE_ENV || 'development';
 
-// Construct the path to the config file based on the environment
-const configPath: string = path.resolve(__dirname, `./config.${env}.js`);
+import developmentConfig from './config.development';
+// import productionConfig from './config.production';
 
-console.log(`Loading config from: ${configPath}`);
+const [config_type, config] = process.env.NODE_ENV === 'production' ? ['Production', developmentConfig] : ['Development', developmentConfig];
 
-let config: any;
-
-try {
-    // Dynamically import the configuration file
-    config = require(configPath);
-} catch (error) {
-    console.error(`Failed to load config for environment: ${env}`);
-    console.error(`Attempted path: ${configPath}`);
-    console.error(error);
-    process.exit(1);
-}
-
-// Export the configuration as the default export
+console.log(`Loading ${config_type} config...`);
 export default config;
