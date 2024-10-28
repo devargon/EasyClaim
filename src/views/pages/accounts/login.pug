@@ -1,5 +1,12 @@
 extends ../layout
 
+block head
+    link(rel="stylesheet" href="/assets/stylesheets/credentials.css")
+    script(src="https://accounts.google.com/gsi/client", async)
+    meta(name="nogra-oauth-google-redirect-uri", content=app.host + '/auth/google/callback')
+    meta(name="nogra-oauth-google-clientid", content=oauth.googleClientId)
+    script(src="/assets/javascripts/google-signin-fe-handler.js")
+
 block content
     section.py-5
         .container.py-5
@@ -8,7 +15,7 @@ block content
                     p.fw-bold.text-success.mb-2 Login to #{app.name}
                     h2.fw-bold Welcome Back
             .row.d-flex.justify-content-center
-                .col-12.col-sm-10.col-md-7.col-xl-5.col-xxl-4
+                .col-12.col-sm-10.col-md-7.col-lg-6.col-xl-5.col-xxl-4
                     .card.p-4
                         .card-body.text-center
                             .circle-background.translucent-blue.mx-auto.mb-3
@@ -16,6 +23,18 @@ block content
                             if login_error
                                 .alert.alert-danger
                                     div !{login_error}
+                            div.mb-3.oauth-container
+                                div.google-signin-container.mb-2.w-100
+                                div.microsoft-signin-container.mb-2
+
+                                    button.btn.btn-primary.w-100.d-inline-flex.justify-content-center.align-items-center
+                                        img(src="/assets/static/oauth/microsoft/microsoft.svg", style="height: 1em; margin-right: 8px;")
+                                        |  Sign in with Microsoft
+
+                            form#google-onetap-signin(action="/auth/google-onetap/callback" method="POST" style="display: none;")
+                                input(type="hidden" name="credential" id="credential" value="")
+                            h6.text-center OR
+
                             form(method='post', action='/accounts/login')
                                 input(type="hidden", name="redirect", id="redirect", value=values.redirect)
                                 div.mb-3.w-100
@@ -33,9 +52,3 @@ block content
                                 if values.redirect
                                     - signupUrl += '?redirect=' + encodeURIComponent(values.redirect)
                                 a.ms-2.text-body-secondary(href=signupUrl) Sign up
-
-
-
-
-
-
