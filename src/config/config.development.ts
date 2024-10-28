@@ -24,6 +24,11 @@ const config: Config = {
                 icon: "/assets/icons/google-temp-icon.svg",
                 name: "Google"
             },
+            default: {
+                clientId: "",
+                icon: "/assets/icons/icon-512.png",
+                name: "Undefined"
+            }
         },
         attachments: {
             maxFileNo: 3,

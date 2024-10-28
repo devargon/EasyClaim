@@ -24,6 +24,7 @@ export interface Config {
         };
         oauth: {
             google: OAuthProviderConfig;
+            default: OAuthProviderConfig
         };
         attachments: {
             maxFileNo: number;
