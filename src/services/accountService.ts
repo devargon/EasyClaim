@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import isEmail from "validator/lib/isEmail";
 import {validatePassword} from "../utils/validatePassword";
 import {generateOTP} from "../utils/generateOTP";
-import {User} from "@prisma/client";
+import {UserConnection, User} from "@prisma/client";
 
 interface UserUpdateData {
     name?: string;
@@ -34,7 +34,8 @@ export async function registerUser(name: string, email: string, password: string
                 password: hashedPassword,
             },
             include: {
-                flags: true
+                flags: true,
+                connections: true,
             }
         });
         const userFlags = await prisma.userFlags.create({
@@ -47,11 +48,33 @@ export async function registerUser(name: string, email: string, password: string
     })
 }
 
+export async function registerUserWithConnection(name: string, email: string, password: string | null, service: string, providerUserId: string, accessToken?: string, refreshToken?: string) {
+    const referer = `oauth-${service}`;
+    return prisma.$transaction(async (tx) => {
+        const user = await registerUser(name, email, password, referer);
+        const userConnection = await prisma.userConnection.create({
+            data: {
+                userId: user.id,
+                service: service,
+                providerUserId: providerUserId,
+                email: email,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+            }
+        });
+        user.connections = [userConnection];
+        return user;
+    })
+}
+
+
 export async function findUserByEmailInternalUsage(email: string) {
     return prisma.user.findUnique({
         where: {email},
         include: {
-            flags: true
+            flags: true,
+            profilePicture: true,
+            connections: true
         }
     });
 }
@@ -67,9 +90,25 @@ export async function findUserByIdInternalUsage(id: number) {
     return prisma.user.findUnique({
         where: {id},
         include: {
-            flags: true
+            flags: true,
+            profilePicture: true,
+            connections: true
         }
     });
+}
+
+export async function findUserConnection(providerUserId: string, email: string, service: string) {
+    return prisma.userConnection.findFirst({
+        where: {
+            OR: [
+                {providerUserId, service},
+                {email, service},
+            ]
+        },
+        include: {
+            user: true
+        }
+    })
 }
 
 export async function findUserById(id: number) {
@@ -225,6 +264,12 @@ export async function deleteUser(id: number) {
             }
         })
         await tx.expense.deleteMany({
+            where: {
+                userId: id
+            }
+        })
+
+        await tx.userConnection.deleteMany({
             where: {
                 userId: id
             }
