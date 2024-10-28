@@ -1,0 +1,68 @@
+extends ../simplified_layout
+
+block head
+    link(rel="stylesheet", href="/assets/stylesheets/postauth.css")
+
+block content
+    #app
+        section.py-3
+            .container.py-5
+                .alert-container
+                    if alerts
+                        each alert in alerts
+                            .mb-3.alert.text-center(class="alert-"+alert.type, role="alert") #{alert.content}
+                div.auth-icons-container.d-flex.flex-row.mb-3
+                    img.auth-icons(src=oAuthClient.icon)
+                    svg.auth-icons.px-1(xmlns="http://www.w3.org/2000/svg",fill="currentColor",class="bi bi-link-45deg",viewBox="0 0 16 16")
+                        path(d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z")
+                        path(d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z")
+                    img.auth-icons(src="/assets/icons/icon-512.png")
+                case oAuthStep
+                    when "unlinkExistingOAuthConnectionThenLink"
+                        h1.text-center.mb-3 Additional Steps Required
+                        p.text-center.mb-3 Your #{oAuthClient.name} account (
+                            strong #{oAuthPayload.serviceEmail}
+                            | ) is already linked to another #{app.name} account.
+                        p.text-center.mb-3 Continuing will unlink this #{oAuthClient.name} account from the existing #{app.name} account.
+                        form(method="POST")
+                        .d-grid.d-md-flex.justify-content-center
+                            button.btn.btn-primary(href="#" role="button", type="submit") Continue
+                    when "verifyOAuthConnection"
+                        h1.text-center.mb-4 Additional Steps Required
+                        p.text-center.mb-4 You're almost there. Sign in to connect your #{oAuthClient.name} and #{app.name} account.
+                        form(method="POST")
+                            .auth-form-container
+                                .row.g-3.mb-3
+                                    .col-12.col-md-6
+                                        label(for="email", class="form-label") Existing #{app.name} Email
+                                        input.form-control(type="text", id="email", name="email", disabled readonly, value=oAuthPayload.userEmail)
+                                    .col-12.col-md-6
+                                        label(for="password", class="form-label") Existing #{app.name} Password
+                                        input.form-control(type="password", id="password", name="password")
+                                .col-12.mt-md-4
+                                .d-grid.d-md-flex.justify-content-md-end.mt-3
+                                    button.btn.btn-primary(type="submit") Submit
+
+                    when "emailDiscrepancy"
+                        h1.text-center.mb-3 Heads Up
+                        p.text-center.mb-3 Your #{app.name} email (
+                            strong #{oAuthPayload.userEmail}
+                            | ) is different from your #{oAuthClient.name} account's email (
+                            strong #{oAuthPayload.serviceEmail}
+                            | ).
+                        p.text-center.mb-3 For consistency, consider updating it in your account settings.
+                        p.text-center.mb-3 This message will not show again.
+                        form(method="POST")
+                            .d-grid.d-md-flex.justify-content-center
+                                button.btn.btn-primary(href="#" role="button", type="submit") Continue
+                    when "error"
+                        h1.text-center.mb-4 Something went wrong.
+                        p.text-center.mb-4 For the security of your #{app.name} account, you can’t continue with this process.
+                        p.text-center.mb-4 Please return to the Login page and log in again with #{oAuthClient.name}.
+                        .d-grid.d-md-flex.justify-content-center
+                            a.btn.btn-primary(href="/accounts/login" role="button") Back to Login
+                    when "success"
+                        h1.text-center.mb-3 Success
+                        p.text-center.mb-3 Your #{oAuthClient.name} account is now connected to your #{app.name} account.
+                        .d-grid.d-md-flex.justify-content-center
+                            a.btn.btn-primary(href="/" role="button") Continue to #{app.name}
