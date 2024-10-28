@@ -17,8 +17,15 @@ interface UpdateOTPRequestOptions {
     isUsed?: boolean;
 }
 
-export async function registerUser(name: string, email: string, password: string) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+export async function registerUser(name: string, email: string, password: string | null, referer: string) {
+    referer = referer.toLowerCase();
+    const a = referer.split("-");
+    if (password === null) {
+        if (!(a[0] === "oauth" && ['google', 'microsoft'].includes(a.at(-1) || ""))) {
+            throw new Error("Standard signup requires password")
+        }
+    }
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     return prisma.$transaction(async (tx) => {
         const user = await prisma.user.create({
             data: {
@@ -161,7 +168,13 @@ export async function processEmailUpdate(userId: number, email: string) {
 }
 
 export async function processPasswordUpdate(userId: number, old_password: null | string, new_password: string, confirm_password: string, isResetFlow: boolean = false) {
-    if ((!isResetFlow && !old_password) || !new_password || !confirm_password) {
+    const currentUser = await findUserByIdInternalUsage(userId);
+    if (!currentUser || currentUser.active === "DELETED") {
+        console.error(`Unable to find user with id ${userId}`);
+        return {} // trigger 500
+    }
+    const noOldPasswordNeeded = isResetFlow || currentUser.password === null;
+    if ((!noOldPasswordNeeded && !old_password) || !new_password || !confirm_password) {
         return { error: "You have not entered one or more required password fields." };
     } else if (new_password !== confirm_password) {
         return { error: "Your new passwords do not match." };
@@ -173,16 +186,12 @@ export async function processPasswordUpdate(userId: number, old_password: null |
     if (!requirementsOk) {
         return { error: "Your new password does not meet the minimum requirements. You need 6-20 characters in your passwords, of which includes at least 1 uppercase letter, 1 lowercase letter and 1 number." };
     }
-    const currentUser = await findUserByIdInternalUsage(userId);
-    if (!currentUser || currentUser.active === "DELETED") {
-        console.error(`Unable to find user with id ${userId}`);
-        return {} // trigger 500
-    }
-    if (!isResetFlow) {
+
+    if (!noOldPasswordNeeded) {
         if (!old_password) {
             return { error: "Your current password is incorrect." };
         }
-        const isValidPassword = await bcrypt.compare(old_password, currentUser.password);
+        const isValidPassword = noOldPasswordNeeded ? true : await bcrypt.compare(old_password, currentUser.password as string);
         console.log("Compared password hashes")
         if (!isValidPassword) {
             return { error: "Your current password is incorrect." };
