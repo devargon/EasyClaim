@@ -8,8 +8,19 @@ import {validateHCaptcha} from "../utils/validatehCaptcha";
 import {platformExtractor} from "../utils/RequestPlatformExtractor";
 import {sendNewLoginEmail} from "../utils/email/email";
 import {insertAccountCreated, insertUserLoginFailure, insertUserLoginSuccess} from "../services/auditLogService";
+import {User} from "@prisma/client";
 
 const debug = require('debug')('easyclaim:accounts');
+
+export const initiateUserSession = async (req: Request, foundUser: User, method: string)=> {
+    const isSameCurrentLoggedInUser = req.user?.id === foundUser.id;
+    req.session.userId = foundUser.id;
+    req.session.save();
+    const platform = platformExtractor(req);
+    sendNewLoginEmail(foundUser, platform);
+    await insertUserLoginSuccess(foundUser.id, req.body.email, method, req);
+    return [isSameCurrentLoggedInUser, true]
+}
 
 
 // noinspection JSUnusedLocalSymbols
@@ -32,19 +43,20 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
 
     debug(`Account for ${req.body.email} found. Comparing hashes`);
 
-    const isValidPassword = await bcrypt.compare(req.body.password, found_user.password);
+    const isValidPassword = found_user.password ? await bcrypt.compare(req.body.password, found_user.password) : false;
     debug(`Password match result for ${req.body.email}:  ${isValidPassword}`);
     console.log("Compared password hashes")
     if (!isValidPassword) {
         await insertUserLoginFailure(req.body.email, "wrongpassword", "password", req);
         return res.status(401).render('pages/accounts/login', {title: 'Login to EasyClaim', login_error: "Your email or password is incorrect.", values: {email: req.body.email, redirect: req.body.redirect}})
     }
-    req.session.userId = found_user.id;
-    req.session.save();
-    const platform = platformExtractor(req);
-    sendNewLoginEmail(found_user, platform);
-    await insertUserLoginSuccess(found_user.id, req.body.email, "password", req);
-    return res.status(201).redirect(req.body.redirect || "/");
+    const [isSameLoggedInUser, loginSuccess] = await initiateUserSession(req, found_user, "password");
+    if (loginSuccess) {
+        return res.status(201).redirect(req.body.redirect || "/");
+    } else {
+        return res.status(500).render('pages/errors/500');
+    }
+
 }
 
 // noinspection JSUnusedLocalSymbols
@@ -75,9 +87,9 @@ export const FormRegisterUser = async (req: Request, res: Response, next: NextFu
         return res.status(400).render('pages/accounts/signup', {title: 'Sign up for EasyClaim', register_error, values: { name, email }});
     }
     debug(`Registering user ${req.body.email}...`);
-    const user = await registerUser(name, email, password);
+    const user = await registerUser(name, email, password, "standard-form-signup");
     debug(`Registration completed for ${req.body.email}`);
-    await insertAccountCreated(user.id, null, name, email, req);
+    await insertAccountCreated(user.id, null, name, email, "standard-form-signup", req);
     req.session.userId = user.id;
     req.session.save();
     return res.status(201).redirect("/accounts/signup/success");
