@@ -17,7 +17,7 @@ model User {
   id          Int         @id @default(autoincrement())
   name        String      @db.VarChar(50)
   email       String      @db.VarChar(255) @unique
-  password    String      @db.VarChar(255)
+  password    String?      @db.VarChar(255)
   createdAt   DateTime    @default(now())
   deletedAt   DateTime?
   locked Boolean @default(false)
@@ -29,7 +29,40 @@ model User {
   otpRequests UserOTP[]
   auditLogEntries AuditLog[]
   flags               UserFlags?
+  profilePicture UserProfilePicture?
+  connections UserConnection[]
   @@map("user")
+}
+
+model UserProfilePicture {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  user  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName String
+  fileUrl String
+  fileObjectUrl String
+  mimeType String
+  fileSize Int
+  createdAt DateTime @default(now())
+
+  @@map("user_profilepicture")
+}
+
+model UserConnection {
+  id Int @id @default(autoincrement())
+  userId Int
+  service String
+  providerUserId String
+  email String
+  accessToken String?
+  refreshToken String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, service])
+  @@map("user_connections")
+
 }
 
 model UserFlags {
@@ -39,6 +72,7 @@ model UserFlags {
   user    User @relation(fields: [userId], references: [id])
   userId  Int @unique
 
+  @@map("user_flags")
 }
 
 enum UserStatus {
@@ -163,5 +197,5 @@ model UserOTP {
   isOverwritten Boolean   @default(false)
   secret      String      @db.VarChar(255) @default("0")
   otp         String      @db.VarChar(6)
-  @@map("userotp")
+  @@map("user_otp")
 }
