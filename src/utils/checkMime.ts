@@ -1,3 +1,5 @@
+import {v4 as uuidv4} from "uuid";
+
 const mimes = [
     {
         mime: 'image/jpeg',
@@ -47,3 +49,13 @@ export const loadMime = async (file: Buffer) => {
 
     return mime ? mime.mime : 'unknown';
 };
+
+export async function generateNameAndMimeType(buffer: Buffer): Promise<[string, string, string | null]> {
+    const mimeType = await loadMime(buffer);
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
+        return ["", "", "Wrong file format: Only JPEG/PNG images are accepted for a profile picture."];
+    }
+    let mimeTypeExtension = mimeType.substring(mimeType.lastIndexOf('/')+1);
+    const fileName = `${uuidv4()}.${mimeTypeExtension}`;
+    return [fileName, mimeType, null]
+}

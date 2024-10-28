@@ -2,6 +2,7 @@ import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from 'dotenv';
+import R2 from "./r2";
 dotenv.config();
 
 const ACCOUNT_ID = process.env.CF_ACCOUNT_ID as string;
@@ -68,6 +69,23 @@ export async function deleteFile(key: string) {
     });
     const response = await client.send(command);
     return response;
+}
+
+export async function uploadFileDirect(path: string, fileName: string, fileSize: number, contentType: string, metaValue: string, fileContent: Buffer) {
+    const fileUrl = `${R2_URL}/${path}${fileName}`
+    const command = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: `${path}${fileName}`,
+        ContentType: contentType,
+        ContentLength: fileSize,
+        Metadata: {
+            'custom': metaValue,
+        },
+        Body: fileContent
+    });
+    const response = await client.send(command);
+    console.log(`S3 client response: ${response}`);
+    return fileUrl;
 }
 
 

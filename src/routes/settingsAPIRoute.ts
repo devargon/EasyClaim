@@ -8,7 +8,7 @@ import config from "../config/configLoader";
 import {processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import {insertExpenseUpdated, insertPasswordChanged, insertProfileUpdated} from "../services/auditLogService";
 import multer from "multer";
-import {loadMime} from "../utils/checkMime";
+import {generateNameAndMimeType, loadMime} from "../utils/checkMime";
 import {uploadProfilePicture} from "../services/settingsService";
 import {v4 as uuidv4} from "uuid";
 
@@ -88,15 +88,10 @@ router.post("/avatar", upload.single('avatar'), redirectAsRequiresLogin, async (
     }
 
     const fileBuffer = req.file.buffer;
-    let fileName = req.file.originalname;
-
-    const mimeType = await loadMime(fileBuffer);
-    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
-        return res.status(400).json({error_message: "Wrong file format: Only JPEG/PNG images are accepted for a profile picture."})
+    const [fileName, mimeType, error] = await generateNameAndMimeType(fileBuffer);
+    if (error) {
+        return res.status(400).json({error_message: error})
     }
-    let mimeTypeExtension = mimeType.substring(mimeType.lastIndexOf('/')+1);
-    // let fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-    fileName = `${uuidv4()}.${mimeTypeExtension}`;
 
 
     const newProfilePicture = await uploadProfilePicture(req.user.id, fileName, mimeType, fileBuffer);
