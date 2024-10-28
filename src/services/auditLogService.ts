@@ -90,12 +90,14 @@ export async function insertAccountCreated(
     referrer: string | null,
     name: string,
     email: string,
+    signupMethod: string,
     req: Request
 ) {
     const details = {
         name: name,
         email: email,
         referrer: referrer,
+        signupMethod: signupMethod,
     };
     return await insertAuditLog(userId, AuditAction.ACCOUNT_CREATED, details, req);
 }

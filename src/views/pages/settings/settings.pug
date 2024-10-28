@@ -111,9 +111,12 @@ block content
                                                 div.mb-3
                                                     h6 Change your password
                                                     form.password-form(method="POST", action="/settings/account/password")
-                                                        div.mb-3
-                                                            label.form-label(for="old_password") Old password
-                                                            input.mb-3.form-control(type="password", name="old_password", id="old_password", placeholder="Old password", required='')
+                                                        if !user.password
+                                                            .alert.alert-warning.mb-3 You do not have a password set for your account yet. For your account's security, please set one now.
+                                                        else
+                                                            div.mb-3
+                                                                label.form-label(for="old_password") Old password
+                                                                input.mb-3.form-control(type="password", name="old_password", id="old_password", placeholder="Old password", required='')
                                                         .row
                                                             .col-12.col-lg-6.mb-3
                                                                 label.form-label(for="password") New password

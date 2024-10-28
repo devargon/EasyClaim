@@ -67,7 +67,7 @@ router.post('/account/delete', redirectAsRequiresLogin, async (req: Request, res
     if (!user_password) {
         return res.status(400).render('pages/settings/confirmaccountdeletion', {error: "You must enter your account's password to delete your account."})
     }
-    const isValidPassword = await bcrypt.compare(user_password, req.user.password);
+    const isValidPassword = req.user.password ? await bcrypt.compare(user_password, req.user.password) : false;
     if (!isValidPassword) {
         return res.status(401).render('pages/settings/confirmaccountdeletion', {error: "Your password is incorrect."});
     }

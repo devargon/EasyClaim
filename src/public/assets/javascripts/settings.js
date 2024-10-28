@@ -299,16 +299,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let response;
             try {
+                const passwordFormBody = {
+                    'password': document.getElementById("password").value,
+                    'confirmpassword': document.getElementById("confirmpassword").value
+                };
+                if (document.getElementById("old_password")) {
+                    passwordFormBody['old_password'] = document.getElementById("old_password").value;
+                }
                 response = await fetch("/api/settings/account/password", {
                     method: 'POST',
-                    body: JSON.stringify({
-                        'old_password': document.getElementById("old_password").value,
-                        'password': document.getElementById("password").value,
-                        'confirmpassword': document.getElementById("confirmpassword").value
-                    }),
+                    body: JSON.stringify(passwordFormBody),
                     headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}
                 });
             } catch (e) {
+                makeFormSubmitButtonUnload(passwordForm);
                 console.error("Failed to make request to update password: ", e);
                 pushAlert(`Could not update password due to a connection issue.`, "danger", ".alert-container");
                 return;
