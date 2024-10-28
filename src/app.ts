@@ -15,12 +15,15 @@ import claimAPIRouter from './routes/claimAPIRoute';
 import settingsRouter from './routes/settingsRoute';
 import settingsAPIRouter from './routes/settingsAPIRoute';
 import claimRoute from './routes/claimRoute';
+import oauthRouter from './routes/oauthRoute';
 import {Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
 import connectSessionSequelize from "connect-session-sequelize";
 import {findUserById} from "./services/accountService";
+import config from "./config/configLoader";
 
 // Sequelize connection as URL:
+console.log("Initializing Sequelize for Express session");
 const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: false});
 
 const SequelizeStore = connectSessionSequelize(session.Store);
@@ -31,6 +34,7 @@ const sessionStore = new SequelizeStore({
   expiration: 7 * 24 * 60 * 60 * 1000,
 })
 
+console.log("Init Express application");
 var app: Application = express();
 
 // view engine setup
@@ -53,7 +57,7 @@ app.use(session({
 }))
 
 sessionStore.sync();
-
+console.log("Synced Session DB schema");
 
 app.use(logger(process.env.NODE_ENV === "production" ? 'combined' : 'dev'));
 app.use(express.json());
@@ -74,11 +78,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.head.url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   res.locals.head.image = "";
 
+  res.locals.oauth = {};
+  res.locals.oauth.googleClientId = config.app.oauth.google.clientId;
+
   res.locals.app = {};
   res.locals.app.host = config.app.constants.host;
   res.locals.app.name = config.app.constants.name;
 
   res.locals.hcaptcha_sitekey = process.env.HCAPTCHA_SITEKEY
+
+  res.locals.userStrings = {}
+  res.locals.userStrings.avatarUrl = req.user?.profilePicture?.fileUrl || "/avatar/default";
   next();
 });
 app.use(flash());
@@ -91,6 +101,7 @@ app.use('/settings', settingsRouter);
 app.use('/api/expenses', expenseAPIRouter);
 app.use('/api/claims', claimAPIRouter);
 app.use('/api/settings', settingsAPIRouter);
+app.use('/auth', oauthRouter)
 
 app.get('/500', function(req: Request, res: Response, next: NextFunction) {
   return res.render('pages/errors/500')
@@ -98,6 +109,10 @@ app.get('/500', function(req: Request, res: Response, next: NextFunction) {
 
 app.get('/404', function(req: Request, res: Response, next: NextFunction) {
   return res.render('pages/errors/404')
+})
+
+app.get('/avatar/default', function(req: Request, res: Response, next: NextFunction) {
+  return res.sendFile(path.join(__dirname, 'public', 'assets/avatar/default.png'));
 })
 
 
