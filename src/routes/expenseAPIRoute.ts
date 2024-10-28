@@ -282,7 +282,7 @@ router.post('/:expenseId/attachments/upload', redirectAsRequiresLogin, async (re
     }
     const contentType = req.body.contentType;
     const metaValue = `Attachment for Expense ${expense.id}`;
-    const path = `${req.user.id}/${expense.id}/attachments/${uuidv4()}/`;
+    const path = `${req.user.id}/expenses/${expense.id}/attachments/${uuidv4()}/`;
     const url = await generatePresignedUrl(path, fileName, fileSize, contentType, metaValue);
     await insertAttachmentPresignedUrlRequested(req.user.id, "expense_attachment", req);
     return res.status(200).json(url);
