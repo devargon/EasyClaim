@@ -1,10 +1,11 @@
 import {findUserByIdInternalUsage} from "../services/accountService";
 import {Request, Response, NextFunction} from "express";
-import type {User, UserFlags} from "@prisma/client";
+import type {User, UserFlags, UserProfilePicture} from "@prisma/client";
 
 declare module "express-serve-static-core" {
     interface UserWithFlags extends User {
         flags?: UserFlags | null;
+        profilePicture?: UserProfilePicture | null;
     }
     interface Request {
         user?: UserWithFlags;
