@@ -64,7 +64,9 @@ html
               li.nav-item
             if user
               .dropdown
-                button.btn.btn-lg.btn-outline-secondary.dropdown-toggle.has-user-name(type="button", data-bs-toggle="dropdown") #{user.name || 'Your account'}
+                a.dropdown-toggle.nav-link(href="#", data-bs-toggle="dropdown" aria-expanded="false")
+                  img.rounded-circle.avatar(src=userStrings.avatarUrl, style="height: 25px; width: 25px; margin-right: 10px")
+                  span.has-user-name #{user.name || 'Your account'}
                 ul.dropdown-menu
                   li
                     a.dropdown-item(href="/settings", target="_blank", type="button")
