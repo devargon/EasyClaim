@@ -175,7 +175,23 @@ export async function updateOTPRequest(id: number, options: UpdateOTPRequestOpti
     });
 }
 
-
+export async function fetchRecentLoginLogsByUserId(userId: number, day_limit: number) {
+    const datetimeCheck = new Date();
+    datetimeCheck.setDate(datetimeCheck.getDate() - day_limit);
+    console.log(`Date after ${day_limit} days: ${datetimeCheck}`);
+    return prisma.auditLog.findMany({
+        where: {
+            action: "USER_LOGIN_SUCCESS",
+            userId,
+            timestamp: {
+                gte: datetimeCheck
+            }
+        },
+        include: {
+            user: true,
+        }
+    })
+}
 
 
 export async function processProfileUpdate(userId: number, newName: string) {

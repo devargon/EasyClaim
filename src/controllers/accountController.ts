@@ -1,6 +1,11 @@
 import {Request, Response, NextFunction} from 'express';
 import isEmail from 'validator/lib/isEmail';
-import {findUserByEmail, findUserByEmailInternalUsage, registerUser} from "../services/accountService";
+import {
+    fetchRecentLoginLogsByUserId,
+    findUserByEmail,
+    findUserByEmailInternalUsage,
+    registerUser
+} from "../services/accountService";
 import 'express-session';
 import bcrypt from 'bcrypt';
 import {validatePassword} from "../utils/validatePassword";
@@ -17,7 +22,20 @@ export const initiateUserSession = async (req: Request, foundUser: User, method:
     req.session.userId = foundUser.id;
     req.session.save();
     const platform = platformExtractor(req);
-    sendNewLoginEmail(foundUser, platform);
+    const recentLogins = await fetchRecentLoginLogsByUserId(foundUser.id, 30);
+    const ipAddress = req.get('x-forwarded-for') || req.socket.remoteAddress || req.ip;
+    let ipAddressPreviouslyLoggedIn = false;
+    for (const recentLogin of recentLogins) {
+        if (recentLogin.ipAddress === ipAddress) {
+            console.log(`Same ip address for ${foundUser.email}`);
+            ipAddressPreviouslyLoggedIn = true;
+            break;
+        }
+    }
+    if (!ipAddressPreviouslyLoggedIn) {
+        console.log(`This is a new IP address being logged in to for ${foundUser.email}!`);
+        sendNewLoginEmail(foundUser, platform);
+    }
     await insertUserLoginSuccess(foundUser.id, req.body.email, method, req);
     return [isSameCurrentLoggedInUser, true]
 }
