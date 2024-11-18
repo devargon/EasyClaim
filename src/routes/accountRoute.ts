@@ -18,7 +18,9 @@ import {sendOTPEmail, sendPasswordChangedEmail} from "../utils/email/email";
 import {validateHCaptcha} from "../utils/validatehCaptcha";
 import {pathExtractor} from "../utils/RequestPathExtractor";
 import {insertPasswordResetCompleted, insertPasswordResetRequested} from "../services/auditLogService";
+import {SessionManager} from "../utils/sessionManager";
 
+const sessionManager = new SessionManager();
 const router = express.Router();
 /* GET home page. */
 // router.get('/', (req: Request, res: Response, next: NextFunction) => {
@@ -215,11 +217,11 @@ router.post('/forgotpassword/reset', async (req: Request, res: Response, next: N
     if (error) {
         return res.status(400).render('pages/accounts/forgotpassword', {step: 'reset_password', error: error})
     }
+    await sessionManager.deleteSessionsByUserIdExceptSessionId(user.id, req.sessionID);
     await insertPasswordResetCompleted(user.id, "otp", req);
-    req.session.destroy(function(err) {})
     sendPasswordChangedEmail(user);
-
-    return res.status(200).render('pages/accounts/forgotpassword', {step: 'complete'});
+    res.status(200).render('pages/accounts/forgotpassword', {step: 'complete'});
+    req.session.destroy(function(err) {});
 })
 
 export default router;

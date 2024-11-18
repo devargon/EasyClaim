@@ -7,8 +7,10 @@ import {Decimal} from "@prisma/client/runtime/library";
 import {deleteUser, processEmailUpdate, processPasswordUpdate, processProfileUpdate} from "../services/accountService";
 import bcrypt from "bcrypt";
 import {insertAccountDeleted, insertProfileUpdated} from "../services/auditLogService";
+import {SessionManager} from "../utils/sessionManager";
 
 const router = express.Router();
+const sessionManager = new SessionManager();
 
 router.get('/', redirectAsRequiresLogin, (req: Request, res: Response, next: NextFunction) => {
     return res.render('pages/settings/settings', {section: 'profile'});
@@ -97,6 +99,7 @@ router.post('/account/password', redirectAsRequiresLogin, async (req: Request, r
         return res.status(400).render('pages/settings/settings', {section: 'account', error: error})
     }
     if (success) {
+        await sessionManager.deleteSessionsByUserIdExceptSessionId(req.user.id, req.sessionID);
         req.user = success;
         res.locals.user = success;
         return res.render('pages/settings/settings', {section: 'account', success: "Your password has been updated."});

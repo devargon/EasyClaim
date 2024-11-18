@@ -11,11 +11,13 @@ import multer from "multer";
 import {generateNameAndMimeType, loadMime} from "../utils/checkMime";
 import {uploadProfilePicture} from "../services/settingsService";
 import {v4 as uuidv4} from "uuid";
+import {SessionManager} from "../utils/sessionManager";
 
 const router = express.Router();
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const sessionManager = new SessionManager();
 
 router.post('/profile', redirectAsRequiresLogin, async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.body);
@@ -66,6 +68,7 @@ router.post('/account/password', redirectAsRequiresLogin, async (req: Request, r
         return res.status(400).json({error_message: error})
     }
     if (success) {
+        await sessionManager.deleteSessionsByUserIdExceptSessionId(req.user.id, req.sessionID);
         await insertPasswordChanged(req.user.id, "settings", "user", req);
         req.user = success;
         res.locals.user = success;

@@ -16,7 +16,7 @@ import settingsRouter from './routes/settingsRoute';
 import settingsAPIRouter from './routes/settingsAPIRoute';
 import claimRoute from './routes/claimRoute';
 import oauthRouter from './routes/oauthRoute';
-import {Sequelize} from "sequelize";
+import {DataTypes, Sequelize} from "sequelize";
 import {MariaDbDialect} from "@sequelize/mariadb";
 import connectSessionSequelize from "connect-session-sequelize";
 import {findUserById} from "./services/accountService";
@@ -24,18 +24,48 @@ import config from "./config/configLoader";
 
 // Sequelize connection as URL:
 console.log("Initializing Sequelize for Express session");
-const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: false});
 
 const SequelizeStore = connectSessionSequelize(session.Store);
+const sequelize = new Sequelize(process.env.DB_SESSION_URL as string, {logging: false});
+
+sequelize.define('Session', {
+  sid: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  expires: DataTypes.DATE,
+  data: DataTypes.TEXT,
+  createdAt: DataTypes.DATE,
+  updatedAt: DataTypes.DATE
+});
+
+function extendDefaultFields(defaults: any, session: any) {
+  console.log(defaults, session);
+  return {
+    data: defaults.data,
+    expires: defaults.expires,
+    userId: session.userId,
+    createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
+  }
+}
+
+var app: Application = express();
 
 const sessionStore = new SequelizeStore({
   db: sequelize,
+  table: "Session",
+  extendDefaultFields: extendDefaultFields,
   checkExpirationInterval: 15 * 60 * 1000,
   expiration: 7 * 24 * 60 * 60 * 1000,
 })
 
 console.log("Init Express application");
-var app: Application = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
