@@ -3,7 +3,7 @@ include icons
 doctype html
 html
   head
-    title #{head.pageTitle} - #{head.siteName}
+    title #{head.pageTitle === head.siteName ? head.pageTitle : head.pageTitle + " - " + head.siteName}
     link(rel='stylesheet', href='/assets/stylesheets/global.css')
     link(rel='preconnect', href='https://rsms.me')
     link(rel='stylesheet', href='https://rsms.me/inter/inter.css')
