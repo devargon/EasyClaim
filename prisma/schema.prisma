@@ -199,3 +199,11 @@ model UserOTP {
   otp         String      @db.VarChar(6)
   @@map("user_otp")
 }
+
+model DeletableFile {
+  id          Int       @id @default(autoincrement())
+  fileUrl     String    @db.VarChar(300)
+  fileObjectUrl String  @db.VarChar(300)
+  markedAt    DateTime  @default(now()) // When the file was marked for deletion
+  @@map("deletable_files")
+}

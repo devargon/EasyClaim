@@ -1,5 +1,5 @@
 import prisma from '../config/db';
-import {deleteFile} from "../config/r2";
+import {deleteFile, deleteFiles} from "../config/r2";
 
 
 export async function findExpenseById(id: number) {
@@ -47,4 +47,33 @@ export async function deleteAttachment(id: number, expenseId: number, userId: nu
         }
     }
     return deletedAttachment;
+}
+
+export async function deleteExpense(expenseId: number, userId?: number) {
+    const foundExpense = await prisma.expense.findFirst({
+        where: userId ? {id: expenseId, userId} : {id: expenseId},
+        include: {
+            attachments: true
+        }
+    });
+    if (foundExpense) {
+        const attachmentObjects = foundExpense.attachments.flatMap(attachment => attachment.fileObjectUrl);
+        prisma.$transaction(async (tx) => {
+            await tx.attachment.deleteMany({
+                where: {
+                    expenseId
+                }
+            })
+            await tx.expense.delete({
+                where: {
+                    id: expenseId,
+                }
+            })
+            await deleteFiles(attachmentObjects);
+        })
+    }
+    return foundExpense;
+
+
+
 }

@@ -1,4 +1,4 @@
-import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {S3Client, DeleteObjectCommand, DeleteObjectsCommand} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from 'dotenv';
@@ -69,6 +69,28 @@ export async function deleteFile(key: string) {
     });
     const response = await client.send(command);
     return response;
+}
+
+export async function deleteFiles(keys: string[]) {
+    const command = new DeleteObjectsCommand({
+        Bucket: R2_BUCKET_NAME,
+        Delete: {
+            Objects: keys.map((key) => ({ Key: key }))
+        }
+    });
+    const response = await client.send(command);
+    return response;
+}
+
+async function deleteFilesInChunks(keys: string[]) {
+    const chunks = [];
+    for (let i = 0; i < keys.length; i += 1000) {
+        chunks.push(keys.slice(i, i + 1000));
+    }
+
+    for (const chunk of chunks) {
+        await deleteFiles(chunk);
+    }
 }
 
 export async function uploadFileDirect(path: string, fileName: string, fileSize: number, contentType: string, metaValue: string, fileContent: Buffer) {

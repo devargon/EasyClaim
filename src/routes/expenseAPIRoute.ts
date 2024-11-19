@@ -4,7 +4,12 @@ import prisma from "../config/db";
 import currency from "currency.js";
 import pug, {render} from "pug";
 import {Decimal} from "@prisma/client/runtime/library";
-import {deleteAttachment, findAttachmentsOfExpense, findExpenseByIdAndUser} from "../services/expenseService";
+import {
+    deleteAttachment,
+    deleteExpense,
+    findAttachmentsOfExpense,
+    findExpenseByIdAndUser
+} from "../services/expenseService";
 import R2_URL, {generatePresignedUrl} from "../config/r2";
 import { v4 as uuidv4 } from 'uuid';
 import {Expense} from "@prisma/client";
@@ -150,7 +155,7 @@ router.post("/:expenseId/delete", redirectAsRequiresLogin, async (req: Request, 
     } else if (expense.claimComplete) {
         return res.status(400).json({error_message: `Expense #${expenseIdActual} has been claimed and can't be deleted for tracking purposes.`});
     } else {
-        const a = await prisma.expense.delete({where: {userId: req.user.id, id: expense.id}});
+        const a = await deleteExpense(expense.id, req.user.id);
         if (a) {
             await insertExpenseDeleted(req.user.id, expense.id, req.user.id === expense.userId ? "user" : "admin", null, req);
             return res.status(200).json({success_message: `Expense #${expenseIdActual} deleted.`});
