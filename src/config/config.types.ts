@@ -2,6 +2,8 @@ export interface OAuthProviderConfig {
     clientId: string;
     icon: string;
     name: string;
+    id: string;
+    enabled: boolean;
 }
 
 export interface Config {
@@ -24,7 +26,7 @@ export interface Config {
         };
         oauth: {
             google: OAuthProviderConfig;
-            default: OAuthProviderConfig
+            default: OAuthProviderConfig;
         };
         attachments: {
             maxFileNo: number;

@@ -3,7 +3,7 @@ import { Config } from './config.types';
 const config: Config = {
     app: {
         constants: {
-            host: "http://localhost:3001",
+            host: "http://localhost:3000",
             name: "EasyClaim (dev)",
         },
         accounts: {
@@ -22,12 +22,16 @@ const config: Config = {
             google: {
                 clientId: "773608657285-6st3votov9quvhes6sj73864int11nn7.apps.googleusercontent.com",
                 icon: "/assets/icons/google-temp-icon.svg",
-                name: "Google"
+                name: "Google",
+                id: "google",
+                enabled: true,
             },
             default: {
                 clientId: "",
                 icon: "/assets/icons/icon-512.png",
-                name: "Undefined"
+                name: "Undefined",
+                id: "undefined",
+                enabled: false,
             }
         },
         attachments: {

@@ -5,8 +5,14 @@ block head
     script(src="https://unpkg.com/vue@3/dist/vue.global.js")
     script(src="/assets/javascripts/passwordValidation.js")
     script(src="/assets/javascripts/checkMime.js")
+    if section === "connections"
+        script(src="https://accounts.google.com/gsi/client", async)
+        meta(name="nogra-oauth-google-redirect-uri", content=app.host + '/auth/google/callback')
+        meta(name="nogra-oauth-google-clientid", content=oauth.googleClientId)
+    script(src="/assets/javascripts/google-signin-fe-handler.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js")
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css")
+
 
 
 block content
@@ -24,7 +30,7 @@ block content
                     button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
                     button.btn.btn-primary#upload-avatar-btn(type="button") Save
 
-    .container-fluid.d-flex.flex-column.min-vh-100#app
+    .container-fluid.d-flex.flex-column.min-vh-80#app
         main.flex-grow-1
             // Hero Section
             section.py-5.py-md-7.py-lg-8.py-xl-12
@@ -44,6 +50,9 @@ block content
                                 a.nav-item.nav-link.has-icon.nav-link-faded(class=(section==='account' ? 'active': ''), href='/settings/account' data-toggle='tab')
                                     i.bi.bi-label.bi-person-gear.h5
                                     | Account Settings
+                                a.nav-item.nav-link.has-icon.nav-link-faded(class=(section === 'connections' ? 'active' : ''), href='/settings/connections' data-toggle='tab')
+                                    i.bi.bi-label.bi-link-45deg
+                                    | Connections
                         .col-md-8
                             .card
                                 .card-body
@@ -154,6 +163,39 @@ block content
                                                         i.bi.bi-exclamation-triangle
                                                         | This action is permanent.
                                                     a.btn.btn-danger(type='button' href="/settings/account/delete") Delete Account
+                                        when "connections"
+                                            #connections.tab-pane
+                                                h5 Manage your connections
+                                                hr
+                                                .alert-container
+                                                    if error
+                                                        .alert.alert-danger= error
+                                                    if success
+                                                        .alert.alert-success= success
+                                                    each alert in alerts.connections
+                                                        .mb-3.alert.text-center(class="alert-"+alert.tpe, role="alert") #{alert.content}
+                                                div
+                                                    each client in possibleClients
+                                                        - let foundConnectionsForClient = user.connections.filter((con) => con.service === client.id)
+                                                        - let foundConnection = foundConnectionsForClient.length > 0 ? foundConnectionsForClient[0] : null
+                                                        form.settings-oauthclient-disp(method='POST', action=`/auth/${client.id}/unlink`)
+                                                            img.oauthclient-icon(src=client.icon, alt=client.name + ' icon')
+                                                            .oauthclient-details
+                                                                .oauthclient-title #{client.name}
+                                                                .oauthclient-subtitle #{foundConnection ? foundConnection.email : `Log in to EasyClaim using your ${client.name} account.`}
+                                                            if client.enabled
+                                                                if foundConnection
+                                                                    button.btn.btn-danger.oauthclient-btn(type="submit") Unlink
+                                                                else
+                                                                    if client.id === "google"
+                                                                        .google-signin-container.oauthclient-btn
+                                                                    else
+                                                                        button.btn.btn-primary.oauthclient-btn Connect
+                                                            else
+                                                                button.btn.btn-secondary.disabled.oauthclient-btn(disabled="") Unavailable
+
+
+
 
         // Footer Section
         //footer.bg-light.py-4

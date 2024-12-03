@@ -34,3 +34,65 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
 }
+
+.settings-oauthclient-disp {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1rem;
+    margin-top: 1rem;
+    height: auto;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.settings-oauthclient-disp .oauthclient-icon {
+    height: 3rem;
+    width: 3rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.oauthclient-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.oauthclient-details {
+    white-space: normal;
+    line-height: 1.5rem;
+}
+.oauthclient-details .oauthclient-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.oauthclient-details .oauthclient-subtitle {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.oauthclient-btn {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .settings-oauthclient-disp {
+        flex-wrap: wrap;
+        padding: 0.75rem;
+    }
+
+    .settings-oauthclient-disp .oauthclient-icon {
+        margin-bottom: 0.5rem; /* Add spacing for icons on smaller screens */
+    }
+
+    .oauthclient-btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        align-self: flex-start; /* Move button to the top of the next line */
+    }
+}

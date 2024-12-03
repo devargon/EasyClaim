@@ -77,7 +77,7 @@ app.use(session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET || 'unknown',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     httpOnly: process.env.NODE_ENV === "production",
     secure: process.env.NODE_ENV === "production",

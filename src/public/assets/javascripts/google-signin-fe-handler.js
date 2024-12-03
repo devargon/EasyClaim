@@ -42,13 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
         google.accounts.id.prompt();
     }
 
-    window.addEventListener("resize", () => {
-        clearTimeout(renderGoogleTimeout);
-        renderGoogleTimeout = setTimeout(() => {
-            googleSigninContainer.innerHTML = "";
-            createGSIButton(googleSigninContainer);
-        }, 200);
-    });
+
+    if (googleSigninContainer.dataset.autoresize === "true") {
+        window.addEventListener("resize", () => {
+            clearTimeout(renderGoogleTimeout);
+            renderGoogleTimeout = setTimeout(() => {
+                googleSigninContainer.innerHTML = "";
+                createGSIButton(googleSigninContainer);
+            }, 200);
+        });
+    }
+
     if (window.google && google.accounts && google.accounts.id) {
         initializeGoogleSignIn();
     } else {

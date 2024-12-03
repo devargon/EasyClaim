@@ -9,6 +9,7 @@ import {OAuthProviderConfig} from "../config/config.types";
 import {findUserByIdInternalUsage} from "../services/accountService";
 import bcrypt from "bcrypt";
 import {initiateUserSession} from "../controllers/accountController";
+import {redirectAsRequiresLogin} from "../middlewares/redirectAsRequiresLogin";
 const router = express.Router();
 const debug = require('debug')('easyclaim:oauthRoute');
 
@@ -35,6 +36,8 @@ function maskEmail(email: string) {
     }
     return `${maskedUsername}@${domain}`;
 }
+
+router.post('/:provider/unlink', redirectAsRequiresLogin, oauthController.handleOAuthUnlink)
 
 router.post('/google/callback', oauthController.handleGoogleRedirectCallback);
 

@@ -15,6 +15,7 @@ import {generateToken, OAuthTokenPayload} from "../utils/jwtUtils";
 import {downloadFileAsBuffer} from "../utils/fileDownloader";
 import {generateNameAndMimeType} from "../utils/checkMime";
 import {uploadProfilePicture} from "../services/settingsService";
+import {OAuthProviderConfig} from "../config/config.types";
 
 const debug = require('debug')('easyclaim:oauthController');
 
@@ -36,6 +37,39 @@ const getCsrfTokenFromCookie = (req: Request) : string | null => {
 }
 
 const oauthController = {
+
+    handleOAuthUnlink: async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return res.redirect("/accounts/login?redirect=/settings/connections")
+        }
+        const service = req.params.provider;
+        const allServices = Object.keys(config.app.oauth);
+        const clients: OAuthProviderConfig[] = Object.keys(config.app.oauth)
+            .filter((key: string) => key !== "default")
+            .map(key => (config.app.oauth as Record<string, OAuthProviderConfig>)[key]);
+        const actualClient = clients.find(client => client.id === service);
+        if (!actualClient) {
+            return res.status(400).json({ error_message: "Invalid OAuth Service" });
+        }
+        const userConnection = await prisma.userConnection.findFirst({
+            where: {
+                userId: req.user.id,
+                service: actualClient.id,
+            },
+        })
+        if (userConnection) {
+            await prisma.userConnection.delete({
+                where: {
+                    id: userConnection.id
+                }
+            })
+            req.flash("settings_unlink_oauth", `success:Your ${actualClient.name} account has been unlinked.`)
+        } else {
+            req.flash("settings_unlink_oauth", `danger:Could not find your linked ${actualClient.name} account.`)
+        }
+        return res.redirect('/settings/connections')
+
+    },
     handleGoogleRedirectCallback: async (req: Request, res: Response, next: NextFunction) => {
         // select_by can also be retrieved
         const { clientId, credential, g_csrf_token } = req.body;

@@ -8,6 +8,8 @@ import {deleteUser, processEmailUpdate, processPasswordUpdate, processProfileUpd
 import bcrypt from "bcrypt";
 import {insertAccountDeleted, insertProfileUpdated} from "../services/auditLogService";
 import {SessionManager} from "../utils/sessionManager";
+import config from "../config/configLoader";
+import {OAuthProviderConfig} from "../config/config.types";
 
 const router = express.Router();
 const sessionManager = new SessionManager();
@@ -17,8 +19,22 @@ router.get('/', redirectAsRequiresLogin, (req: Request, res: Response, next: Nex
 });
 
 router.get('/:section', redirectAsRequiresLogin, (req: Request, res: Response, next: NextFunction) => {
-    if (['profile', 'account'].includes(req.params.section)) {
-        return res.render('pages/settings/settings', {section: req.params.section});
+    if (['profile', 'account', 'connections'].includes(req.params.section)) {
+        const clients: OAuthProviderConfig[] = Object.keys(config.app.oauth)
+            .filter((key: string) => key !== "default")
+            .map(key => (config.app.oauth as Record<string, OAuthProviderConfig>)[key]);
+        const OAuthFlashMessages = req.flash('settings_unlink_oauth') as unknown as string[];
+        let alerts: {
+            profile: { tpe: string; content: string }[];
+            account: { tpe: string; content: string }[];
+            connections: { tpe: string; content: string }[]
+        } = {profile: [], account: [], connections: []};
+        for (const flashMsg of OAuthFlashMessages) {
+            const splitMsg = flashMsg.split(":");
+            const flashAlert = { tpe: splitMsg[0], content: splitMsg.slice(1).join(":") };
+            alerts.connections.push(flashAlert);
+        }
+        return res.render('pages/settings/settings', {section: req.params.section, possibleClients: clients, alerts: alerts});
     } else {
         next();
     }
