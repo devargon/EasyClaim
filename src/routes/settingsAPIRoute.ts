@@ -12,6 +12,7 @@ import {generateNameAndMimeType, loadMime} from "../utils/checkMime";
 import {uploadProfilePicture} from "../services/settingsService";
 import {v4 as uuidv4} from "uuid";
 import {SessionManager} from "../utils/sessionManager";
+import {deleteFile} from "../config/r2";
 
 const router = express.Router();
 
@@ -109,6 +110,7 @@ router.post("/avatar/delete", redirectAsRequiresLogin, async (req: Request, res:
         }
     })
     if (a) {
+        await deleteFile(a.fileObjectUrl)
         return res.status(200).json({success_message: "Profile picture successfully deleted"});
     } else {
         return res.status(404).json({error_message: "No avatar picture"});

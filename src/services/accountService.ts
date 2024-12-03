@@ -4,6 +4,7 @@ import isEmail from "validator/lib/isEmail";
 import {validatePassword} from "../utils/validatePassword";
 import {generateOTP} from "../utils/generateOTP";
 import {UserConnection, User} from "@prisma/client";
+import {deleteFiles} from "../config/r2";
 
 interface UserUpdateData {
     name?: string;
@@ -269,11 +270,18 @@ export async function updateUser(id: number, data: Partial<UserUpdateData>) {
 
 export async function deleteUser(id: number) {
     return prisma.$transaction(async (tx) => {
+        const attachments = await tx.attachment.findMany({
+            where: {
+                uploaderId: id
+            }
+        })
+        const attachmentObjects = attachments.flatMap(attachment => attachment.fileObjectUrl);
         await tx.attachment.deleteMany({
             where: {
                 uploaderId: id
             }
         })
+
         await tx.claim.deleteMany({
             where: {
                 userId: id
@@ -290,7 +298,13 @@ export async function deleteUser(id: number) {
                 userId: id
             }
         })
-
+        const profilePictures = await tx.userProfilePicture.findMany({
+            where: {
+                userId: id
+            }
+        })
+        const profilePictureObjects = profilePictures.flatMap(pp => pp.fileObjectUrl);
+        await deleteFiles(attachmentObjects.concat(profilePictureObjects));
         const uniqueName = `DeletedUser${id}`;
         const uniqueEmail = `easyclaim_deleteduser_${id}@deleted.nogra.app`;
         return prisma.user.update({
