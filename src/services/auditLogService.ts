@@ -10,7 +10,7 @@ export async function insertAuditLog(
 ) {
     const ipAddress = req.get('x-forwarded-for') || req.socket.remoteAddress || req.ip || null;
     const userAgent = req.get('User-Agent') || null;
-
+    console.log(ipAddress, ipAddress?.length)
     return prisma.auditLog.create({
         data: {
             userId: userId,                // Allow null userId
