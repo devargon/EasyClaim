@@ -14,6 +14,7 @@ import {platformExtractor} from "../utils/RequestPlatformExtractor";
 import {sendNewLoginEmail} from "../utils/email/email";
 import {insertAccountCreated, insertUserLoginFailure, insertUserLoginSuccess} from "../services/auditLogService";
 import {User} from "@prisma/client";
+import {parseIpAddresses} from "../utils/deriveIpAddress";
 
 const debug = require('debug')('easyclaim:accounts');
 
@@ -23,10 +24,10 @@ export const initiateUserSession = async (req: Request, foundUser: User, method:
     req.session.save();
     const platform = platformExtractor(req);
     const recentLogins = await fetchRecentLoginLogsByUserId(foundUser.id, 30);
-    const ipAddress = req.get('x-forwarded-for') || req.socket.remoteAddress || req.ip;
+    const [ipv6, ipv4 ] = parseIpAddresses(req);
     let ipAddressPreviouslyLoggedIn = false;
     for (const recentLogin of recentLogins) {
-        if (recentLogin.ipAddress === ipAddress) {
+        if (recentLogin.ipAddressV4 === ipv4 || recentLogin.ipAddressV6 === ipv6 ) {
             console.log(`Same ip address for ${foundUser.email}`);
             ipAddressPreviouslyLoggedIn = true;
             break;

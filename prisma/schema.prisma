@@ -152,7 +152,8 @@ model AuditLog {
   action      AuditAction
   timestamp   DateTime    @default(now())
   details     Json?
-  ipAddress   String?     @db.VarChar(45)
+  ipAddressV6 String?     @db.VarChar(39)
+  ipAddressV4 String?     @db.VarChar(15)
   userAgent   String?     @db.VarChar(255)
 
   @@map("audit_log")

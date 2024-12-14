@@ -1,6 +1,7 @@
 import prisma from '../config/db';
 import { AuditAction, Prisma } from '@prisma/client';
 import { Request } from 'express';
+import { parseIpAddresses } from '../utils/deriveIpAddress'
 
 export async function insertAuditLog(
     userId: number | null,  // userId can be null
@@ -8,15 +9,16 @@ export async function insertAuditLog(
     details: Prisma.InputJsonValue = {},  // Use Prisma.InputJsonValue instead
     req: Request                     // Accept Express.Request as last parameter
 ) {
-    const ipAddress = req.get('x-forwarded-for') || req.socket.remoteAddress || req.ip || null;
+    const [ ipv6, ipv4 ] = parseIpAddresses(req);
+
     const userAgent = req.get('User-Agent') || null;
-    console.log(ipAddress, ipAddress?.length)
     return prisma.auditLog.create({
         data: {
             userId: userId,                // Allow null userId
             action: action,
             details: details ?? {},        // Ensure details is never null, fallback to empty object
-            ipAddress: ipAddress,
+            ipAddressV6: ipv6,
+            ipAddressV4: ipv4,
             userAgent: userAgent,
         },
     });
